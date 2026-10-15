@@ -1,60 +1,39 @@
 ---
+// Server-rendered departure card. Keep the markup in sync with
+// src/lib/departureCard.ts, which builds the same card in the browser.
 import type { Departure } from '../data/departures';
 import { getTrek } from '../data/treks';
 import { getRegion } from '../data/regions';
 
 interface Props { d: Departure }
 const { d } = Astro.props;
-const trek = getTrek(d.trek)!;
-const region = getRegion(trek.region)!;
+const trek = getTrek(d.trek);
+const region = trek ? getRegion(trek.region) : undefined;
 const date = new Date(d.start + 'T00:00:00');
-const day = date.toLocaleDateString('en-GB', { day: '2-digit' });
-const month = date.toLocaleDateString('en-GB', { month: 'short' });
-const year = date.getFullYear();
 const filled = Math.round(((d.groupMax - d.seatsLeft) / d.groupMax) * 100);
-const fewLeft = d.seatsLeft <= 4;
-const subject = encodeURIComponent(`Fixed departure: ${trek.name} – ${d.start}`);
+const full = d.seatsLeft <= 0;
+const name = trek?.name ?? d.trek;
+const subject = encodeURIComponent(full ? `Next departure: ${name}` : `Fixed departure: ${name} – ${d.start}`);
 ---
-<article class="dep">
+{trek && region && (
+<article class:list={['dep', { full }]}>
   <div class="dep-date">
-    <span class="dep-day">{day}</span>
-    <span class="dep-month">{month}</span>
-    <span class="dep-year">{year}</span>
+    <span class="dep-day">{date.toLocaleDateString('en-GB', { day: '2-digit' })}</span>
+    <span class="dep-month">{date.toLocaleDateString('en-GB', { month: 'short' })}</span>
+    <span class="dep-year">{date.getFullYear()}</span>
   </div>
   <div class="dep-main">
     <span class="dep-region">{region.name}</span>
-    <h3><a href={`/${region.slug}/${trek.slug}/`}>{trek.name}</a></h3>
+    <h3><a href={`/${region.slug}/${trek.slug}/`}>{name}</a></h3>
     <div class="dep-meta">{d.days} days · max {trek.maxAltitude.split(' (')[0]} · <span class={`badge badge-${trek.difficulty}`}>{trek.difficulty}</span></div>
     <div class="dep-seats">
-      <div class="bar"><span style={`width:${filled}%`}></span></div>
-      <span class:list={['seats', { few: fewLeft }]}>{d.seatsLeft} of {d.groupMax} seats left</span>
+      <div class="bar"><span style={`width:${full ? 100 : filled}%`}></span></div>
+      <span class:list={['seats', { few: !full && d.seatsLeft <= 4 }]}>{full ? 'Fully booked' : `${d.seatsLeft} of ${d.groupMax} seats left`}</span>
     </div>
     <div class="dep-foot">
       <span class="price">{d.price ? <>From <strong>{d.price}</strong></> : 'Ask for price'}</span>
-      <a class="btn btn-sun btn-sm" href={`mailto:hello@trekkingpartnersnepal.com?subject=${subject}`}>Join</a>
+      <a class:list={['btn btn-sm', full ? 'btn-outline' : 'btn-sun']} href={`mailto:hello@trekkingpartnersnepal.com?subject=${subject}`}>{full ? 'Next date?' : 'Join'}</a>
     </div>
   </div>
 </article>
-
-<style>
-  .dep { display: flex; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); min-width: 0; }
-  .dep-date { flex: 0 0 78px; background: linear-gradient(180deg, var(--sky-500), var(--night-800)); color: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 14px 6px; text-align: center; }
-  .dep-day { font-family: var(--font-head); font-size: 1.9rem; font-weight: 700; line-height: 1; }
-  .dep-month { text-transform: uppercase; font-weight: 600; letter-spacing: .08em; font-size: .85rem; margin-top: 4px; }
-  .dep-year { font-size: .75rem; opacity: .75; }
-  .dep-main { padding: 16px 18px; flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  .dep-region { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--sky-600); }
-  h3 { margin: 2px 0 4px; font-size: 1.12rem; }
-  h3 a { color: var(--ink); text-decoration: none; }
-  h3 a:hover { color: var(--sky-600); }
-  .dep-meta { font-size: .86rem; color: var(--muted); }
-  .dep-seats { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: .82rem; }
-  .bar { flex: 1; height: 6px; background: var(--sky-100); border-radius: 99px; overflow: hidden; }
-  .bar span { display: block; height: 100%; background: var(--sky-500); border-radius: 99px; }
-  .seats { color: var(--muted); white-space: nowrap; }
-  .seats.few { color: var(--sun-dark); font-weight: 600; }
-  .dep-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
-  .price { font-size: .9rem; color: var(--muted); }
-  .price strong { color: var(--ink); }
-  .btn-sm { padding: 8px 18px; font-size: .88rem; }
-</style>
+)}

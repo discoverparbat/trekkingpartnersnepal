@@ -1,8 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import DepartureCard from '../components/DepartureCard.astro';
-import { upcomingDepartures } from '../data/departures';
-const deps = upcomingDepartures();
+import DepartureList from '../components/DepartureList.astro';
 ---
 <Base
   title="Fixed Departure Treks in Nepal – Join a Small Group | Trekking Partners Nepal"
@@ -17,10 +15,7 @@ const deps = upcomingDepartures();
   </section>
   <section class="section">
     <div class="container">
-      <div class="dep-grid">{deps.map((d) => <DepartureCard d={d} />)}</div>
+      <DepartureList />
     </div>
   </section>
 </Base>
-<style>
-  .dep-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
-</style>

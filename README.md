@@ -13,7 +13,7 @@ public/
 ├── images/        hero.jpg + 12 region photos (easternnepal.webp and manaslu1.webp are .webp)
 ├── _headers
 ├── robots.txt
-├── logo.png       (also used as the favicon)
+├── logo.jpg       (also used as the favicon)
 └── login-test.html (delete before launch)
 ```
 Pages like the homepage, privacy, terms, 404, login and the sitemap are built by Astro –
@@ -24,7 +24,7 @@ If you change an image's file type, update its path in `src/data/regions.ts`.
 ## Where to edit
 - `src/data/regions.ts` – the 6 regions (text + images)
 - `src/data/treks.ts` – all treks; adding one creates its page automatically
-- `src/data/departures.ts` – fixed departures (SAMPLE dates – replace with real ones)
+- Fixed departures – manage them at /admin/ (stored in Supabase)
 - `src/lib/supabase.ts` – Supabase URL and publishable key
 - `src/pages/privacy.astro`, `src/pages/terms.astro` – legal pages
 
@@ -35,8 +35,10 @@ If you change an image's file type, update its path in `src/data/regions.ts`.
 - Environment variable: `NODE_VERSION` = `22`
 
 ## Supabase
-Run `supabase/schema.sql` once in Supabase → SQL Editor. It creates the profiles, trips and comments tables with security rules.
+Run `supabase/schema.sql` and then `supabase/departures.sql` once in Supabase → SQL Editor. It creates the profiles, trips and comments tables with security rules.
 
 Authentication → URL Configuration → Redirect URLs must include:
 - https://trekkingpartnersnepal.com/login/
+- https://trekkingpartnersnepal.com/admin/
 - http://localhost:4321/login/
+- http://localhost:4321/admin/
