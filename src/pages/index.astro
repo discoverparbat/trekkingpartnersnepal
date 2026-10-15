@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import DepartureList from '../components/DepartureList.astro';
+import OperatorBar from '../components/OperatorBar.astro';
 import LatestPosts from '../components/LatestPosts.astro';
 import { regions } from '../data/regions';
 import { treks, treksInRegion } from '../data/treks';
@@ -43,11 +44,12 @@ const schema = {
           <div>
             <span class="eyebrow">Guaranteed to run</span>
             <h2>Upcoming fixed departures</h2>
-            <p>Small groups with a licensed local guide. Join on your own – you’ll trek with others on the same dates.</p>
+            <p>Join a small group with Discover Parbat’s licensed local guides. Come on your own – you’ll trek with others on the same dates.</p>
           </div>
           <a href="/fixed-departures/" class="link-arrow">All departures →</a>
         </div>
         <DepartureList limit={3} />
+        <OperatorBar />
       </div>
     </div>
   </section>

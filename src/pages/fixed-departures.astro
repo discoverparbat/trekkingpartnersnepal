@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import DepartureList from '../components/DepartureList.astro';
+import OperatorBar from '../components/OperatorBar.astro';
 ---
 <Base
   title="Fixed Departure Treks in Nepal – Join a Small Group | Trekking Partners Nepal"
@@ -10,12 +11,13 @@ import DepartureList from '../components/DepartureList.astro';
     <div class="container">
       <nav class="crumbs"><a href="/">Home</a> › Fixed departures</nav>
       <h1>Fixed departures</h1>
-      <p>Small-group treks with a licensed local guide, guaranteed to run. Join on your own and meet your group on the trail.</p>
+      <p>Small-group treks with Discover Parbat’s licensed local guides, guaranteed to run. Join on your own and meet your group on the trail.</p>
     </div>
   </section>
   <section class="section">
     <div class="container">
       <DepartureList />
+      <OperatorBar />
     </div>
   </section>
 </Base>
