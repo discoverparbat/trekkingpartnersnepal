@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import TrekCard from '../../components/TrekCard.astro';
+import TrekPosts from '../../components/TrekPosts.astro';
 import { regions, type Region } from '../../data/regions';
 import { treksInRegion } from '../../data/treks';
 
@@ -60,11 +61,10 @@ const schema = [
 
   <section class="section" style="padding-top:0">
     <div class="container">
-      <div class="panel panel-dashed">
-        <h3>Trekkers looking for partners in {region.name}</h3>
-        <p style="color:var(--muted)">Partner posts are coming soon. Sign in with Google to post your dates and find people heading the same way.</p>
-        <a href="/find-partners/" class="btn btn-sun">Post your trek</a>
+      <div class="section-head">
+        <h2>Trekkers looking for partners in {region.name}</h2>
       </div>
+      <TrekPosts region={region.slug} label={region.name} />
     </div>
   </section>
 </Base>

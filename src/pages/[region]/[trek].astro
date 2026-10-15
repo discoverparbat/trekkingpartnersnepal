@@ -1,10 +1,10 @@
 ---
 import Base from '../../layouts/Base.astro';
 import TrekCard from '../../components/TrekCard.astro';
-import DepartureCard from '../../components/DepartureCard.astro';
+import DepartureList from '../../components/DepartureList.astro';
+import TrekPosts from '../../components/TrekPosts.astro';
 import { treks, treksInRegion, type Trek } from '../../data/treks';
 import { getRegion, type Region } from '../../data/regions';
-import { upcomingDepartures } from '../../data/departures';
 
 export function getStaticPaths() {
   return treks.map((trek) => ({
@@ -15,7 +15,6 @@ export function getStaticPaths() {
 
 const { trek, region } = Astro.props as { trek: Trek; region: Region };
 const url = `https://trekkingpartnersnepal.com/${region.slug}/${trek.slug}/`;
-const deps = upcomingDepartures().filter((d) => d.trek === trek.slug);
 const related = treksInRegion(region.slug).filter((t) => t.slug !== trek.slug).slice(0, 3);
 const image = trek.image ?? region.hero;
 
@@ -71,23 +70,13 @@ const schema = [
         )}
 
         <h2>Trekkers looking for partners</h2>
-        <div class="panel panel-dashed">
-          <p style="color:var(--muted)">No partner posts for {trek.name} yet. Be the first – post your dates and others heading this way will find you.</p>
-          <a href="/find-partners/" class="btn btn-sun">Post a trip</a>
-        </div>
+        <TrekPosts trek={trek.slug} label={trek.name} />
       </div>
 
       <aside>
         <div class="side">
           <h3>Join a fixed departure</h3>
-          {deps.length > 0 ? (
-            <div class="side-deps">{deps.map((d) => <DepartureCard d={d} />)}</div>
-          ) : (
-            <>
-              <p style="color:var(--muted)">No group dates for this trek yet. Ask us about a private or custom departure.</p>
-              <a class="btn btn-outline" href={`mailto:hello@trekkingpartnersnepal.com?subject=${encodeURIComponent(trek.name + ' trek enquiry')}`}>Ask about dates</a>
-            </>
-          )}
+          <DepartureList trek={trek.slug} stack />
         </div>
       </aside>
     </div>
@@ -115,7 +104,6 @@ const schema = [
   .factbox strong { font-family: var(--font-head); font-size: 1.05rem; }
   .notice { background: #fff6ee; border: 1px solid #f7d6bd; border-left: 4px solid var(--sun); border-radius: 10px; padding: 14px 18px; margin-bottom: 32px; }
   .side { position: sticky; top: 90px; background: linear-gradient(180deg, var(--sky-100), var(--white)); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
-  .side-deps { display: grid; gap: 14px; }
   @media (max-width: 960px) {
     .layout { grid-template-columns: 1fr; }
     .factbox { grid-template-columns: 1fr 1fr; }
