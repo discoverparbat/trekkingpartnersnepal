@@ -1,5 +1,5 @@
 // Builds a departure card in the browser – same markup as DepartureCard.astro.
-import type { Departure } from '../data/departures';
+import { departureUrl, type Departure } from '../data/departures';
 import { getTrek } from '../data/treks';
 import { getRegion } from '../data/regions';
 
@@ -31,7 +31,7 @@ export function departureCard(d: Departure): HTMLElement | null {
   const main = el('div', 'dep-main');
   const h3 = el('h3');
   const link = el('a', '', trek.name);
-  link.href = `/${region.slug}/${trek.slug}/`;
+  link.href = departureUrl(d.id);
   h3.append(link);
 
   const meta = el('div', 'dep-meta', `${d.days} days · max ${trek.maxAltitude.split(' (')[0]} · `);
@@ -51,9 +51,10 @@ export function departureCard(d: Departure): HTMLElement | null {
   const price = el('span', 'price');
   if (d.price) { price.append('From '); price.append(el('strong', '', d.price)); }
   else price.textContent = 'Ask for price';
-  const btn = el('a', full ? 'btn btn-sm btn-outline' : 'btn btn-sm btn-sun', full ? 'Next date?' : 'Join');
-  const subject = full ? `Next departure: ${trek.name}` : `Fixed departure: ${trek.name} – ${d.start}`;
-  btn.href = `mailto:hello@trekkingpartnersnepal.com?subject=${encodeURIComponent(subject)}`;
+  const btn = el('a', full ? 'btn btn-sm btn-outline' : 'btn btn-sm btn-sun', full ? 'Next date?' : 'View & join');
+  btn.href = full
+    ? `mailto:hello@trekkingpartnersnepal.com?subject=${encodeURIComponent(`Next departure: ${trek.name}`)}`
+    : departureUrl(d.id);
   foot.append(price, btn);
 
   main.append(el('span', 'dep-region', region.name), h3, meta, seats, foot);
