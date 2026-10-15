@@ -4,6 +4,7 @@
 import { departureUrl, type Departure } from '../data/departures';
 import { getTrek } from '../data/treks';
 import { getRegion } from '../data/regions';
+import { operator } from '../data/operator';
 
 interface Props { d: Departure }
 const { d } = Astro.props;
@@ -13,7 +14,6 @@ const date = new Date(d.start + 'T00:00:00');
 const filled = Math.round(((d.groupMax - d.seatsLeft) / d.groupMax) * 100);
 const full = d.seatsLeft <= 0;
 const name = trek?.name ?? d.trek;
-const subject = encodeURIComponent(full ? `Next departure: ${name}` : `Fixed departure: ${name} – ${d.start}`);
 ---
 {trek && region && (
 <article class:list={['dep', { full }]}>
@@ -32,7 +32,7 @@ const subject = encodeURIComponent(full ? `Next departure: ${name}` : `Fixed dep
     </div>
     <div class="dep-foot">
       <span class="price">{d.price ? <>From <strong>{d.price}</strong></> : 'Ask for price'}</span>
-      <a class:list={['btn btn-sm', full ? 'btn-outline' : 'btn-sun']} href={full ? `mailto:hello@trekkingpartnersnepal.com?subject=${subject}` : departureUrl(d.id)}>{full ? 'Next date?' : 'View & join'}</a>
+      <a class:list={['btn btn-sm', full ? 'btn-outline' : 'btn-sun']} href={full ? operator.contact : departureUrl(d.id)}>{full ? 'Next date?' : 'View & join'}</a>
     </div>
   </div>
 </article>
