@@ -13,7 +13,7 @@ const FB = 'https://www.facebook.com/groups/887606059135821';
       <a href="/find-partners/" class="link-arrow">See all posts →</a>
     </div>
 
-    <div id="latest-posts" class="post-grid" aria-live="polite">
+    <div id="latest-posts" class="post-grid four" aria-live="polite">
       {[1, 2, 3, 4].map(() => <div class="post skeleton" aria-hidden="true"></div>)}
     </div>
 
@@ -21,7 +21,7 @@ const FB = 'https://www.facebook.com/groups/887606059135821';
       <h3>No open posts yet</h3>
       <p style="color:var(--muted)">Be the first to post your trek dates, or ask in our Facebook group.</p>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-        <a href="/find-partners/" class="btn btn-sun">Post your trek</a>
+        <a href="/find-partners/new/" class="btn btn-sun">Post your trek</a>
         <a href={FB} class="btn btn-outline" target="_blank" rel="noopener">Facebook group</a>
       </div>
     </div>
@@ -30,142 +30,23 @@ const FB = 'https://www.facebook.com/groups/887606059135821';
 
 <style>
   .latest { padding-top: 64px; padding-bottom: 24px; }
-  .post-grid { display: grid; gap: 18px; grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 1100px) { .post-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px)  { .post-grid { grid-template-columns: 1fr; } }
-
-  .post-grid :global(.post) {
-    background: var(--white); border: 1px solid var(--line); border-radius: var(--radius);
-    padding: 18px; display: flex; flex-direction: column; gap: 12px;
-    text-decoration: none; color: inherit; min-height: 220px;
-    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-  }
-  .post-grid :global(a.post:hover) { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--sky-200); }
-
-  .post-grid :global(.post-who) { display: flex; align-items: center; gap: 10px; }
-  .post-grid :global(.post-who img),
-  .post-grid :global(.post-initial) {
-    width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex: 0 0 40px;
-    background: var(--sky-100); color: var(--sky-700); display: grid; place-items: center;
-    font-family: var(--font-head); font-weight: 700;
-  }
-  .post-grid :global(.post-name) { font-weight: 600; font-size: .95rem; line-height: 1.2; }
-  .post-grid :global(.post-sub) { font-size: .8rem; color: var(--muted); }
-
-  .post-grid :global(.post-trek) { font-family: var(--font-head); font-weight: 600; font-size: 1.12rem; line-height: 1.2; }
-  .post-grid :global(.post-region) { font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--sky-600); }
-  .post-grid :global(.post-dates) {
-    display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
-    background: linear-gradient(90deg, var(--sky-100), var(--sky-50)); color: var(--night-800);
-    border-radius: 999px; padding: 4px 12px; font-size: .84rem; font-weight: 600;
-  }
-  .post-grid :global(.post-text) {
-    font-size: .9rem; color: var(--muted); margin: 0;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-  }
-  .post-grid :global(.post-tags) { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
-
-  .skeleton {
-    background: linear-gradient(100deg, var(--white) 30%, var(--sky-50) 50%, var(--white) 70%) !important;
-    background-size: 200% 100% !important; animation: shimmer 1.4s linear infinite;
-  }
-  @keyframes shimmer { to { background-position: -200% 0; } }
-  @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
 </style>
 
 <script>
-  import { supabase } from '../lib/supabase';
-  import { getTrek } from '../data/treks';
-  import { getRegion } from '../data/regions';
+  import { fetchTrips, postCard } from '../lib/posts';
 
   const grid = document.getElementById('latest-posts')!;
   const empty = document.getElementById('latest-empty')!;
 
-  // Build elements with textContent only, so user text can never inject HTML.
-  function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls = '', text = '') {
-    const e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text) e.textContent = text;
-    return e;
-  }
-
-  const fmt = (d: string, opts: Intl.DateTimeFormatOptions) =>
-    new Date(d + 'T00:00:00').toLocaleDateString('en-GB', opts);
-
-  function dateRange(start: string, end: string | null) {
-    if (!end || end === start) return fmt(start, { day: 'numeric', month: 'short', year: 'numeric' });
-    const s = new Date(start), e = new Date(end);
-    const sameMonth = s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear();
-    return sameMonth
-      ? `${fmt(start, { day: 'numeric' })}–${fmt(end, { day: 'numeric', month: 'short', year: 'numeric' })}`
-      : `${fmt(start, { day: 'numeric', month: 'short' })} – ${fmt(end, { day: 'numeric', month: 'short', year: 'numeric' })}`;
-  }
-
-  function timeAgo(iso: string) {
-    const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
-    if (mins < 60) return `${Math.max(mins, 1)} min ago`;
-    const hrs = Math.round(mins / 60);
-    if (hrs < 24) return `${hrs} h ago`;
-    const days = Math.round(hrs / 24);
-    return days === 1 ? 'yesterday' : `${days} days ago`;
-  }
-
-  function card(t: any) {
-    const trek = getTrek(t.trek);
-    const region = getRegion(t.region);
-    const p = t.profiles || {};
-    const name = p.display_name || 'Trekker';
-
-    const a = el('a', 'post');
-    a.href = trek && region ? `/${region.slug}/${trek.slug}/#trip-${t.id}` : '/find-partners/';
-
-    const who = el('div', 'post-who');
-    if (p.avatar_url) {
-      const img = el('img');
-      img.src = p.avatar_url; img.alt = ''; img.width = 40; img.height = 40;
-      img.referrerPolicy = 'no-referrer'; img.loading = 'lazy';
-      who.append(img);
-    } else {
-      who.append(el('span', 'post-initial', name.charAt(0).toUpperCase()));
-    }
-    const meta = el('div');
-    meta.append(el('div', 'post-name', name));
-    meta.append(el('div', 'post-sub', [p.nationality, timeAgo(t.created_at)].filter(Boolean).join(' · ')));
-    who.append(meta);
-
-    const head = el('div');
-    head.append(el('div', 'post-region', region?.name ?? ''));
-    head.append(el('div', 'post-trek', trek?.name ?? t.trek));
-
-    const dates = el('span', 'post-dates', '🗓 ' + dateRange(t.start_date, t.end_date) + (t.flexible ? ' · flexible' : ''));
-
-    const tags = el('div', 'post-tags');
-    if (t.group_size) tags.append(el('span', 'badge', `Group of ${t.group_size}`));
-    if (t.pace) tags.append(el('span', 'badge', `${t.pace[0].toUpperCase()}${t.pace.slice(1)} pace`));
-
-    a.append(who, head, dates, el('p', 'post-text', t.description), tags);
-    return a;
-  }
-
-  async function load() {
-    const today = new Date().toISOString().slice(0, 10);
-    const { data, error } = await supabase
-      .from('trips')
-      .select('id, region, trek, start_date, end_date, flexible, group_size, pace, description, created_at, profiles(display_name, avatar_url, nationality)')
-      .eq('status', 'open')
-      .gte('start_date', today)
-      .order('created_at', { ascending: false })
-      .limit(4);
-
-    grid.replaceChildren();
-    if (error || !data || data.length === 0) {
-      if (error) console.error('Latest posts:', error.message);
+  fetchTrips({ limit: 4 })
+    .then((trips) => {
+      grid.replaceChildren(...trips.map(postCard));
+      grid.hidden = trips.length === 0;
+      empty.hidden = trips.length > 0;
+    })
+    .catch((e) => {
+      console.error('Latest posts:', e.message);
       grid.hidden = true;
       empty.hidden = false;
-      return;
-    }
-    data.forEach((t) => grid.append(card(t)));
-  }
-
-  load();
+    });
 </script>
