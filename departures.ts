@@ -48,3 +48,34 @@ export function getDepartures(): Promise<Departure[]> {
   });
   return cache;
 }
+
+// ── Single departure with its details (browser) ──
+export interface DepartureDetail extends Departure {
+  published: boolean;
+  overview?: string;
+  itinerary?: string;
+  included?: string;
+  notIncluded?: string;
+  meetingPoint?: string;
+}
+
+export async function fetchDeparture(id: string): Promise<DepartureDetail | null> {
+  const { data, error } = await supabase
+    .from('departures')
+    .select(`${COLUMNS}, published, overview, itinerary, included, not_included, meeting_point`)
+    .eq('id', id)
+    .maybeSingle();
+  if (error || !data) return null;
+  return {
+    ...fromRow(data),
+    published: data.published,
+    overview: data.overview || undefined,
+    itinerary: data.itinerary || undefined,
+    included: data.included || undefined,
+    notIncluded: data.not_included || undefined,
+    meetingPoint: data.meeting_point || undefined,
+  };
+}
+
+/** Departure page address */
+export const departureUrl = (id: string) => `/departure/?id=${encodeURIComponent(id)}`;

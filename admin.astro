@@ -77,6 +77,28 @@ import { treksInRegion } from '../data/treks';
         <label>Seats left <input type="number" name="seats_left" min="0" max="50" value="12" required /></label>
       </div>
 
+      <fieldset class="details">
+        <legend>Departure page details <span class="hint">all optional</span></legend>
+        <p id="copied-note" class="copied" hidden>Details copied from your last departure of this trek – edit as needed.</p>
+        <label>Overview
+          <textarea name="overview" rows="3" maxlength="2000" placeholder="A few lines about this departure: the route, who it suits, what makes it special."></textarea>
+        </label>
+        <label>Itinerary <span class="hint">one day per line</span>
+          <textarea name="itinerary" rows="6" maxlength="6000" placeholder="Day 1: Drive Pokhara to Kande, trek to Australian Camp&#10;Day 2: Trek to Forest Camp&#10;Day 3: …"></textarea>
+        </label>
+        <div class="row">
+          <label>Included <span class="hint">one per line</span>
+            <textarea name="included" rows="5" maxlength="3000" placeholder="Licensed guide&#10;Permits&#10;Teahouse rooms"></textarea>
+          </label>
+          <label>Not included <span class="hint">one per line</span>
+            <textarea name="not_included" rows="5" maxlength="3000" placeholder="Travel insurance&#10;Drinks and snacks&#10;Tips"></textarea>
+          </label>
+        </div>
+        <label>Meeting point
+          <input type="text" name="meeting_point" maxlength="300" placeholder="e.g. Our office in Lakeside, Pokhara – 7:00 am" />
+        </label>
+      </fieldset>
+
       <label class="check"><input type="checkbox" name="published" checked /> Show on the website</label>
 
       <p id="form-error" class="error" hidden></p>
@@ -118,14 +140,18 @@ import { treksInRegion } from '../data/treks';
   .past { margin-top: 32px; }
   .past summary { cursor: pointer; font-weight: 600; margin-bottom: 12px; color: var(--sky-700); }
 
-  dialog { border: 0; border-radius: 18px; padding: 0; width: min(520px, calc(100vw - 32px)); box-shadow: 0 30px 80px -20px rgba(8,22,52,.5); }
+  dialog { border: 0; border-radius: 18px; padding: 0; width: min(640px, calc(100vw - 32px)); max-height: 92vh; overflow-y: auto; box-shadow: 0 30px 80px -20px rgba(8,22,52,.5); }
   dialog::backdrop { background: rgba(8,22,52,.55); backdrop-filter: blur(2px); }
   form { padding: 26px; display: grid; gap: 14px; }
   form h2 { font-size: 1.4rem; margin: 0; }
   label { display: grid; gap: 6px; font-weight: 600; font-size: .9rem; }
   .hint { font-weight: 400; color: var(--muted); font-size: .8rem; }
-  input, select { font: 400 1rem var(--font-body); padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); color: var(--ink); width: 100%; }
-  input:focus, select:focus { outline: 2px solid var(--sky-400); outline-offset: 1px; border-color: var(--sky-400); }
+  textarea { resize: vertical; line-height: 1.5; }
+  .details { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px 16px; margin: 4px 0 0; display: grid; gap: 12px; }
+  .details legend { font-weight: 700; padding: 0 6px; }
+  .copied { margin: 0; font-size: .85rem; color: #1b7a47; background: #e3f6ec; border-radius: 8px; padding: 8px 12px; }
+  input, select, textarea { font: 400 1rem var(--font-body); padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); color: var(--ink); width: 100%; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--sky-400); outline-offset: 1px; border-color: var(--sky-400); }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .check { display: flex; align-items: center; gap: 10px; font-weight: 500; }
   .check input { width: 18px; height: 18px; }
@@ -280,16 +306,39 @@ import { treksInRegion } from '../data/treks';
     field('group_max').value = String(r?.group_max ?? 12);
     field('seats_left').value = String(r?.seats_left ?? 12);
     field('published').checked = r ? r.published : true;
+    field('overview').value = r?.overview ?? '';
+    field('itinerary').value = r?.itinerary ?? '';
+    field('included').value = r?.included ?? '';
+    field('not_included').value = r?.not_included ?? '';
+    field('meeting_point').value = r?.meeting_point ?? '';
+    $('copied-note').hidden = true;
     dlg.showModal();
   }
 
   $('add').addEventListener('click', () => openForm());
   $('cancel').addEventListener('click', () => dlg.close());
 
-  // When creating a departure, picking a trek pre-fills its typical length
+  // When creating a departure, picking a trek pre-fills from your last departure of
+  // that trek (days, price, group size and page details), or the trek's usual length.
+  const DETAIL_FIELDS = ['overview', 'itinerary', 'included', 'not_included', 'meeting_point'];
   field('trek').addEventListener('change', () => {
-    if (field('id').value || field('days').value) return;
-    const t = getTrek(field('trek').value);
+    if (field('id').value) return;
+    const slug = field('trek').value;
+    const previous = rows.filter((r) => r.trek === slug).sort((a, b) => b.start_date.localeCompare(a.start_date))[0];
+    if (previous) {
+      field('days').value = String(previous.days);
+      if (!field('price').value && previous.price) field('price').value = previous.price;
+      field('group_max').value = String(previous.group_max);
+      field('seats_left').value = String(previous.group_max);
+      let copied = false;
+      for (const k of DETAIL_FIELDS) {
+        if (!field(k).value && previous[k]) { field(k).value = previous[k]; copied = true; }
+      }
+      $('copied-note').hidden = !copied;
+      return;
+    }
+    if (field('days').value) return;
+    const t = getTrek(slug);
     const max = t?.days.split('–').pop();
     if (max && /^\d+$/.test(max)) field('days').value = max;
   });
@@ -311,6 +360,11 @@ import { treksInRegion } from '../data/treks';
       group_max: groupMax,
       seats_left: seatsLeft,
       published: field('published').checked,
+      overview: field('overview').value.trim() || null,
+      itinerary: field('itinerary').value.trim() || null,
+      included: field('included').value.trim() || null,
+      not_included: field('not_included').value.trim() || null,
+      meeting_point: field('meeting_point').value.trim() || null,
     };
     const id = field('id').value;
     const save = $<HTMLButtonElement>('save');

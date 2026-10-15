@@ -1,7 +1,7 @@
 ---
 // Server-rendered departure card. Keep the markup in sync with
 // src/lib/departureCard.ts, which builds the same card in the browser.
-import type { Departure } from '../data/departures';
+import { departureUrl, type Departure } from '../data/departures';
 import { getTrek } from '../data/treks';
 import { getRegion } from '../data/regions';
 
@@ -24,7 +24,7 @@ const subject = encodeURIComponent(full ? `Next departure: ${name}` : `Fixed dep
   </div>
   <div class="dep-main">
     <span class="dep-region">{region.name}</span>
-    <h3><a href={`/${region.slug}/${trek.slug}/`}>{name}</a></h3>
+    <h3><a href={departureUrl(d.id)}>{name}</a></h3>
     <div class="dep-meta">{d.days} days · max {trek.maxAltitude.split(' (')[0]} · <span class={`badge badge-${trek.difficulty}`}>{trek.difficulty}</span></div>
     <div class="dep-seats">
       <div class="bar"><span style={`width:${full ? 100 : filled}%`}></span></div>
@@ -32,7 +32,7 @@ const subject = encodeURIComponent(full ? `Next departure: ${name}` : `Fixed dep
     </div>
     <div class="dep-foot">
       <span class="price">{d.price ? <>From <strong>{d.price}</strong></> : 'Ask for price'}</span>
-      <a class:list={['btn btn-sm', full ? 'btn-outline' : 'btn-sun']} href={`mailto:hello@trekkingpartnersnepal.com?subject=${subject}`}>{full ? 'Next date?' : 'Join'}</a>
+      <a class:list={['btn btn-sm', full ? 'btn-outline' : 'btn-sun']} href={full ? `mailto:hello@trekkingpartnersnepal.com?subject=${subject}` : departureUrl(d.id)}>{full ? 'Next date?' : 'View & join'}</a>
     </div>
   </div>
 </article>

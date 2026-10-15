@@ -27,9 +27,9 @@ import Base from '../layouts/Base.astro';
           </div>
 
           <div class="author">
-            <span id="a-avatar"></span>
+            <a id="a-avatar-link" href="#" aria-hidden="true" tabindex="-1"><span id="a-avatar"></span></a>
             <div>
-              <div id="a-name" class="author-name"></div>
+              <a id="a-name" class="author-name" href="#"></a>
               <div id="a-facts" class="post-sub"></div>
             </div>
             <span id="t-time" class="post-sub when"></span>
@@ -40,6 +40,7 @@ import Base from '../layouts/Base.astro';
           <div class="trip-links">
             <a id="t-treklink" class="link-arrow" href="#">About this trek →</a>
             <div id="owner" class="owner" hidden>
+              <a id="edit" class="btn btn-outline btn-sm" href="#" hidden>Edit</a>
               <button id="toggle" type="button" class="btn btn-outline btn-sm"></button>
               <button id="delete" type="button" class="btn btn-outline btn-sm danger">Delete</button>
             </div>
@@ -90,7 +91,8 @@ import Base from '../layouts/Base.astro';
   .trip-chips { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   .author { display: flex; align-items: center; gap: 12px; margin: 24px 0 18px; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   .author :global(.avatar) { width: 52px; height: 52px; font-size: 1.2rem; }
-  .author-name { font-weight: 600; font-size: 1.05rem; }
+  .author-name { display: block; font-weight: 600; font-size: 1.05rem; color: var(--ink); text-decoration: none; }
+  .author-name:hover { color: var(--sky-600); text-decoration: underline; }
   .when { margin-left: auto; white-space: nowrap; }
   .trip-text { white-space: pre-wrap; font-size: 1.02rem; line-height: 1.7; margin: 0 0 20px; overflow-wrap: anywhere; }
   .trip-links { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -107,7 +109,8 @@ import Base from '../layouts/Base.astro';
   .r-list :global(.reply .avatar) { width: 40px; height: 40px; }
   .r-list :global(.reply-body) { flex: 1; min-width: 0; }
   .r-list :global(.reply-head) { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
-  .r-list :global(.reply-name) { font-weight: 600; }
+  .r-list :global(.reply-name) { font-weight: 600; color: var(--ink); text-decoration: none; }
+  .r-list :global(.reply-name:hover) { color: var(--sky-600); text-decoration: underline; }
   .r-list :global(.reply-text) { white-space: pre-wrap; margin: 6px 0 0; overflow-wrap: anywhere; }
   .r-list :global(.reply-del) { background: none; border: 0; color: var(--muted); font: 500 .8rem var(--font-body); cursor: pointer; margin-left: auto; }
   .r-list :global(.reply-del:hover) { color: #b3261e; }
@@ -145,6 +148,9 @@ import Base from '../layouts/Base.astro';
 
     $('a-avatar').replaceChildren(avatar(trip.author, 52));
     $('a-name').textContent = authorName(trip.author);
+    const profileUrl = `/trekker/?id=${encodeURIComponent(trip.user_id)}`;
+    ($('a-name') as HTMLAnchorElement).href = profileUrl;
+    ($('a-avatar-link') as HTMLAnchorElement).href = profileUrl;
     $('a-facts').textContent = authorFacts(trip.author);
     $('t-time').textContent = 'Posted ' + timeAgo(trip.created_at);
     $('t-text').textContent = trip.description;
@@ -169,6 +175,9 @@ import Base from '../layouts/Base.astro';
       $('owner').hidden = false;
       const toggle = $('toggle') as HTMLButtonElement;
       if (isOwner) {
+        const edit = $('edit') as HTMLAnchorElement;
+        edit.href = `/find-partners/new/?edit=${trip.id}`;
+        edit.hidden = false;
         toggle.textContent = trip.status === 'open' ? 'Close post' : 'Reopen post';
         toggle.addEventListener('click', async () => {
           await supabase.from('trips').update({ status: trip.status === 'open' ? 'closed' : 'open' }).eq('id', trip.id);
@@ -250,7 +259,9 @@ import Base from '../layouts/Base.astro';
       const item = el('div', c.user_id === myId ? 'reply mine' : 'reply');
       const bodyBox = el('div', 'reply-body');
       const head = el('div', 'reply-head');
-      head.append(el('span', 'reply-name', authorName(a)));
+      const nameLink = el('a', 'reply-name', authorName(a));
+      nameLink.href = `/trekker/?id=${encodeURIComponent(c.user_id)}`;
+      head.append(nameLink);
       const facts = authorFacts(a);
       head.append(el('span', 'post-sub', [facts, timeAgo(c.created_at)].filter(Boolean).join(' · ')));
       if (c.user_id === myId || canModerate) {
