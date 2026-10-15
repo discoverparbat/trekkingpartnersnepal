@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Login test | Trekking Partners Nepal</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f6f3ec;color:#14202b;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:20px;box-sizing:border-box}
+  .card{background:#fffdf8;border:1px solid #e3ddd0;border-radius:18px;padding:36px;max-width:420px;width:100%;text-align:center}
+  h1{font-size:1.4rem;margin:0 0 6px}
+  p{color:#3a4a57;margin:0 0 24px;line-height:1.55}
+  button{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 18px;border-radius:999px;font-size:1rem;font-weight:600;cursor:pointer;border:1.5px solid #14202b;background:#fff;color:#14202b}
+  button:hover{background:#14202b;color:#fff}
+  button svg{width:20px;height:20px}
+  .user img{width:72px;height:72px;border-radius:50%;margin-bottom:12px}
+  .user .name{font-weight:700;font-size:1.1rem}
+  .user .email{color:#6b7a85;font-size:.9rem;margin-bottom:22px}
+  .status{margin-top:18px;font-size:.85rem;color:#6b7a85;word-break:break-word}
+  .ok{color:#1f7a3f}.err{color:#b8461f}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Login test</h1>
+  <p>Temporary page to check that Google sign-in works. Delete it before launch.</p>
+
+  <div id="signed-out" hidden>
+    <button id="google-btn" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.3H12v4.3h5.9a5 5 0 0 1-2.2 3.3v2.8h3.6c2-1.9 3.2-4.7 3.2-8.1z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.8c-1 .7-2.3 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.9A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7H2.1a11 11 0 0 0 0 10l3.7-2.9z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7l3.7 2.9C6.7 7.3 9.1 5.4 12 5.4z"/></svg>
+      Continue with Google
+    </button>
+  </div>
+
+  <div id="signed-in" class="user" hidden>
+    <img id="avatar" alt="" referrerpolicy="no-referrer">
+    <div class="name" id="name"></div>
+    <div class="email" id="email"></div>
+    <button id="logout-btn" type="button">Sign out</button>
+  </div>
+
+  <div class="status" id="status">Loading…</div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  // ── Your Supabase project ───────────────────────────────
+  const SUPABASE_URL = 'https://waorryrsgdfvhujreuvq.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_xZ4nFS-OrOyHDu8kkzJVYg_0y4I4ogh';   // sb_publishable_...  (never the secret key)
+  // ─────────────────────────────────────────────────────────
+
+  const $ = id => document.getElementById(id);
+  const status = (msg, cls = '') => { $('status').textContent = msg; $('status').className = 'status ' + cls; };
+
+  if (SUPABASE_KEY.startsWith('PASTE')) {
+    status('Add your publishable key in login-test.html first.', 'err');
+    throw new Error('Missing Supabase key');
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  function render(session) {
+    const user = session?.user;
+    $('signed-out').hidden = !!user;
+    $('signed-in').hidden = !user;
+    if (user) {
+      const m = user.user_metadata || {};
+      $('name').textContent = m.full_name || m.name || 'Signed in';
+      $('email').textContent = user.email || '';
+      if (m.avatar_url) $('avatar').src = m.avatar_url; else $('avatar').hidden = true;
+      status('✓ Google sign-in works. User ID: ' + user.id, 'ok');
+    } else {
+      status('Not signed in.');
+    }
+  }
+
+  $('google-btn').addEventListener('click', async () => {
+    status('Redirecting to Google…');
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + window.location.pathname }
+    });
+    if (error) status('Error: ' + error.message, 'err');
+  });
+
+  $('logout-btn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    render(null);
+  });
+
+  // Show errors Google/Supabase send back in the URL
+  const params = new URLSearchParams(window.location.hash.slice(1) || window.location.search);
+  const urlError = params.get('error_description') || params.get('error');
+
+  const { data: { session } } = await supabase.auth.getSession();
+  render(session);
+  if (urlError && !session) status('Error from sign-in: ' + urlError, 'err');
+
+  supabase.auth.onAuthStateChange((_event, s) => render(s));
+</script>
+</body>
+</html>
