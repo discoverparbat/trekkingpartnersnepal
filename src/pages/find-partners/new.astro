@@ -1,0 +1,161 @@
+---
+import Base from '../../layouts/Base.astro';
+import { regions } from '../../data/regions';
+import { treksInRegion } from '../../data/treks';
+---
+<Base title="Post your trek | Trekking Partners Nepal" description="Post your trek dates and find trekking partners in Nepal." noindex>
+  <section class="section">
+    <div class="container narrow">
+      <nav class="crumbs-dark"><a href="/find-partners/">Find partners</a> › Post your trek</nav>
+      <h1>Post your trek</h1>
+      <p class="muted lead">Tell other trekkers where and when you’re going. People heading the same way can reply and you can team up.</p>
+
+      <div id="gate" class="panel" style="text-align:center">
+        <p class="muted" style="margin:0">Checking your account…</p>
+      </div>
+
+      <form id="post" class="form-card form-grid" novalidate hidden>
+        <label class="field">Trek
+          <select name="trek" required>
+            <option value="">Choose a trek…</option>
+            {regions.map((r) => (
+              <optgroup label={r.name}>
+                {treksInRegion(r.slug).map((t) => <option value={t.slug} data-region={r.slug}>{t.name}</option>)}
+              </optgroup>
+            ))}
+          </select>
+        </label>
+
+        <div class="field-row">
+          <label class="field">Start date <span class="hint">first day on the trail</span>
+            <input type="date" name="start_date" required />
+          </label>
+          <label class="field">End date <span class="hint">optional</span>
+            <input type="date" name="end_date" />
+          </label>
+        </div>
+
+        <label class="check-field"><input type="checkbox" name="flexible" /> My dates are flexible</label>
+
+        <div class="field-row">
+          <label class="field">Ideal group size <span class="hint">optional, including you</span>
+            <select name="group_size">
+              <option value="">No preference</option>
+              {Array.from({ length: 11 }, (_, i) => i + 2).map((n) => <option value={n}>{n} people</option>)}
+            </select>
+          </label>
+          <label class="field">Pace <span class="hint">optional</span>
+            <select name="pace">
+              <option value="">No preference</option>
+              <option value="relaxed">Relaxed – plenty of stops</option>
+              <option value="steady">Steady – normal stages</option>
+              <option value="fast">Fast – long days</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field">Message
+          <span class="hint">Who you are, your plans (guide, porter, budget), and the kind of partner you’re looking for.</span>
+          <textarea name="description" required minlength="20" maxlength="1500"
+            placeholder="E.g. I’m arriving in Kathmandu on 2 Nov and plan to do the Annapurna Base Camp trek with a guide. Looking for 1–2 people to share the guide and teahouse costs. Steady pace, keen photographer."></textarea>
+          <span class="counter" id="counter">0 / 1500</span>
+        </label>
+
+        <p class="form-note">🔒 Your post is public, so don’t put your phone number or email here. Share contact details in the replies, which only signed-in members can read.</p>
+
+        <p id="error" class="form-error" hidden></p>
+
+        <div class="form-actions">
+          <a href="/find-partners/" class="btn btn-outline">Cancel</a>
+          <button type="submit" id="submit" class="btn btn-sun">Publish post</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .narrow { max-width: 720px; }
+  .muted { color: var(--muted); }
+  .lead { font-size: 1.05rem; margin-bottom: 24px; }
+  h1 { font-size: 2.2rem; }
+  .crumbs-dark { font-size: .88rem; color: var(--muted); margin-bottom: 10px; }
+  .crumbs-dark a { color: var(--sky-600); text-decoration: none; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 10px; }
+</style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+  import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../../lib/auth';
+  import { getTrek } from '../../data/treks';
+
+  const form = document.getElementById('post') as HTMLFormElement;
+  const f = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+  const errorBox = document.getElementById('error')!;
+  const today = new Date().toISOString().slice(0, 10);
+
+  async function start() {
+    const user = await getUser();
+    if (!user) return goToLogin();
+    const profile = await getMyProfile(user.id);
+    if (!isComplete(profile)) return goToAccount();
+
+    document.getElementById('gate')!.hidden = true;
+    form.hidden = false;
+
+    f('start_date').min = today;
+    f('end_date').min = today;
+    const pre = new URLSearchParams(location.search).get('trek');
+    if (pre && getTrek(pre)) f('trek').value = pre;
+  }
+
+  f('start_date').addEventListener('change', () => {
+    f('end_date').min = f('start_date').value || today;
+  });
+
+  const desc = form.elements.namedItem('description') as HTMLTextAreaElement;
+  desc.addEventListener('input', () => {
+    document.getElementById('counter')!.textContent = `${desc.value.length} / 1500`;
+  });
+
+  function showError(msg: string) {
+    errorBox.textContent = msg;
+    errorBox.hidden = false;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.hidden = true;
+    const trekSlug = f('trek').value;
+    const trek = getTrek(trekSlug);
+    const start = f('start_date').value;
+    const end = f('end_date').value;
+    const text = desc.value.trim();
+
+    if (!trek) return showError('Please choose a trek.');
+    if (!start) return showError('Please choose a start date.');
+    if (start < today) return showError('The start date can’t be in the past.');
+    if (end && end < start) return showError('The end date must be after the start date.');
+    if (text.length < 20) return showError('Please write a little more in your message (at least 20 characters).');
+
+    const btn = document.getElementById('submit') as HTMLButtonElement;
+    btn.disabled = true;
+    btn.textContent = 'Publishing…';
+    const { data, error } = await supabase.from('trips').insert({
+      region: trek.region,
+      trek: trek.slug,
+      start_date: start,
+      end_date: end || null,
+      flexible: f('flexible').checked,
+      group_size: f('group_size').value ? Number(f('group_size').value) : null,
+      pace: f('pace').value || null,
+      description: text,
+    }).select('id').single();
+    btn.disabled = false;
+    btn.textContent = 'Publish post';
+    if (error) return showError('Could not publish: ' + error.message);
+    location.href = `/post/?id=${data.id}&new=1`;
+  });
+
+  start();
+</script>

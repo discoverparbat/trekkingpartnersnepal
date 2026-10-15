@@ -1,9 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
-import DepartureList from '../components/DepartureList.astro';
+import DepartureCard from '../components/DepartureCard.astro';
 import LatestPosts from '../components/LatestPosts.astro';
 import { regions } from '../data/regions';
 import { treks, treksInRegion } from '../data/treks';
+import { upcomingDepartures } from '../data/departures';
+
+const deps = upcomingDepartures().slice(0, 3);
 
 const schema = {
   '@context': 'https://schema.org',
@@ -47,7 +50,9 @@ const schema = {
           </div>
           <a href="/fixed-departures/" class="link-arrow">All departures →</a>
         </div>
-        <DepartureList limit={3} />
+        <div class="dep-grid">
+          {deps.map((d) => <DepartureCard d={d} />)}
+        </div>
       </div>
     </div>
   </section>
@@ -143,6 +148,7 @@ const schema = {
   /* Departures panel pulled up into the hero */
   .departures { margin-top: -110px; position: relative; z-index: 2; }
   .dep-panel { background: var(--white); border-radius: 20px; padding: 32px; box-shadow: 0 24px 60px -24px rgba(8,22,52,.45); border-top: 4px solid var(--sun); }
+  .dep-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
 
   /* How it works */
   .how .center { justify-content: center; text-align: center; }
@@ -193,5 +199,6 @@ const schema = {
   @media (max-width: 600px) {
     .hero { padding: 90px 0 150px; }
     .dep-panel { padding: 22px 16px; }
+    .dep-grid { grid-template-columns: 1fr; }
   }
 </style>
