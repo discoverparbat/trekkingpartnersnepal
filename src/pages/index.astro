@@ -25,7 +25,8 @@ const schema = {
       <h1>Don’t trek alone.<br />Find your trail partner.</h1>
       <p class="hero-sub">Post your dates, meet other trekkers heading the same way, and share the trail, the guide and the costs. Or join one of our small-group departures.</p>
       <div class="hero-actions">
-        <a href="/find-partners/" class="btn btn-sun">Find a partner</a>
+        <a href="/find-partners/new/" class="btn btn-sun">Post your trek</a>
+        <a href="/find-partners/" class="btn btn-white">Find a partner</a>
         <a href="#departures" class="btn btn-light">See fixed departures</a>
       </div>
       <ul class="hero-stats">
@@ -139,6 +140,8 @@ const schema = {
   .hero h1 { max-width: 760px; text-shadow: 0 2px 20px rgba(8,22,52,.35); }
   .hero-sub { font-size: 1.15rem; max-width: 580px; color: #e4efff; margin-bottom: 28px; }
   .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-white { background: var(--white); color: var(--night-800); }
+  .btn-white:hover { background: var(--sky-100); }
   .hero-stats { list-style: none; padding: 0; margin: 40px 0 0; display: flex; gap: 32px; flex-wrap: wrap; color: #cfe3ff; font-size: .95rem; }
   .hero-stats strong { color: var(--white); font-family: var(--font-head); font-size: 1.5rem; margin-right: 6px; }
 
