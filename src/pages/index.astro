@@ -1,0 +1,204 @@
+---
+import Base from '../layouts/Base.astro';
+import DepartureCard from '../components/DepartureCard.astro';
+import LatestPosts from '../components/LatestPosts.astro';
+import { regions } from '../data/regions';
+import { treks, treksInRegion } from '../data/treks';
+import { upcomingDepartures } from '../data/departures';
+
+const deps = upcomingDepartures().slice(0, 3);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Trekking Partners Nepal',
+  url: 'https://trekkingpartnersnepal.com/',
+};
+---
+<Base
+  title="Trekking Partners Nepal – Find a Trekking Buddy for Your Nepal Trek"
+  description="Find trekking partners for Annapurna, Everest, Manaslu, Langtang and remote Nepal treks, or join a small-group fixed departure with a local guide."
+  schema={schema}
+>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <span class="hero-tag">For solo trekkers in Nepal</span>
+      <h1>Don’t trek alone.<br />Find your trail partner.</h1>
+      <p class="hero-sub">Post your dates, meet other trekkers heading the same way, and share the trail, the guide and the costs. Or join one of our small-group departures.</p>
+      <div class="hero-actions">
+        <a href="/find-partners/" class="btn btn-sun">Find a partner</a>
+        <a href="#departures" class="btn btn-light">See fixed departures</a>
+      </div>
+      <ul class="hero-stats">
+        <li><strong>{regions.length}</strong> regions</li>
+        <li><strong>{treks.length}</strong> treks</li>
+        <li><strong>Free</strong> to post</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FIXED DEPARTURES – overlaps the hero so it's seen straight away -->
+  <section id="departures" class="departures">
+    <div class="container">
+      <div class="dep-panel">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Guaranteed to run</span>
+            <h2>Upcoming fixed departures</h2>
+            <p>Small groups with a licensed local guide. Join on your own – you’ll trek with others on the same dates.</p>
+          </div>
+          <a href="/fixed-departures/" class="link-arrow">All departures →</a>
+        </div>
+        <div class="dep-grid">
+          {deps.map((d) => <DepartureCard d={d} />)}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LATEST PARTNER POSTS (live from Supabase) -->
+  <LatestPosts />
+
+  <!-- HOW IT WORKS -->
+  <section class="section how">
+    <div class="container">
+      <div class="section-head center">
+        <div>
+          <span class="eyebrow">How it works</span>
+          <h2>Three steps to a trekking partner</h2>
+        </div>
+      </div>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          <h3>Pick your trek</h3>
+          <p>Browse treks by region and see who is already planning the same route.</p>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <h3>Post your dates</h3>
+          <p>Sign in with Google and share when you’re going, your pace and what you’re looking for.</p>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <h3>Team up</h3>
+          <p>Reply to trekkers who match, agree on a plan, and split guide, porter and permit costs.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- REGIONS -->
+  <section id="regions" class="section regions">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Explore</span>
+          <h2>Treks by region</h2>
+          <p>From busy teahouse trails to remote valleys that need a partner to get the permit.</p>
+        </div>
+      </div>
+      <div class="region-grid">
+        {regions.map((r, i) => (
+          <a href={`/${r.slug}/`} class:list={['region', { wide: i === 0 }]}>
+            <img src={r.card} alt={`${r.name} trekking region, Nepal`} loading="lazy" width="800" height="600" />
+            <div class="region-text">
+              <span class="region-count">{treksInRegion(r.slug).length} {treksInRegion(r.slug).length === 1 ? "trek" : "treks"}</span>
+              <h3>{r.name}</h3>
+              <p>{r.short}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- NIGHT SKY CTA -->
+  <section class="night">
+    <div class="container night-inner">
+      <h2>Planning a trek this season?</h2>
+      <p>Post your dates in two minutes. Other trekkers heading the same way will find you.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="/find-partners/" class="btn btn-sun">Post your trek</a>
+        <a href="https://www.facebook.com/groups/887606059135821" class="btn btn-light" target="_blank" rel="noopener">Join the Facebook group</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Hero: photo fading from clear daytime sky into night blue */
+  .hero {
+    position: relative; color: var(--white);
+    background:
+      linear-gradient(180deg, rgba(8,22,52,.15) 0%, rgba(14,33,73,.55) 55%, var(--night-900) 100%),
+      url('/images/hero.jpg') center 35% / cover no-repeat,
+      var(--night-800);
+    padding: 120px 0 170px;
+  }
+  .hero-inner { max-width: var(--max); }
+  .hero-tag { display: inline-block; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); padding: 6px 14px; border-radius: 999px; font-size: .85rem; font-weight: 500; margin-bottom: 18px; backdrop-filter: blur(6px); }
+  .hero h1 { max-width: 760px; text-shadow: 0 2px 20px rgba(8,22,52,.35); }
+  .hero-sub { font-size: 1.15rem; max-width: 580px; color: #e4efff; margin-bottom: 28px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hero-stats { list-style: none; padding: 0; margin: 40px 0 0; display: flex; gap: 32px; flex-wrap: wrap; color: #cfe3ff; font-size: .95rem; }
+  .hero-stats strong { color: var(--white); font-family: var(--font-head); font-size: 1.5rem; margin-right: 6px; }
+
+  /* Departures panel pulled up into the hero */
+  .departures { margin-top: -110px; position: relative; z-index: 2; }
+  .dep-panel { background: var(--white); border-radius: 20px; padding: 32px; box-shadow: 0 24px 60px -24px rgba(8,22,52,.45); border-top: 4px solid var(--sun); }
+  .dep-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+
+  /* How it works */
+  .how .center { justify-content: center; text-align: center; }
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; counter-reset: s; }
+  .steps li { background: linear-gradient(180deg, var(--white), var(--sky-100)); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; }
+  .steps p { color: var(--muted); margin: 0; }
+  .step-num { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--sky-500); color: var(--white); font-family: var(--font-head); font-weight: 700; margin-bottom: 14px; }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+
+  /* Regions – sky-blue band */
+  .regions { background: linear-gradient(180deg, var(--sky-100) 0%, var(--sky-50) 100%); }
+  .region-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 260px; gap: 18px; }
+  .region { position: relative; border-radius: var(--radius); overflow: hidden; color: var(--white); text-decoration: none; isolation: isolate; }
+  .region.wide { grid-column: span 2; grid-row: span 2; }
+  .region.wide .region-text h3 { font-size: 2rem; }
+  .region img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform .5s ease; }
+  .region::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(8,22,52,0) 35%, rgba(8,22,52,.88) 100%); }
+  .region:hover img { transform: scale(1.05); }
+  .region-text { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px 22px; }
+  .region-text h3 { font-size: 1.5rem; margin: 4px 0 4px; }
+  .region-text p { margin: 0; font-size: .92rem; color: #dbe9ff; max-width: 420px; }
+  .region-count { font-size: .76rem; font-weight: 600; background: rgba(255,255,255,.2); padding: 3px 10px; border-radius: 999px; backdrop-filter: blur(4px); }
+  @media (max-width: 900px) { .region-grid { grid-template-columns: 1fr 1fr; } .region.wide { grid-row: auto; } .region:last-child { grid-column: span 2; } }
+  @media (max-width: 600px) { .region-grid { grid-template-columns: 1fr; } .region.wide, .region:last-child { grid-column: auto; } }
+
+  /* Night sky CTA */
+  .night {
+    position: relative; color: var(--white); text-align: center; padding: 90px 0; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 120%, var(--night-700) 0%, var(--night-800) 45%, var(--night-900) 100%);
+  }
+  .night::before {
+    content: ''; position: absolute; inset: 0; opacity: .8;
+    background-image:
+      radial-gradient(1.5px 1.5px at 10% 20%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 25% 65%, #fff 50%, transparent 51%),
+      radial-gradient(1.2px 1.2px at 40% 30%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 55% 80%, #cfe3ff 50%, transparent 51%),
+      radial-gradient(1.6px 1.6px at 70% 15%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 82% 55%, #fff 50%, transparent 51%),
+      radial-gradient(1.3px 1.3px at 92% 30%, #cfe3ff 50%, transparent 51%),
+      radial-gradient(1px 1px at 15% 85%, #fff 50%, transparent 51%),
+      radial-gradient(1.2px 1.2px at 65% 45%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 35% 10%, #fff 50%, transparent 51%);
+  }
+  .night-inner { position: relative; }
+  .night p { color: #cfe3ff; font-size: 1.1rem; margin-bottom: 26px; }
+
+  @media (max-width: 600px) {
+    .hero { padding: 90px 0 150px; }
+    .dep-panel { padding: 22px 16px; }
+    .dep-grid { grid-template-columns: 1fr; }
+  }
+</style>

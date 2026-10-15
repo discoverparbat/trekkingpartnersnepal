@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import { regions } from '../data/regions';
+---
+<Base
+  title="Find a Trekking Partner in Nepal | Trekking Partners Nepal"
+  description="Post your trek dates and find other trekkers heading to Annapurna, Everest, Manaslu, Langtang and remote Nepal."
+>
+  <section class="page-hero" style="background-image:url('/images/hero.jpg')">
+    <div class="container">
+      <nav class="crumbs"><a href="/">Home</a> › Find partners</nav>
+      <h1>Find a trekking partner</h1>
+      <p>Partner posts are launching soon. Until then, our Facebook group is the quickest way to find someone heading your way.</p>
+      <a href="https://www.facebook.com/groups/887606059135821" class="btn btn-sun" target="_blank" rel="noopener">Join the Facebook group</a>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="panel panel-dashed">
+        <h3>Coming soon: post your dates</h3>
+        <p style="color:var(--muted)">Sign in with Google, choose your trek and dates, and get matched with others on the same route.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+          {regions.map((r) => <a class="btn btn-outline" href={`/${r.slug}/`}>{r.name}</a>)}
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
