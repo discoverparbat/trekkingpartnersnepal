@@ -24,7 +24,7 @@ const year = new Date().getFullYear();
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
-    <link rel="icon" type="image/png" href="/logo.jpg" />
+    <link rel="icon" type="image/jpeg" href="/logo.jpg" />
     <link rel="apple-touch-icon" href="/logo.jpg" />
     <meta name="theme-color" content="#081634" />
 
@@ -55,7 +55,7 @@ const year = new Date().getFullYear();
           <a href="/fixed-departures/">Fixed departures</a>
           <a href="/find-partners/">Find partners</a>
           <a href="https://www.facebook.com/groups/887606059135821" target="_blank" rel="noopener">Facebook group</a>
-          <a href="/login/" class="btn btn-sun">Log in</a>
+          <a href="/login/" class="btn btn-sun" id="nav-login">Log in</a>
         </nav>
       </div>
     </header>
@@ -100,6 +100,26 @@ const year = new Date().getFullYear();
         </div>
       </div>
     </footer>
+
+    <script>
+      // Signed in? Swap "Log in" for the trekker's photo and a link to their account.
+      import { supabase } from '../lib/supabase';
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const link = document.getElementById('nav-login') as HTMLAnchorElement | null;
+        if (!session || !link) return;
+        const m = session.user.user_metadata || {};
+        link.href = '/account/';
+        link.className = 'nav-account';
+        link.textContent = '';
+        if (m.avatar_url) {
+          const img = document.createElement('img');
+          img.src = m.avatar_url; img.alt = ''; img.className = 'avatar';
+          img.referrerPolicy = 'no-referrer';
+          link.append(img);
+        }
+        link.append('My account');
+      });
+    </script>
 
     <script>
       const btn = document.querySelector('.nav-toggle');
