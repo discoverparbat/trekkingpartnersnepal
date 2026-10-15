@@ -1,0 +1,39 @@
+---
+// Server-rendered departure card. Keep the markup in sync with
+// src/lib/departureCard.ts, which builds the same card in the browser.
+import type { Departure } from '../data/departures';
+import { getTrek } from '../data/treks';
+import { getRegion } from '../data/regions';
+
+interface Props { d: Departure }
+const { d } = Astro.props;
+const trek = getTrek(d.trek);
+const region = trek ? getRegion(trek.region) : undefined;
+const date = new Date(d.start + 'T00:00:00');
+const filled = Math.round(((d.groupMax - d.seatsLeft) / d.groupMax) * 100);
+const full = d.seatsLeft <= 0;
+const name = trek?.name ?? d.trek;
+const subject = encodeURIComponent(full ? `Next departure: ${name}` : `Fixed departure: ${name} – ${d.start}`);
+---
+{trek && region && (
+<article class:list={['dep', { full }]}>
+  <div class="dep-date">
+    <span class="dep-day">{date.toLocaleDateString('en-GB', { day: '2-digit' })}</span>
+    <span class="dep-month">{date.toLocaleDateString('en-GB', { month: 'short' })}</span>
+    <span class="dep-year">{date.getFullYear()}</span>
+  </div>
+  <div class="dep-main">
+    <span class="dep-region">{region.name}</span>
+    <h3><a href={`/${region.slug}/${trek.slug}/`}>{name}</a></h3>
+    <div class="dep-meta">{d.days} days · max {trek.maxAltitude.split(' (')[0]} · <span class={`badge badge-${trek.difficulty}`}>{trek.difficulty}</span></div>
+    <div class="dep-seats">
+      <div class="bar"><span style={`width:${full ? 100 : filled}%`}></span></div>
+      <span class:list={['seats', { few: !full && d.seatsLeft <= 4 }]}>{full ? 'Fully booked' : `${d.seatsLeft} of ${d.groupMax} seats left`}</span>
+    </div>
+    <div class="dep-foot">
+      <span class="price">{d.price ? <>From <strong>{d.price}</strong></> : 'Ask for price'}</span>
+      <a class:list={['btn btn-sm', full ? 'btn-outline' : 'btn-sun']} href={`mailto:hello@trekkingpartnersnepal.com?subject=${subject}`}>{full ? 'Next date?' : 'Join'}</a>
+    </div>
+  </div>
+</article>
+)}

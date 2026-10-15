@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import DepartureList from '../components/DepartureList.astro';
+---
+<Base
+  title="Fixed Departure Treks in Nepal – Join a Small Group | Trekking Partners Nepal"
+  description="Upcoming fixed-departure group treks in Nepal with a licensed local guide. Join solo and trek with others on the same dates."
+>
+  <section class="page-hero" style="background-image:url('/images/hero.jpg')">
+    <div class="container">
+      <nav class="crumbs"><a href="/">Home</a> › Fixed departures</nav>
+      <h1>Fixed departures</h1>
+      <p>Small-group treks with a licensed local guide, guaranteed to run. Join on your own and meet your group on the trail.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <DepartureList />
+    </div>
+  </section>
+</Base>

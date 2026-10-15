@@ -1,0 +1,273 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Trek partner post | Trekking Partners Nepal" description="A trekker looking for partners in Nepal." noindex>
+  <section class="section post-page">
+    <div class="container narrow">
+      <nav class="crumbs-dark"><a href="/find-partners/">Find partners</a> › <span id="crumb">Post</span></nav>
+
+      <div id="loading" class="panel" style="text-align:center"><p class="muted" style="margin:0">Loading…</p></div>
+      <div id="missing" class="panel panel-dashed" hidden>
+        <h3>Post not found</h3>
+        <p class="muted">It may have been deleted by the trekker.</p>
+        <a href="/find-partners/" class="btn btn-sun">Browse other posts</a>
+      </div>
+
+      <div id="app" hidden>
+        <p id="new-note" class="form-note" hidden>✓ Your post is live. Other trekkers can now find it and reply. You can close it from <a href="/account/">My account</a> once you’ve found partners.</p>
+
+        <article class="trip">
+          <div class="trip-top">
+            <span id="t-region" class="post-region"></span>
+            <h1 id="t-trek"></h1>
+            <div class="trip-chips">
+              <span id="t-dates" class="post-dates"></span>
+              <span id="t-tags" class="post-tags"></span>
+            </div>
+          </div>
+
+          <div class="author">
+            <span id="a-avatar"></span>
+            <div>
+              <div id="a-name" class="author-name"></div>
+              <div id="a-facts" class="post-sub"></div>
+            </div>
+            <span id="t-time" class="post-sub when"></span>
+          </div>
+
+          <p id="t-text" class="trip-text"></p>
+
+          <div class="trip-links">
+            <a id="t-treklink" class="link-arrow" href="#">About this trek →</a>
+            <div id="owner" class="owner" hidden>
+              <button id="toggle" type="button" class="btn btn-outline btn-sm"></button>
+              <button id="delete" type="button" class="btn btn-outline btn-sm danger">Delete</button>
+            </div>
+          </div>
+        </article>
+
+        <section class="replies">
+          <h2 id="r-title">Replies</h2>
+
+          <!-- Not signed in / no profile -->
+          <div id="r-locked" class="panel locked" hidden>
+            <p class="lock-icon" aria-hidden="true">🔒</p>
+            <h3 id="r-locked-title"></h3>
+            <p class="muted" id="r-locked-text"></p>
+            <button id="r-locked-btn" type="button" class="btn btn-sun"></button>
+          </div>
+
+          <!-- Members -->
+          <div id="r-member" hidden>
+            <div id="r-list" class="r-list"></div>
+            <p id="r-none" class="muted" hidden>No replies yet. Be the first to say hi!</p>
+
+            <form id="r-form" class="form-card form-grid reply-form" novalidate>
+              <label class="field">Your reply
+                <textarea name="body" required maxlength="1000" placeholder="Introduce yourself and say how you’d like to plan the trek. You can share your WhatsApp, email or Instagram here to continue the conversation."></textarea>
+                <span class="counter" id="r-counter">0 / 1000</span>
+              </label>
+              <p class="form-note">Replies are visible only to signed-in members with a profile. Share contact details only with people you’re comfortable trekking with, and meet in a public place first.</p>
+              <p id="r-error" class="form-error" hidden></p>
+              <div style="display:flex;justify-content:flex-end"><button type="submit" id="r-send" class="btn btn-sun">Post reply</button></div>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .narrow { max-width: 760px; }
+  .muted { color: var(--muted); }
+  .crumbs-dark { font-size: .88rem; color: var(--muted); margin-bottom: 14px; }
+  .crumbs-dark a { color: var(--sky-600); text-decoration: none; }
+  #new-note { margin-bottom: 18px; }
+
+  .trip { background: var(--white); border: 1px solid var(--line); border-radius: 18px; padding: 28px; box-shadow: var(--shadow); }
+  .trip-top h1 { font-size: clamp(1.7rem, 4vw, 2.3rem); margin: 4px 0 12px; }
+  .trip-chips { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .author { display: flex; align-items: center; gap: 12px; margin: 24px 0 18px; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .author :global(.avatar) { width: 52px; height: 52px; font-size: 1.2rem; }
+  .author-name { font-weight: 600; font-size: 1.05rem; }
+  .when { margin-left: auto; white-space: nowrap; }
+  .trip-text { white-space: pre-wrap; font-size: 1.02rem; line-height: 1.7; margin: 0 0 20px; overflow-wrap: anywhere; }
+  .trip-links { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .owner { display: flex; gap: 8px; }
+  .danger { color: #b3261e !important; }
+
+  .replies { margin-top: 40px; }
+  .replies h2 { font-size: 1.4rem; }
+  .locked { text-align: center; padding: 34px 24px; background: linear-gradient(180deg, var(--sky-100), var(--white)); }
+  .lock-icon { font-size: 1.8rem; margin: 0; }
+  .r-list { display: grid; gap: 14px; margin-bottom: 24px; }
+  .r-list :global(.reply) { display: flex; gap: 12px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+  .r-list :global(.reply.mine) { border-color: var(--sky-200); background: var(--sky-50); }
+  .r-list :global(.reply .avatar) { width: 40px; height: 40px; }
+  .r-list :global(.reply-body) { flex: 1; min-width: 0; }
+  .r-list :global(.reply-head) { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .r-list :global(.reply-name) { font-weight: 600; }
+  .r-list :global(.reply-text) { white-space: pre-wrap; margin: 6px 0 0; overflow-wrap: anywhere; }
+  .r-list :global(.reply-del) { background: none; border: 0; color: var(--muted); font: 500 .8rem var(--font-body); cursor: pointer; margin-left: auto; }
+  .r-list :global(.reply-del:hover) { color: #b3261e; }
+  .reply-form textarea { min-height: 110px; }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../lib/auth';
+  import { fetchTrip, avatar, authorName, authorFacts, dateRange, timeAgo, paceLabel, el, type Author } from '../lib/posts';
+  import { getTrek } from '../data/treks';
+  import { getRegion } from '../data/regions';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id') ?? '';
+
+  async function start() {
+    const trip = id ? await fetchTrip(id) : null;
+    $('loading').hidden = true;
+    if (!trip) { $('missing').hidden = false; return; }
+
+    const trek = getTrek(trip.trek);
+    const region = getRegion(trip.region);
+    const name = trek?.name ?? trip.trek;
+    document.title = `${name} – trekking partner wanted | Trekking Partners Nepal`;
+    $('crumb').textContent = name;
+    $('t-region').textContent = region?.name ?? '';
+    $('t-trek').textContent = name;
+    $('t-dates').textContent = '🗓 ' + dateRange(trip.start_date, trip.end_date) + (trip.flexible ? ' · flexible' : '');
+    const tags = $('t-tags');
+    if (trip.group_size) tags.append(el('span', 'badge', `Group of ${trip.group_size}`));
+    if (trip.pace) tags.append(el('span', 'badge', paceLabel(trip.pace)));
+    if (trip.status === 'closed') tags.append(el('span', 'badge badge-warn', 'Closed – no longer looking'));
+
+    $('a-avatar').replaceChildren(avatar(trip.author, 52));
+    $('a-name').textContent = authorName(trip.author);
+    $('a-facts').textContent = authorFacts(trip.author);
+    $('t-time').textContent = 'Posted ' + timeAgo(trip.created_at);
+    $('t-text').textContent = trip.description;
+    if (trek && region) ($('t-treklink') as HTMLAnchorElement).href = `/${region.slug}/${trek.slug}/`;
+    else $('t-treklink').hidden = true;
+    $('new-note').hidden = !params.has('new');
+    $('app').hidden = false;
+
+    // Who is viewing?
+    const user = await getUser();
+    const profile = user ? await getMyProfile(user.id) : null;
+    const member = isComplete(profile);
+    let admin = false;
+    if (user) {
+      const { data } = await supabase.rpc('is_admin');
+      admin = !!data;
+    }
+
+    // Owner / admin controls
+    const isOwner = user?.id === trip.user_id;
+    if (isOwner || admin) {
+      $('owner').hidden = false;
+      const toggle = $('toggle') as HTMLButtonElement;
+      if (isOwner) {
+        toggle.textContent = trip.status === 'open' ? 'Close post' : 'Reopen post';
+        toggle.addEventListener('click', async () => {
+          await supabase.from('trips').update({ status: trip.status === 'open' ? 'closed' : 'open' }).eq('id', trip.id);
+          location.reload();
+        });
+      } else {
+        toggle.hidden = true;
+      }
+      $('delete').addEventListener('click', async () => {
+        if (!confirm('Delete this post and all its replies? This can’t be undone.')) return;
+        const { error } = await supabase.from('trips').delete().eq('id', trip.id);
+        if (error) return alert('Could not delete: ' + error.message);
+        location.href = isOwner ? '/account/' : '/find-partners/';
+      });
+    }
+
+    // Replies
+    const n = trip.replies;
+    $('r-title').textContent = n === 1 ? '1 reply' : `${n} replies`;
+    if (!member) {
+      const locked = $('r-locked');
+      const btn = $('r-locked-btn') as HTMLButtonElement;
+      if (!user) {
+        $('r-locked-title').textContent = n ? `Sign in to read ${n === 1 ? 'the reply' : `the ${n} replies`}` : 'Sign in to reply';
+        $('r-locked-text').textContent = 'Replies are for members only, so trekkers can share contact details safely. Signing in with Google takes a few seconds.';
+        btn.textContent = 'Sign in with Google';
+        btn.addEventListener('click', () => goToLogin());
+      } else {
+        $('r-locked-title').textContent = 'Complete your profile to see replies';
+        $('r-locked-text').textContent = 'Add your name, age and nationality so other trekkers know who they’re talking to.';
+        btn.textContent = 'Complete my profile';
+        btn.addEventListener('click', () => goToAccount());
+      }
+      locked.hidden = false;
+      return;
+    }
+
+    $('r-member').hidden = false;
+    loadReplies(user!.id, admin || isOwner);
+
+    const form = $('r-form') as HTMLFormElement;
+    const body = form.elements.namedItem('body') as HTMLTextAreaElement;
+    body.addEventListener('input', () => { $('r-counter').textContent = `${body.value.length} / 1000`; });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      $('r-error').hidden = true;
+      const text = body.value.trim();
+      if (!text) return;
+      const send = $('r-send') as HTMLButtonElement;
+      send.disabled = true;
+      const { error } = await supabase.from('comments').insert({ trip_id: trip.id, body: text });
+      send.disabled = false;
+      if (error) {
+        $('r-error').textContent = 'Could not post: ' + error.message;
+        $('r-error').hidden = false;
+        return;
+      }
+      body.value = '';
+      $('r-counter').textContent = '0 / 1000';
+      loadReplies(user!.id, admin || isOwner);
+    });
+  }
+
+  async function loadReplies(myId: string, canModerate: boolean) {
+    const { data: rows } = await supabase
+      .from('comments').select('id, user_id, body, created_at')
+      .eq('trip_id', id).order('created_at', { ascending: true });
+    const comments = rows ?? [];
+    const ids = [...new Set(comments.map((c) => c.user_id))];
+    const { data: people } = ids.length
+      ? await supabase.from('public_profiles').select('id, display_name, avatar_url, nationality, gender, age').in('id', ids)
+      : { data: [] as Author[] };
+    const byId = new Map((people ?? []).map((p: Author) => [p.id, p]));
+
+    $('r-title').textContent = comments.length === 1 ? '1 reply' : `${comments.length} replies`;
+    $('r-none').hidden = comments.length > 0;
+    $('r-list').replaceChildren(...comments.map((c) => {
+      const a = byId.get(c.user_id);
+      const item = el('div', c.user_id === myId ? 'reply mine' : 'reply');
+      const bodyBox = el('div', 'reply-body');
+      const head = el('div', 'reply-head');
+      head.append(el('span', 'reply-name', authorName(a)));
+      const facts = authorFacts(a);
+      head.append(el('span', 'post-sub', [facts, timeAgo(c.created_at)].filter(Boolean).join(' · ')));
+      if (c.user_id === myId || canModerate) {
+        const del = el('button', 'reply-del', 'Delete');
+        del.type = 'button';
+        del.addEventListener('click', async () => {
+          if (!confirm('Delete this reply?')) return;
+          await supabase.from('comments').delete().eq('id', c.id);
+          loadReplies(myId, canModerate);
+        });
+        head.append(del);
+      }
+      bodyBox.append(head, el('p', 'reply-text', c.body));
+      item.append(avatar(a, 40), bodyBox);
+      return item;
+    }));
+  }
+
+  start();
+</script>

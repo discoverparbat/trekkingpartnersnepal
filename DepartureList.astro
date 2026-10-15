@@ -1,0 +1,51 @@
+---
+// Fixed departures list. Rendered into the page at build time (good for Google),
+// then refreshed from Supabase in the browser so admin changes show instantly.
+import DepartureCard from './DepartureCard.astro';
+import { getDepartures } from '../data/departures';
+
+interface Props {
+  limit?: number;      // show only the first N
+  trek?: string;       // only this trek
+  stack?: boolean;     // one column (sidebar)
+}
+const { limit, trek, stack = false } = Astro.props;
+
+let deps = await getDepartures();
+if (trek) deps = deps.filter((d) => d.trek === trek);
+if (limit) deps = deps.slice(0, limit);
+const subject = encodeURIComponent(trek ? 'Trek enquiry' : 'Upcoming fixed departures');
+---
+<div class="dep-list" data-limit={limit ?? ''} data-trek={trek ?? ''}>
+  <div class:list={['dep-grid', { stack }]} data-dep-grid hidden={deps.length === 0}>
+    {deps.map((d) => <DepartureCard d={d} />)}
+  </div>
+  <div class="dep-empty" data-dep-empty hidden={deps.length > 0}>
+    <p>{trek ? 'No group dates for this trek yet. Ask us about a private or custom departure.' : 'New departure dates are coming soon. Ask us about upcoming dates or a private trek.'}</p>
+    <a class="btn btn-outline" href={`mailto:hello@trekkingpartnersnepal.com?subject=${subject}`}>Ask about dates</a>
+  </div>
+</div>
+
+<script>
+  import { fetchUpcoming } from '../data/departures';
+  import { departureCard } from '../lib/departureCard';
+
+  const lists = document.querySelectorAll<HTMLElement>('.dep-list');
+  if (lists.length) {
+    fetchUpcoming()
+      .then((all) => {
+        lists.forEach((list) => {
+          const { limit, trek } = list.dataset;
+          let deps = trek ? all.filter((d) => d.trek === trek) : all;
+          if (limit) deps = deps.slice(0, Number(limit));
+          const grid = list.querySelector<HTMLElement>('[data-dep-grid]')!;
+          const empty = list.querySelector<HTMLElement>('[data-dep-empty]')!;
+          const cards = deps.map(departureCard).filter((c): c is HTMLElement => !!c);
+          grid.replaceChildren(...cards);
+          grid.hidden = cards.length === 0;
+          empty.hidden = cards.length > 0;
+        });
+      })
+      .catch((e) => console.warn('Departures refresh failed:', e.message)); // keep build-time cards
+  }
+</script>

@@ -1,0 +1,101 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Log in | Trekking Partners Nepal" description="Sign in to Trekking Partners Nepal with Google." noindex>
+  <section class="section">
+    <div class="container" style="max-width:460px">
+      <div class="panel login">
+        <div id="signed-out" hidden>
+          <h1>Log in</h1>
+          <p class="muted">Sign in to post your trek dates and reply to other trekkers.</p>
+          <button id="google-btn" type="button" class="google">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.3H12v4.3h5.9a5 5 0 0 1-2.2 3.3v2.8h3.6c2-1.9 3.2-4.7 3.2-8.1z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.8c-1 .7-2.3 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.9A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7H2.1a11 11 0 0 0 0 10l3.7-2.9z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7l3.7 2.9C6.7 7.3 9.1 5.4 12 5.4z"/></svg>
+            Continue with Google
+          </button>
+          <p class="small">By continuing you agree to our <a href="/terms/">Terms</a> and <a href="/privacy/">Privacy Policy</a>.</p>
+        </div>
+
+        <div id="signed-in" hidden>
+          <img id="avatar" alt="" referrerpolicy="no-referrer" width="72" height="72" />
+          <h1 id="name" style="font-size:1.5rem">Signed in</h1>
+          <p class="muted" id="email"></p>
+          <a href="/find-partners/" class="btn btn-sun" style="width:100%;margin-bottom:10px">Find a partner</a>
+          <a href="/account/" class="btn btn-outline" style="width:100%;margin-bottom:10px">My account</a>
+          <button id="logout-btn" type="button" class="btn btn-outline" style="width:100%">Sign out</button>
+        </div>
+
+        <p id="status" class="small"></p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .login { text-align: center; padding: 36px 28px; }
+  .login h1 { font-size: 2rem; }
+  .muted { color: var(--muted); }
+  .small { font-size: .85rem; color: var(--muted); margin: 16px 0 0; }
+  .small:empty { display: none; }
+  .google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px 18px; border-radius: 999px; font: 600 1rem var(--font-body); cursor: pointer; border: 1.5px solid var(--line); background: var(--white); color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+  .google:hover { border-color: var(--sky-500); box-shadow: 0 4px 14px -6px rgba(46,143,220,.5); }
+  .google svg { width: 20px; height: 20px; }
+  #avatar { border-radius: 50%; margin: 0 auto 12px; }
+  .err { color: var(--sun-dark); }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { getMyProfile, isComplete, takeNext, peekNext } from '../lib/auth';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const status = (msg: string, err = false) => { $('status').textContent = msg; $('status').className = 'small' + (err ? ' err' : ''); };
+
+  function render(session: any) {
+    const user = session?.user;
+    $('signed-out').hidden = !!user;
+    $('signed-in').hidden = !user;
+    if (user) {
+      const m = user.user_metadata || {};
+      $('name').textContent = m.full_name || m.name || 'Signed in';
+      $('email').textContent = user.email || '';
+      const img = $('avatar') as HTMLImageElement;
+      if (m.avatar_url) img.src = m.avatar_url; else img.hidden = true;
+    }
+  }
+
+  $('google-btn').addEventListener('click', async () => {
+    status('Redirecting to Google…');
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/login/' },
+    });
+    if (error) status('Error: ' + error.message, true);
+  });
+
+  $('logout-btn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    render(null);
+    status('Signed out.');
+  });
+
+  const params = new URLSearchParams(window.location.hash.slice(1) || window.location.search);
+  const urlError = params.get('error_description') || params.get('error');
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (urlError && !session) status('Sign-in error: ' + urlError, true);
+
+  if (session) {
+    // Signed in: new trekkers set up their profile first, everyone else goes back where they were
+    const profile = await getMyProfile(session.user.id);
+    if (!isComplete(profile)) {
+      location.replace('/account/?complete=1');   // the return page stays saved for after setup
+    } else if (peekNext()) {
+      location.replace(takeNext() ?? '/');
+    } else {
+      render(session);
+    }
+  } else {
+    render(null);
+  }
+  supabase.auth.onAuthStateChange((_e, s) => { if (!s) render(null); });
+</script>
