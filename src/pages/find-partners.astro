@@ -1,28 +1,114 @@
 ---
 import Base from '../layouts/Base.astro';
 import { regions } from '../data/regions';
+
+// Next 12 months for the month filter
+const now = new Date();
+const months = Array.from({ length: 12 }, (_, i) => {
+  const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+  return {
+    value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+    label: d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
+  };
+});
+const FB = 'https://www.facebook.com/groups/887606059135821';
 ---
 <Base
   title="Find a Trekking Partner in Nepal | Trekking Partners Nepal"
-  description="Post your trek dates and find other trekkers heading to Annapurna, Everest, Manaslu, Langtang and remote Nepal."
+  description="Browse trekkers looking for partners in Annapurna, Everest, Manaslu, Langtang and remote Nepal, or post your own trek dates."
 >
   <section class="page-hero" style="background-image:url('/images/hero.jpg')">
     <div class="container">
       <nav class="crumbs"><a href="/">Home</a> › Find partners</nav>
       <h1>Find a trekking partner</h1>
-      <p>Partner posts are launching soon. Until then, our Facebook group is the quickest way to find someone heading your way.</p>
-      <a href="https://www.facebook.com/groups/887606059135821" class="btn btn-sun" target="_blank" rel="noopener">Join the Facebook group</a>
+      <p>Trekkers heading into the mountains and looking for company. Found someone going your way? Reply to their post and team up.</p>
+      <a href="/find-partners/new/" class="btn btn-sun">Post your trek</a>
     </div>
   </section>
+
   <section class="section">
     <div class="container">
-      <div class="panel panel-dashed">
-        <h3>Coming soon: post your dates</h3>
-        <p style="color:var(--muted)">Sign in with Google, choose your trek and dates, and get matched with others on the same route.</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
-          {regions.map((r) => <a class="btn btn-outline" href={`/${r.slug}/`}>{r.name}</a>)}
+      <div class="filters">
+        <label class="field">Region
+          <select id="f-region">
+            <option value="">All regions</option>
+            {regions.map((r) => <option value={r.slug}>{r.name}</option>)}
+          </select>
+        </label>
+        <label class="field">Month
+          <select id="f-month">
+            <option value="">Any month</option>
+            {months.map((m) => <option value={m.value}>{m.label}</option>)}
+          </select>
+        </label>
+        <p id="f-count" class="count" aria-live="polite"></p>
+      </div>
+
+      <div id="posts" class="post-grid">
+        {[1, 2, 3, 4, 5, 6].map(() => <div class="post skeleton" aria-hidden="true"></div>)}
+      </div>
+
+      <div id="empty" class="panel panel-dashed" hidden>
+        <h3 id="empty-title">No open posts yet</h3>
+        <p style="color:var(--muted)">Post your dates and other trekkers heading the same way will find you. You can also ask in our Facebook group.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <a href="/find-partners/new/" class="btn btn-sun">Post your trek</a>
+          <a href={FB} class="btn btn-outline" target="_blank" rel="noopener">Facebook group</a>
         </div>
       </div>
     </div>
   </section>
 </Base>
+
+<style>
+  .page-hero .btn { margin-top: 8px; }
+  .filters { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; margin-bottom: 24px; }
+  .filters .field { min-width: 200px; }
+  .count { margin: 0 0 12px auto; color: var(--muted); font-size: .9rem; }
+</style>
+
+<script>
+  import { fetchTrips, postCard, type Trip } from '../lib/posts';
+
+  const grid = document.getElementById('posts')!;
+  const empty = document.getElementById('empty')!;
+  const emptyTitle = document.getElementById('empty-title')!;
+  const count = document.getElementById('f-count')!;
+  const region = document.getElementById('f-region') as HTMLSelectElement;
+  const month = document.getElementById('f-month') as HTMLSelectElement;
+
+  // Remember filters in the address so results can be shared
+  const params = new URLSearchParams(location.search);
+  region.value = params.get('region') ?? '';
+  month.value = params.get('month') ?? '';
+
+  let all: Trip[] = [];
+
+  // A post matches a month if its trek dates overlap that month
+  function inMonth(t: Trip, m: string) {
+    const start = t.start_date.slice(0, 7);
+    const end = (t.end_date ?? t.start_date).slice(0, 7);
+    return start <= m && end >= m;
+  }
+
+  function render() {
+    const list = all.filter((t) => (!region.value || t.region === region.value) && (!month.value || inMonth(t, month.value)));
+    grid.replaceChildren(...list.map(postCard));
+    grid.hidden = list.length === 0;
+    empty.hidden = list.length > 0;
+    emptyTitle.textContent = all.length ? 'No posts match these filters' : 'No open posts yet';
+    count.textContent = all.length ? `${list.length} ${list.length === 1 ? 'trekker' : 'trekkers'} looking for partners` : '';
+
+    const q = new URLSearchParams();
+    if (region.value) q.set('region', region.value);
+    if (month.value) q.set('month', month.value);
+    history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
+  }
+
+  region.addEventListener('change', render);
+  month.addEventListener('change', render);
+
+  fetchTrips()
+    .then((trips) => { all = trips; render(); })
+    .catch((e) => { console.error(e.message); all = []; render(); });
+</script>
