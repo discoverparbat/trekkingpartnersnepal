@@ -20,6 +20,7 @@ import Base from '../layouts/Base.astro';
           <h1 id="name" style="font-size:1.5rem">Signed in</h1>
           <p class="muted" id="email"></p>
           <a href="/find-partners/" class="btn btn-sun" style="width:100%;margin-bottom:10px">Find a partner</a>
+          <a href="/account/" class="btn btn-outline" style="width:100%;margin-bottom:10px">My account</a>
           <button id="logout-btn" type="button" class="btn btn-outline" style="width:100%">Sign out</button>
         </div>
 
@@ -44,6 +45,7 @@ import Base from '../layouts/Base.astro';
 
 <script>
   import { supabase } from '../lib/supabase';
+  import { getMyProfile, isComplete, takeNext, peekNext } from '../lib/auth';
 
   const $ = (id: string) => document.getElementById(id)!;
   const status = (msg: string, err = false) => { $('status').textContent = msg; $('status').className = 'small' + (err ? ' err' : ''); };
@@ -80,7 +82,20 @@ import Base from '../layouts/Base.astro';
   const urlError = params.get('error_description') || params.get('error');
 
   const { data: { session } } = await supabase.auth.getSession();
-  render(session);
   if (urlError && !session) status('Sign-in error: ' + urlError, true);
-  supabase.auth.onAuthStateChange((_e, s) => render(s));
+
+  if (session) {
+    // Signed in: new trekkers set up their profile first, everyone else goes back where they were
+    const profile = await getMyProfile(session.user.id);
+    if (!isComplete(profile)) {
+      location.replace('/account/?complete=1');   // the return page stays saved for after setup
+    } else if (peekNext()) {
+      location.replace(takeNext() ?? '/');
+    } else {
+      render(session);
+    }
+  } else {
+    render(null);
+  }
+  supabase.auth.onAuthStateChange((_e, s) => { if (!s) render(null); });
 </script>

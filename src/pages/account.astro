@@ -18,6 +18,7 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
             <span class="eyebrow">My account</span>
             <h1 id="acc-title">Your trekker profile</h1>
             <p class="muted" id="acc-email"></p>
+            <a id="acc-public" class="link-arrow" href="#" hidden>View my public profile →</a>
           </div>
         </div>
 
@@ -95,6 +96,8 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
   .my-list :global(.mine button) { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font: 600 .85rem var(--font-body); color: var(--sky-700); cursor: pointer; }
   .my-list :global(.mine button:hover) { border-color: var(--sky-400); }
   .my-list :global(.mine button.danger) { color: #b3261e; }
+  .my-list :global(.mine .edit-link) { border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font: 600 .85rem var(--font-body); color: var(--sky-700); text-decoration: none; }
+  .my-list :global(.mine .edit-link:hover) { border-color: var(--sky-400); }
 </style>
 
 <script>
@@ -120,6 +123,9 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
     }
 
     document.getElementById('acc-email')!.textContent = user.email ?? '';
+    const pub = document.getElementById('acc-public') as HTMLAnchorElement;
+    pub.href = `/trekker/?id=${user.id}`;
+    pub.hidden = !isComplete(profile);
     document.getElementById('acc-avatar')!.replaceChildren(
       avatar({ id: user.id, display_name: profile?.display_name ?? null, avatar_url: profile?.avatar_url ?? user.user_metadata?.avatar_url ?? null, nationality: null, gender: null, age: null }, 72),
     );
@@ -202,7 +208,9 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
         await supabase.from('trips').delete().eq('id', t.id);
         loadMyPosts(userId);
       });
-      acts.append(toggle, del);
+      const edit = el('a', 'edit-link', 'Edit');
+      edit.href = `/find-partners/new/?edit=${t.id}`;
+      acts.append(edit, toggle, del);
       row.append(info, acts);
       return row;
     }));
