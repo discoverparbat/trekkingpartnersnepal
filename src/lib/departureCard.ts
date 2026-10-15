@@ -2,6 +2,7 @@
 import { departureUrl, type Departure } from '../data/departures';
 import { getTrek } from '../data/treks';
 import { getRegion } from '../data/regions';
+import { operator } from '../data/operator';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls = '', text = '') {
   const e = document.createElement(tag);
@@ -52,9 +53,7 @@ export function departureCard(d: Departure): HTMLElement | null {
   if (d.price) { price.append('From '); price.append(el('strong', '', d.price)); }
   else price.textContent = 'Ask for price';
   const btn = el('a', full ? 'btn btn-sm btn-outline' : 'btn btn-sm btn-sun', full ? 'Next date?' : 'View & join');
-  btn.href = full
-    ? `mailto:hello@trekkingpartnersnepal.com?subject=${encodeURIComponent(`Next departure: ${trek.name}`)}`
-    : departureUrl(d.id);
+  btn.href = full ? operator.contact : departureUrl(d.id);
   foot.append(price, btn);
 
   main.append(el('span', 'dep-region', region.name), h3, meta, seats, foot);
