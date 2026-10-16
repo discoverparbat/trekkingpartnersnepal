@@ -6,6 +6,7 @@ import DepartureList from '../../components/DepartureList.astro';
 import { getCategory, trailStatusLabel } from '../../data/news';
 import { getTrek } from '../../data/treks';
 import { getRegion } from '../../data/regions';
+import { operator } from '../../data/operator';
 import { getArticles, articleImage, formatDate, isoDate, readingTime, type Article } from '../../lib/news';
 
 export async function getStaticPaths() {
@@ -66,7 +67,7 @@ const schema = [
     mainEntityOfPage: url,
     articleSection: cat.name,
     keywords: [...treks.map((t) => `${t.name} trek`), ...regions.map((r) => `${r.name} region`), 'Nepal trekking'].join(', '),
-    author: { '@type': 'Organization', name: data.author, url: `${SITE}/about/` },
+    author: { '@type': 'Person', name: data.author, worksFor: { '@type': 'TravelAgency', name: operator.name, url: operator.site } },
     publisher: {
       '@type': 'Organization',
       name: 'Trekking Partners Nepal',
@@ -91,7 +92,7 @@ const schema = [
       <p class="article-meta">
         <time datetime={isoDate(data.date)}>{formatDate(data.date)}</time>
         {data.updated && <span>{' · '}Updated <time datetime={isoDate(data.updated)}>{formatDate(data.updated)}</time></span>}
-        {` · ${minutes} min read · By ${data.author}`}
+        {` · ${minutes} min read · By ${data.author}, `}<a href={operator.site} target="_blank" rel="noopener">{operator.name}</a>
       </p>
     </div>
   </section>
@@ -129,6 +130,8 @@ const schema = [
             <ul>{data.sources.map((s) => <li><a href={s.url} target="_blank" rel="noopener nofollow">{s.title}</a></li>)}</ul>
           </div>
         )}
+
+        <p class="byline">Written by <strong>{data.author}</strong>, <a href={operator.site} target="_blank" rel="noopener">{operator.name}</a></p>
 
         <div class="share">
           <span>Share this update</span>
@@ -195,6 +198,8 @@ const schema = [
   .article-hero h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); max-width: 900px; }
   .hero-cat { display: inline-block; background: var(--sun); color: var(--white); font-size: .74rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; margin-bottom: 14px; }
   .article-meta { font-size: .95rem !important; color: #cfe3ff !important; margin: 0; }
+  .article-meta a { color: var(--white); font-weight: 600; text-underline-offset: 2px; }
+  .byline { margin: 32px 0 0; padding: 14px 18px; background: var(--sky-100); border-radius: var(--radius); font-size: .98rem; color: var(--night-700); }
   .article-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 48px; align-items: start; }
   .article-layout article { max-width: 740px; min-width: 0; }
   .lede { font-size: 1.22rem; line-height: 1.6; color: var(--night-700); font-weight: 500; margin-bottom: 1.4em; }

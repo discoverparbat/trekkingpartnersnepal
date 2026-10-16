@@ -308,3 +308,4 @@ a.post:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-co
 .news-cta h2 { color: var(--white); font-size: 1.5rem; margin-bottom: 6px; }
 .news-cta p { margin: 0; max-width: 560px; }
 .news-cta-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.prose iframe { width: 100%; height: auto; aspect-ratio: 16/9; border: 0; border-radius: var(--radius); margin: 1.4em 0; }

@@ -1,32 +1,49 @@
-# News & updates: how to publish
+# News & updates: setup and how to publish
 
-Articles are Markdown files in `src/content/news/`. Each file becomes a page at
-`/news/<file-name>/`, so `manaslu-circuit-reopens.md` → `/news/manaslu-circuit-reopens/`.
+Articles are written at **/admin/ → News** and stored in Supabase (table `news`).
+Each article becomes a pre-built page at `/news/<web-address>/`, which is best for Google.
+After you save, Supabase tells Cloudflare to rebuild the site; the change is live in about 2 minutes.
 
-## Publish a new article
-1. Copy `src/content/news/_template.md` and rename it, e.g. `thorong-la-snow-update.md`
-   (lowercase, hyphens, no spaces; this is the URL, so don't rename it after publishing).
-2. Fill in the fields at the top and write the article below.
-3. Optional photo: put it in `public/images/news/` and set `image: /images/news/name.jpg`.
-   No photo? The trek's region photo is used automatically.
-4. Check it locally: `npm run dev` → http://localhost:4321/news/ (drafts show here only).
-5. Set `draft: false`, commit and push. Cloudflare rebuilds and it's live in a minute or two.
+## One-time setup (about 10 minutes)
 
-If something is wrong in a field (unknown trek slug, description too long…), `npm run build`
-stops with an error that names the file and the field.
+### 1. Create the news table
+Supabase → SQL Editor → New query → paste all of `supabase/update-7-news.sql` → Run.
+This creates the `news` table, a public `news` photo bucket, and the two starter articles as drafts.
 
-## Where articles appear
-- `/news/`: all articles; the newest (or one with `featured: true`) is the big card
-- `/news/topic/<category>/`: route-updates, trek-news, permits-rules, tourism-news
-- Homepage "Trail news" section: latest 3 (hidden until the first article is published)
-- Trek and region pages: "Latest updates for …" box, from the `treks` and `regions` tags
-- `/news/rss.xml`: RSS feed
-- `sitemap-index.xml`: added automatically
+### 2. Create a Cloudflare deploy hook
+Cloudflare dashboard → Workers & Pages → trekkingpartnersnepal → Settings → Builds →
+Deploy hooks → Add deploy hook. Name: `news`, branch: `main` → Save. Copy the URL it shows
+(starts with `https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/...`).
+Keep this URL private: anyone with it can trigger rebuilds.
+
+### 3. Connect Supabase to the deploy hook
+Supabase → Database → Webhooks (enable webhooks if asked) → Create a new hook:
+- Name: `rebuild-site-on-news`
+- Table: `news`
+- Events: Insert, Update, Delete
+- Type: HTTP Request, Method: POST, URL: the deploy hook URL from step 2
+- Create webhook
+
+Done. Every save, publish, unpublish or delete in /admin/ now rebuilds the site.
+
+## Writing an article
+1. /admin/ → News → **+ New article**
+2. Headline, short summary (120–158 characters), topic, and tick the treks it's about
+   (the article then also shows on those trek pages).
+3. Optional cover photo: upload it, and it's resized automatically. Without one, the trek's region photo is used.
+4. Write the article. Use the toolbar for headings, bold, links, lists, notes, photos and YouTube videos.
+   Click **Preview** to see how it will look.
+5. Tick **Publish on the website** and click Save. Leave it unticked to keep a private draft.
+
+The byline "By Sameer Regmi, Discover Parbat" is added automatically (change "Written by" to use another name).
 
 ## Updating an article
-Change the text, add `updated: YYYY-MM-DD`, and change `trailStatus` if needed.
-Google and the page then show "Updated …". Updating the same page beats writing a new one
-for an ongoing story (e.g. a road closure), since the page keeps its ranking.
+Edit it, click **Mark as updated today**, and change the trail status if needed. Updating the same
+article is better than writing a new one for an ongoing story, since the page keeps its Google ranking.
+Avoid changing the web address of a published article.
 
-## Categories and fields
-Categories are in `src/data/news.ts`. Field rules are in `src/content.config.ts`.
+## If something goes wrong
+- **Article not showing after 5 minutes:** Cloudflare → Deployments. If no new build started,
+  check the Supabase webhook (step 3). If a build failed, open it and read the error.
+- **Build error "Could not load news from Supabase":** Supabase couldn't be reached during the build.
+  The live site keeps working with the previous version. Click "Retry deployment" in Cloudflare.

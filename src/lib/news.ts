@@ -4,9 +4,9 @@ import { getTrek } from '../data/treks';
 
 export type Article = CollectionEntry<'news'>;
 
-// Published articles, newest first. Drafts show in `npm run dev` only, never on the live site.
+// Published articles (from Supabase at build time), newest first.
 export async function getArticles(): Promise<Article[]> {
-  const all = await getCollection('news', ({ data }) => import.meta.env.DEV || !data.draft);
+  const all = await getCollection('news');
   return all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 
