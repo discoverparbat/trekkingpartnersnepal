@@ -228,3 +228,17 @@ a.post:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-co
 /* ── Header account link ────────────────────────────────── */
 .nav-account { display: inline-flex; align-items: center; gap: 8px; }
 .nav-account img, .nav-account .avatar { width: 30px; height: 30px; font-size: .8rem; }
+
+/* ── Report button + dialog ─────────────────────────────── */
+.report-btn { background: none; border: 0; padding: 0; color: var(--muted); font: 500 .8rem var(--font-body); cursor: pointer; }
+.report-btn:hover { color: #b3261e; text-decoration: underline; }
+.report-dlg { border: 0; border-radius: 18px; padding: 0; width: min(480px, calc(100vw - 32px)); max-height: 92vh; overflow-y: auto; box-shadow: 0 30px 80px -20px rgba(8,22,52,.5); }
+.report-dlg::backdrop { background: rgba(8,22,52,.55); }
+.report-form { padding: 24px; display: grid; gap: 14px; }
+.report-form h2 { font-size: 1.3rem; margin: 0; }
+.report-form .muted { color: var(--muted); font-size: .9rem; margin: 0; }
+.report-reasons { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+.report-reasons legend { font-weight: 600; font-size: .92rem; margin-bottom: 6px; }
+.report-form .field textarea { min-height: 80px; }
+.report-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.banned-note { background: #fde8e8; border: 1px solid #f3c2c2; color: #8a1f1a; border-radius: 10px; padding: 12px 14px; font-size: .9rem; margin: 0; }
