@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Email settings | Trekking Partners Nepal" description="Turn off reply emails." noindex>
+  <section class="section">
+    <div class="container" style="max-width:560px">
+      <div class="panel" style="text-align:center">
+        <h1 id="u-title" style="font-size:1.8rem">Turning off reply emails…</h1>
+        <p id="u-text" class="muted" style="color:var(--muted)"></p>
+        <a href="/account/" class="btn btn-outline btn-sm" id="u-link" hidden>Email settings in My account</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  const $ = (id: string) => document.getElementById(id)!;
+  const token = new URLSearchParams(location.search).get('t') ?? '';
+
+  (async () => {
+    const valid = /^[0-9a-f-]{36}$/i.test(token);
+    const { data } = valid ? await supabase.rpc('unsubscribe_replies', { token }) : { data: false };
+    if (data) {
+      $('u-title').textContent = 'Reply emails turned off';
+      $('u-text').textContent = 'You won’t get emails about replies any more. You can turn them back on any time in My account.';
+    } else {
+      $('u-title').textContent = 'This link didn’t work';
+      $('u-text').textContent = 'It may be old or incomplete. Sign in and change your email settings in My account instead.';
+    }
+    $('u-link').hidden = false;
+  })();
+</script>

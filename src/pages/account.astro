@@ -60,6 +60,13 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
           </div>
         </form>
 
+        <div class="form-card email-card">
+          <h2 class="form-title">Email alerts</h2>
+          <label class="check-field"><input type="checkbox" id="email-replies" /> Email me when someone replies to my posts, or to a post I replied on</label>
+          <p class="muted small">Sent to <span id="email-to"></span>. At most one email per post every 30 minutes.</p>
+          <span id="email-saved" class="saved" hidden>✓ Saved</span>
+        </div>
+
         <div class="my-posts">
           <div class="section-head" style="margin-bottom:16px">
             <h2>My posts</h2>
@@ -87,6 +94,8 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
   .saved { color: #1b7a47; font-weight: 600; }
   #welcome { margin-bottom: 20px; }
   .my-posts { margin-top: 48px; }
+  .email-card { margin-top: 24px; display: grid; gap: 10px; }
+  .small { font-size: .86rem; margin: 0; }
   .my-list { display: grid; gap: 12px; }
   .my-list :global(.mine) { display: flex; justify-content: space-between; align-items: center; gap: 16px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; flex-wrap: wrap; }
   .my-list :global(.mine a.title) { font-weight: 600; color: var(--ink); text-decoration: none; }
@@ -168,6 +177,18 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
       // Came here to finish setting up? Go back to where they were.
       const next = peekNext() ? takeNext() : null;
       if (next) location.href = next;
+    });
+
+    // Email alerts
+    const box = document.getElementById('email-replies') as HTMLInputElement;
+    document.getElementById('email-to')!.textContent = user.email ?? 'your Google email';
+    const { data: pref } = await supabase.from('profiles').select('email_replies').eq('id', user.id).maybeSingle();
+    box.checked = pref?.email_replies ?? true;
+    box.addEventListener('change', async () => {
+      const { error } = await supabase.from('profiles').update({ email_replies: box.checked }).eq('id', user.id);
+      if (error) { box.checked = !box.checked; alert('Could not save: ' + error.message); return; }
+      const s = document.getElementById('email-saved')!;
+      s.hidden = false; setTimeout(() => (s.hidden = true), 2000);
     });
 
     loadMyPosts(user.id);
