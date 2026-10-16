@@ -1,0 +1,106 @@
+---
+import Base from '../layouts/Base.astro';
+
+const tips = [
+  {
+    icon: '☕',
+    title: 'Meet in public first',
+    text: 'Before you agree to trek together, meet in a busy café in Thamel or Lakeside Pokhara. Spend an hour together and talk about pace, budget, guide and plans. If something feels off, it is fine to say no.',
+  },
+  {
+    icon: '📍',
+    title: 'Tell someone your plans',
+    text: 'Send a friend or family member your route, dates and the names of the people you are walking with. Check in whenever you have signal, and agree on what they should do if they don’t hear from you.',
+  },
+  {
+    icon: '🛡️',
+    title: 'Get the right insurance',
+    text: 'Your travel insurance must cover trekking up to the highest altitude on your route, including helicopter rescue. Many standard policies stop at 3,000 or 4,000 metres, so check the small print before you go.',
+  },
+  {
+    icon: '🧭',
+    title: 'Follow the guide rules',
+    text: 'Since 2023, foreign trekkers in most of Nepal’s national parks and conservation areas need a licensed guide, and restricted areas need a special permit and a group. Rules can differ by area, so check the current rules for your trek. Sharing a guide is one of the best reasons to find partners.',
+  },
+  {
+    icon: '💸',
+    title: 'Never send money to someone you haven’t met',
+    text: 'Don’t pay deposits, “permit fees” or shared costs to another trekker before you meet in person. Book guides, permits and transport through licensed agencies or official offices, and get a receipt.',
+  },
+  {
+    icon: '📱',
+    title: 'Share contact details carefully',
+    text: 'Posts are public, so never put your phone number or email in them. Replies are only visible to signed-in members. Share WhatsApp or email there, and only with people you have a good feeling about.',
+  },
+  {
+    icon: '⛰️',
+    title: 'Respect the altitude',
+    text: 'Walk at the pace of the slowest person, go up slowly and plan rest days above 3,000 metres. Headache, nausea or unusual tiredness can be altitude sickness: stop going up, and go down if it gets worse. No trek is worth pushing on for.',
+  },
+  {
+    icon: '🚶',
+    title: 'You can always split up',
+    text: 'Agreeing to trek together doesn’t oblige you to finish together. If the group isn’t working, if someone makes you uncomfortable or if paces don’t match, part ways at the next village. Teahouse owners and guides can help.',
+  },
+];
+---
+<Base title="Trekking Safety Tips for Meeting Partners | Trekking Partners Nepal" description="How to meet trekking partners safely in Nepal: meet in public first, share your plans, get the right insurance, follow guide rules and know who to call in an emergency.">
+  <section class="page-hero" style="background-image:url('/images/hero.jpg')">
+    <div class="container">
+      <nav class="crumbs"><a href="/">Home</a> › Safety</nav>
+      <h1>Trek together, safely</h1>
+      <p>Most people you meet here are friendly travellers looking for the same thing as you. A few simple habits keep it that way.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="tips">
+        {tips.map((t) => (
+          <div class="tip">
+            <span class="tip-icon" aria-hidden="true">{t.icon}</span>
+            <h2>{t.title}</h2>
+            <p>{t.text}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="two">
+        <div class="panel emergency">
+          <h2>In an emergency</h2>
+          <ul>
+            <li><strong>Tourist Police:</strong> <a href="tel:1144">1144</a> (free, English spoken)</li>
+            <li><strong>Police:</strong> <a href="tel:100">100</a></li>
+            <li><strong>Ambulance:</strong> <a href="tel:102">102</a></li>
+            <li><strong>Your insurance helpline</strong>: save it in your phone before you start, as they arrange helicopter rescue.</li>
+          </ul>
+          <p class="muted">Save these numbers before you set off. Mobile signal is patchy on many trails, so a local SIM with data helps.</p>
+        </div>
+
+        <div class="panel report">
+          <h2>See something wrong? Report it</h2>
+          <p>Every post, reply and trekker profile has a <strong>Report</strong> button. Use it for spam, scams, fake profiles, harassment or anything that makes you uneasy. Only the site admin sees reports, and the person won’t know who reported them.</p>
+          <p>We check reports regularly and remove content or ban accounts that break our <a href="/terms/">rules</a>. For anything urgent, email <a href="mailto:hello@trekkingpartnersnepal.com">hello@trekkingpartnersnepal.com</a>.</p>
+          <a href="/find-partners/" class="btn btn-sun">Find trekking partners</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .tips { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .tip { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .tip-icon { font-size: 1.7rem; display: block; margin-bottom: 10px; }
+  .tip h2 { font-size: 1.12rem; margin-bottom: 8px; }
+  .tip p { color: var(--muted); font-size: .94rem; margin: 0; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 32px; }
+  @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+  .two h2 { font-size: 1.35rem; }
+  .emergency { background: var(--night-900); color: #d6e6ff; border-color: var(--night-900); }
+  .emergency h2 { color: var(--white); }
+  .emergency a { color: var(--white); font-weight: 600; }
+  .emergency ul { padding-left: 20px; margin: 0 0 14px; display: grid; gap: 8px; }
+  .emergency .muted { color: #a9bfdd; font-size: .9rem; margin: 0; }
+  .report p { color: #33445c; }
+</style>

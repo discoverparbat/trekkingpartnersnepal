@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import { operator } from '../data/operator';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: 'About Trekking Partners Nepal',
+  url: 'https://trekkingpartnersnepal.com/about/',
+  publisher: {
+    '@type': 'Organization',
+    name: 'Trekking Partners Nepal',
+    url: 'https://trekkingpartnersnepal.com/',
+    email: 'hello@trekkingpartnersnepal.com',
+    parentOrganization: { '@type': 'TravelAgency', name: operator.name, url: operator.site },
+  },
+};
+---
+<Base title="About Us | Trekking Partners Nepal" description="Trekking Partners Nepal is a free noticeboard for finding trekking partners in Nepal, run by the local team behind Discover Parbat." schema={schema}>
+  <section class="page-hero" style="background-image:url('/images/hero.jpg')">
+    <div class="container">
+      <nav class="crumbs"><a href="/">Home</a> › About</nav>
+      <h1>Made in Nepal, for people who don’t want to trek alone</h1>
+      <p>A free place to find someone to share the trail, the guide and the costs with.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container about">
+      <div class="about-main">
+        <h2>Why we built this</h2>
+        <p>Every season we meet solo travellers in Kathmandu and Pokhara asking the same question: is anyone else going my way? Since most trekking areas now require a licensed guide, finding a partner also means sharing the cost of that guide, a jeep or a room.</p>
+        <p>Facebook groups help, but posts disappear in the feed within hours. So we started the <a href="https://www.facebook.com/groups/887606059135821" target="_blank" rel="noopener">Trekking Partners Nepal group</a>, and then built this site: one place where every trek in Nepal has its own page, and posts stay up until the trek date has passed.</p>
+
+        <h2>Who runs it</h2>
+        <p>Trekking Partners Nepal is run by the team behind <a href={operator.site} target="_blank" rel="noopener">{operator.name}</a>, a licensed local trekking company from the Parbat district of western Nepal. We grew up in these hills, guide treks in the Annapurna region ourselves, and opened the Kokhe Danda trail together with our local guides.</p>
+
+        <h2>How it works, and how it’s paid for</h2>
+        <ul>
+          <li><strong>Finding partners is free</strong>, and always will be. Sign in with Google, add your name, age and nationality, and post your dates or reply to others.</li>
+          <li><strong>Fixed departures</strong> are small-group guided treks run by {operator.name}. If you would rather join a ready-made group, these are how the site pays its way. You never have to book one to use the partner board.</li>
+          <li><strong>We don’t sell your data</strong> or show ads. See our <a href="/privacy/">privacy policy</a>.</li>
+        </ul>
+
+        <h2>Keeping it friendly</h2>
+        <p>Every post, reply and profile can be reported, and we remove spam, scams and anyone who makes others uncomfortable. Before you meet someone, please read our <a href="/safety/">safety tips</a>.</p>
+      </div>
+
+      <aside class="about-side">
+        <div class="panel">
+          <h3>Get in touch</h3>
+          <p><a href="mailto:hello@trekkingpartnersnepal.com">hello@trekkingpartnersnepal.com</a></p>
+          <p><a href="https://www.facebook.com/groups/887606059135821" target="_blank" rel="noopener">Facebook group →</a></p>
+          <h3>{operator.name}</h3>
+          <p><a href={operator.site} target="_blank" rel="noopener">Website →</a><br />
+            <a href={operator.facebook} target="_blank" rel="noopener">Facebook page →</a><br />
+            <a href={operator.maps} target="_blank" rel="noopener">Google reviews →</a></p>
+          <a href="/find-partners/new/" class="btn btn-sun">Post your trek</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .about { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; align-items: start; }
+  @media (max-width: 860px) { .about { grid-template-columns: 1fr; } }
+  .about-main { max-width: 720px; }
+  .about-main h2 { font-size: 1.45rem; margin-top: 32px; }
+  .about-main h2:first-child { margin-top: 0; }
+  .about-main p, .about-main li { color: #33445c; font-size: 1.02rem; }
+  .about-main ul { padding-left: 22px; display: grid; gap: 8px; }
+  .about-side { position: sticky; top: 90px; }
+  .about-side h3 { margin-top: 18px; }
+  .about-side h3:first-child { margin-top: 0; }
+  .about-side p { margin-bottom: 10px; }
+</style>

@@ -61,7 +61,7 @@ import { treksInRegion } from '../../data/treks';
           <span class="counter" id="counter">0 / 1500</span>
         </label>
 
-        <p class="form-note">🔒 Your post is public, so don’t put your phone number or email here. Share contact details in the replies, which only signed-in members can read.</p>
+        <p class="form-note">🔒 Your post is public, so don’t put your phone number or email here. Share contact details in the replies, which only signed-in members can read. Before you meet anyone, <a href="/safety/">read our safety tips</a>.</p>
 
         <p id="error" class="form-error" hidden></p>
 
@@ -102,6 +102,17 @@ import { treksInRegion } from '../../data/treks';
     if (!user) return goToLogin();
     const profile = await getMyProfile(user.id);
     if (!isComplete(profile)) return goToAccount();
+    const { data: banned } = await supabase.rpc('is_banned');
+    if (banned) {
+      const gate = document.getElementById('gate')!;
+      gate.replaceChildren();
+      const p = document.createElement('p');
+      p.className = 'banned-note';
+      p.textContent = 'Your account has been suspended for breaking our rules, so you can’t publish posts. If you think this is a mistake, email hello@trekkingpartnersnepal.com.';
+      gate.append(p);
+      gate.style.textAlign = 'left';
+      return;
+    }
 
     f('start_date').min = today;
     f('end_date').min = today;

@@ -39,6 +39,7 @@ import Base from '../layouts/Base.astro';
 
           <div class="trip-links">
             <a id="t-treklink" class="link-arrow" href="#">About this trek →</a>
+            <span id="t-report" hidden></span>
             <div id="owner" class="owner" hidden>
               <a id="edit" class="btn btn-outline btn-sm" href="#" hidden>Edit</a>
               <button id="toggle" type="button" class="btn btn-outline btn-sm"></button>
@@ -68,7 +69,7 @@ import Base from '../layouts/Base.astro';
                 <textarea name="body" required maxlength="1000" placeholder="Introduce yourself and say how you’d like to plan the trek. You can share your WhatsApp, email or Instagram here to continue the conversation."></textarea>
                 <span class="counter" id="r-counter">0 / 1000</span>
               </label>
-              <p class="form-note">Replies are visible only to signed-in members with a profile. Share contact details only with people you’re comfortable trekking with, and meet in a public place first.</p>
+              <p class="form-note">Replies are visible only to signed-in members with a profile. Share contact details only with people you’re comfortable trekking with, and meet in a public place first. <a href="/safety/">Read our safety tips</a>.</p>
               <p id="r-error" class="form-error" hidden></p>
               <div style="display:flex;justify-content:flex-end"><button type="submit" id="r-send" class="btn btn-sun">Post reply</button></div>
             </form>
@@ -97,6 +98,7 @@ import Base from '../layouts/Base.astro';
   .trip-text { white-space: pre-wrap; font-size: 1.02rem; line-height: 1.7; margin: 0 0 20px; overflow-wrap: anywhere; }
   .trip-links { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
   .owner { display: flex; gap: 8px; }
+  #t-report { margin-left: auto; }
   .danger { color: #b3261e !important; }
 
   .replies { margin-top: 40px; }
@@ -121,6 +123,7 @@ import Base from '../layouts/Base.astro';
   import { supabase } from '../lib/supabase';
   import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../lib/auth';
   import { fetchTrip, avatar, authorName, authorFacts, dateRange, timeAgo, paceLabel, el, type Author } from '../lib/posts';
+  import { reportButton } from '../lib/report';
   import { getTrek } from '../data/treks';
   import { getRegion } from '../data/regions';
 
@@ -171,6 +174,10 @@ import Base from '../layouts/Base.astro';
 
     // Owner / admin controls
     const isOwner = user?.id === trip.user_id;
+    if (!isOwner) {
+      $('t-report').replaceChildren(reportButton('post', trip.id, 'Report post'));
+      $('t-report').hidden = false;
+    }
     if (isOwner || admin) {
       $('owner').hidden = false;
       const toggle = $('toggle') as HTMLButtonElement;
@@ -197,10 +204,19 @@ import Base from '../layouts/Base.astro';
     // Replies
     const n = trip.replies;
     $('r-title').textContent = n === 1 ? '1 reply' : `${n} replies`;
-    if (!member) {
+    let banned = false;
+    if (member) {
+      const { data } = await supabase.rpc('is_banned');
+      banned = !!data;
+    }
+    if (!member || banned) {
       const locked = $('r-locked');
       const btn = $('r-locked-btn') as HTMLButtonElement;
-      if (!user) {
+      if (banned) {
+        $('r-locked-title').textContent = 'Your account can’t read or post replies';
+        $('r-locked-text').textContent = 'It was suspended for breaking our rules. If you think this is a mistake, email hello@trekkingpartnersnepal.com.';
+        btn.hidden = true;
+      } else if (!user) {
         $('r-locked-title').textContent = n ? `Sign in to read ${n === 1 ? 'the reply' : `the ${n} replies`}` : 'Sign in to reply';
         $('r-locked-text').textContent = 'Replies are for members only, so trekkers can share contact details safely. Signing in with Google takes a few seconds.';
         btn.textContent = 'Sign in with Google';
@@ -273,6 +289,11 @@ import Base from '../layouts/Base.astro';
           loadReplies(myId, canModerate);
         });
         head.append(del);
+      }
+      if (c.user_id !== myId) {
+        const rep = reportButton('reply', c.id);
+        if (!(c.user_id === myId || canModerate)) rep.style.marginLeft = 'auto';
+        head.append(rep);
       }
       bodyBox.append(head, el('p', 'reply-text', c.body));
       item.append(avatar(a, 40), bodyBox);

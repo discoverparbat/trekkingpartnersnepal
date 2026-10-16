@@ -19,8 +19,8 @@ import { treksInRegion } from '../data/treks';
         <div class="admin-head">
           <div>
             <span class="eyebrow">Admin</span>
-            <h1>Fixed departures</h1>
-            <p class="muted">Changes appear on the homepage, the fixed departures page and trek pages straight away.</p>
+            <h1 id="admin-title">Fixed departures</h1>
+            <p class="muted" id="admin-lead">Changes appear on the homepage, the fixed departures page and trek pages straight away.</p>
           </div>
           <div class="head-actions">
             <button id="add" type="button" class="btn btn-sun">+ Add departure</button>
@@ -28,6 +28,12 @@ import { treksInRegion } from '../data/treks';
           </div>
         </div>
 
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" class="tab on" data-tab="departures" aria-selected="true">Fixed departures</button>
+          <button type="button" role="tab" class="tab" data-tab="moderation" aria-selected="false">Moderation <span id="open-count" class="count" hidden></span></button>
+        </div>
+
+        <div id="tab-departures">
         <h2 class="list-title">Upcoming</h2>
         <div class="table-wrap"><table><thead><tr>
           <th>Date</th><th>Trek</th><th>Days</th><th>Price</th><th>Seats</th><th>Status</th><th></th>
@@ -40,6 +46,40 @@ import { treksInRegion } from '../data/treks';
             <th>Date</th><th>Trek</th><th>Days</th><th>Price</th><th>Seats</th><th>Status</th><th></th>
           </tr></thead><tbody id="rows-past"></tbody></table></div>
         </details>
+        </div>
+
+        <!-- Moderation -->
+        <div id="tab-moderation" hidden>
+          <div class="mod-section-head">
+            <h2 class="list-title">Reports</h2>
+            <div class="filter">
+              <button type="button" class="on" data-report-filter="open">Open</button>
+              <button type="button" data-report-filter="all">All</button>
+            </div>
+          </div>
+          <div id="report-list" class="mod-list"></div>
+          <p id="none-reports" class="muted" hidden>No open reports.</p>
+
+          <h2 class="list-title mod-gap">Latest posts</h2>
+          <div class="table-wrap"><table><thead><tr>
+            <th>Posted</th><th>By</th><th>Post</th><th></th>
+          </tr></thead><tbody id="recent-posts"></tbody></table></div>
+          <p id="none-posts" class="muted" hidden>No posts yet.</p>
+
+          <h2 class="list-title mod-gap">Latest replies</h2>
+          <div class="table-wrap"><table><thead><tr>
+            <th>Posted</th><th>By</th><th>Reply</th><th></th>
+          </tr></thead><tbody id="recent-replies"></tbody></table></div>
+          <p id="none-replies" class="muted" hidden>No replies yet.</p>
+
+          <div class="mod-section-head mod-gap">
+            <h2 class="list-title">Members <span id="member-count" class="muted"></span></h2>
+            <input id="member-search" type="search" placeholder="Search name, email or country" />
+          </div>
+          <div class="table-wrap"><table><thead><tr>
+            <th>Name</th><th>Email</th><th>Nationality</th><th>Joined</th><th>Posts / replies</th><th></th>
+          </tr></thead><tbody id="members"></tbody></table></div>
+        </div>
       </div>
 
       <div id="toast" role="status" hidden></div>
@@ -158,12 +198,45 @@ import { treksInRegion } from '../data/treks';
   .error { color: #b3261e; margin: 0; font-size: .9rem; }
   .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
 
+  .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin-bottom: 26px; }
+  .tab { background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 14px; font: 600 .95rem var(--font-body); color: var(--muted); cursor: pointer; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 8px; }
+  .tab.on { color: var(--ink); border-bottom-color: var(--sun); }
+  .count { background: #b3261e; color: var(--white); border-radius: 999px; font-size: .72rem; padding: 1px 8px; }
+  .mod-section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .mod-section-head .list-title { margin: 0; }
+  .mod-section-head input { width: min(300px, 100%); }
+  .mod-gap { margin-top: 40px; }
+  .filter { display: flex; background: var(--white); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+  .filter button { background: none; border: 0; border-radius: 999px; padding: 6px 14px; font: 600 .85rem var(--font-body); color: var(--muted); cursor: pointer; }
+  .filter button.on { background: var(--sky-100); color: var(--sky-700); }
+  .mod-list { display: grid; gap: 12px; }
+  .mod-card { background: var(--white); border: 1px solid var(--line); border-left: 4px solid #b3261e; border-radius: var(--radius); padding: 16px 18px; display: grid; gap: 10px; }
+  .mod-card.status-resolved, .mod-card.status-dismissed { border-left-color: var(--line); opacity: .75; }
+  .mod-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .mod-head .tag { background: var(--sky-100); color: var(--sky-700); }
+  .mod-head .tag.off { background: #eef0f3; color: var(--muted); }
+  .mod-when { margin-left: auto; font-size: .82rem; color: var(--muted); }
+  .mod-details { margin: 0; font-style: italic; color: #33445c; overflow-wrap: anywhere; }
+  .mod-target { background: var(--sky-50); border-radius: 10px; padding: 10px 14px; overflow-wrap: anywhere; }
+  .mod-target p { margin: 4px 0 0; font-size: .92rem; white-space: pre-wrap; }
+  .mod-title { font-weight: 600; font-size: .92rem; }
+  .mod-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .mod-actions button, .mod-actions .mod-link { background: none; border: 1px solid var(--line); color: var(--sky-700); font: 600 .84rem var(--font-body); cursor: pointer; padding: 6px 12px; border-radius: 999px; text-decoration: none; }
+  .mod-actions button:hover, .mod-actions .mod-link:hover { background: var(--sky-100); }
+  .mod-actions button.danger { color: #b3261e; border-color: #f3c2c2; }
+  .mod-actions button.danger:hover { background: #fde8e8; }
+  td.mod-text { max-width: 460px; overflow-wrap: anywhere; }
+  td.mod-text .muted { font-size: .86rem; }
+  td.nowrap { white-space: nowrap; }
+  td.actions a { color: var(--sky-600); font: 600 .88rem var(--font-body); padding: 4px 8px; text-decoration: none; }
+
   #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--night-900); color: var(--white); padding: 12px 20px; border-radius: 999px; font-size: .92rem; box-shadow: var(--shadow); z-index: 100; }
 </style>
 
 <script>
   import { supabase } from '../lib/supabase';
   import { getTrek } from '../data/treks';
+  import { initModeration } from '../lib/moderation';
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const gateMsg = $('gate-msg');
@@ -199,7 +272,31 @@ import { treksInRegion } from '../data/treks';
     $('gate').hidden = true;
     $('app').hidden = false;
     load();
+    initModeration(toast);
+    if (location.hash === '#moderation') showTab('moderation', false);
   }
+
+  // ── Tabs ──────────────────────────────────────────────────
+  const LEADS: Record<string, [string, string]> = {
+    departures: ['Fixed departures', 'Changes appear on the homepage, the fixed departures page and trek pages straight away.'],
+    moderation: ['Moderation', 'Reports from trekkers, the latest posts and replies, and all members. Banned members can’t post, reply or read replies.'],
+  };
+  function showTab(name: string, reload = true) {
+    document.querySelectorAll<HTMLButtonElement>('.tab').forEach((t) => {
+      const on = t.dataset.tab === name;
+      t.classList.toggle('on', on);
+      t.setAttribute('aria-selected', String(on));
+    });
+    $('tab-departures').hidden = name !== 'departures';
+    $('tab-moderation').hidden = name !== 'moderation';
+    $('add').hidden = name !== 'departures';
+    $('admin-title').textContent = LEADS[name][0];
+    $('admin-lead').textContent = LEADS[name][1];
+    history.replaceState(null, '', name === 'moderation' ? '#moderation' : location.pathname);
+    if (name === 'moderation' && reload) initModeration(toast);
+  }
+  document.querySelectorAll<HTMLButtonElement>('.tab').forEach((t) =>
+    t.addEventListener('click', () => showTab(t.dataset.tab!)));
 
   $('signin').addEventListener('click', () =>
     supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/admin/' } }));
