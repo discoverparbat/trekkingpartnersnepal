@@ -53,6 +53,11 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
               {countries.map((c) => <option value={c}>{c}</option>)}
             </select>
           </label>
+          <label class="field">About you <span class="hint">optional · shown only on your profile page, not on your posts</span>
+            <textarea name="bio" maxlength="300" rows="3" placeholder="E.g. Photographer from Berlin, third time in Nepal. I like an early start and a slow, steady pace."></textarea>
+            <span class="counter" id="bio-counter">0 / 300</span>
+          </label>
+          <p class="hint-note">Don’t put your phone number or email here – profiles are public.</p>
           <p id="profile-error" class="form-error" hidden></p>
           <div class="form-actions">
             <button type="submit" id="save" class="btn btn-sun">Save profile</button>
@@ -92,6 +97,8 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
   .form-title { font-size: 1.3rem; margin: 0; }
   .form-actions { display: flex; align-items: center; gap: 14px; }
   .saved { color: #1b7a47; font-weight: 600; }
+  .field textarea[name=bio] { min-height: 90px; }
+  .hint-note { font-size: .82rem; color: var(--muted); margin: -8px 0 0; }
   #welcome { margin-bottom: 20px; }
   .my-posts { margin-top: 48px; }
   .email-card { margin-top: 24px; display: grid; gap: 10px; }
@@ -142,6 +149,11 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
     f('birth_year').value = profile?.birth_year ? String(profile.birth_year) : '';
     f('gender').value = profile?.gender ?? '';
     f('nationality').value = profile?.nationality ?? '';
+    const bio = form.elements.namedItem('bio') as HTMLTextAreaElement;
+    const bioCount = () => { document.getElementById('bio-counter')!.textContent = `${bio.value.length} / 300`; };
+    bio.value = profile?.bio ?? '';
+    bioCount();
+    bio.addEventListener('input', bioCount);
 
     const needsSetup = !isComplete(profile);
     document.getElementById('welcome')!.hidden = !(needsSetup || new URLSearchParams(location.search).has('complete'));
@@ -165,6 +177,7 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
         birth_year: Number(f('birth_year').value),
         gender: f('gender').value || null,
         nationality: f('nationality').value,
+        bio: bio.value.trim() || null,
       }).eq('id', user.id);
       save.disabled = false;
       if (error) return showError('Could not save: ' + error.message);

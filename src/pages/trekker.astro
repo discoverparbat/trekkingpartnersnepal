@@ -19,6 +19,7 @@ import Base from '../layouts/Base.astro';
             <h1 id="p-name"></h1>
             <ul id="p-facts" class="p-facts"></ul>
             <p id="p-since" class="muted"></p>
+            <p id="p-bio" class="p-bio" hidden></p>
           </div>
           <a id="p-edit" href="/account/" class="btn btn-outline btn-sm" hidden>Edit my profile</a>
           <span id="p-report" class="p-report" hidden></span>
@@ -44,6 +45,7 @@ import Base from '../layouts/Base.astro';
   .p-facts { list-style: none; padding: 0; margin: 0 0 6px; display: flex; gap: 8px; flex-wrap: wrap; }
   .p-facts :global(li) { background: var(--white); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .88rem; font-weight: 500; }
   .p-info p { margin: 0; font-size: .9rem; }
+  .p-info .p-bio { margin-top: 14px; font-size: 1rem; line-height: 1.6; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; max-width: 60ch; }
   .p-report { align-self: flex-start; }
   .posts-title { font-size: 1.4rem; margin: 40px 0 16px; }
 </style>
@@ -60,7 +62,7 @@ import Base from '../layouts/Base.astro';
 
   async function start() {
     const { data: p } = id
-      ? await supabase.from('public_profiles').select('id, display_name, avatar_url, nationality, gender, age, created_at').eq('id', id).maybeSingle()
+      ? await supabase.from('public_profiles').select('id, display_name, avatar_url, nationality, gender, age, created_at, bio').eq('id', id).maybeSingle()
       : { data: null };
     $('loading').hidden = true;
     if (!p) { $('missing').hidden = false; return; }
@@ -77,6 +79,7 @@ import Base from '../layouts/Base.astro';
     if (p.created_at) {
       $('p-since').textContent = 'Member since ' + new Date(p.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
     }
+    if (p.bio) { $('p-bio').textContent = p.bio; $('p-bio').hidden = false; }
     $('posts-title').textContent = `${name.split(' ')[0]}’s open posts`;
     $('app').hidden = false;
 
