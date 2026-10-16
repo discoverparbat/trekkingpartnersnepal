@@ -8,6 +8,7 @@ export interface MyProfile {
   birth_year: number | null;
   gender: string | null;
   nationality: string | null;
+  bio: string | null;
 }
 
 export async function getUser() {
@@ -18,7 +19,7 @@ export async function getUser() {
 export async function getMyProfile(userId: string): Promise<MyProfile | null> {
   const { data } = await supabase
     .from('profiles')
-    .select('id, display_name, avatar_url, birth_year, gender, nationality')
+    .select('id, display_name, avatar_url, birth_year, gender, nationality, bio')
     .eq('id', userId)
     .maybeSingle();
   return data;
