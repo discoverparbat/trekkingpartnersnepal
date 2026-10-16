@@ -1,0 +1,23 @@
+---
+import { getCategory } from '../data/news';
+import { articleUrl, articleImage, formatDate, isoDate, type Article } from '../lib/news';
+
+interface Props { article: Article; big?: boolean; compact?: boolean }
+const { article, big = false, compact = false } = Astro.props;
+const { data } = article;
+const cat = getCategory(data.category);
+---
+<a href={articleUrl(article)} class:list={['news-card', { big, compact }]}>
+  {!compact && (
+    <div class="news-img">
+      <img src={articleImage(article)} alt={data.imageAlt ?? ''} loading="lazy" width="800" height="500" />
+      {data.trailStatus && <span class={`status-pill status-${data.trailStatus}`}>{data.trailStatus === 'caution' ? 'Caution' : data.trailStatus === 'closed' ? 'Closed' : 'Open'}</span>}
+    </div>
+  )}
+  <div class="news-body">
+    <span class={`news-cat cat-${data.category}`}>{cat.name}</span>
+    <h3>{data.title}</h3>
+    {!compact && <p>{data.description}</p>}
+    <time datetime={isoDate(data.updated ?? data.date)}>{data.updated ? `Updated ${formatDate(data.updated)}` : formatDate(data.date)}</time>
+  </div>
+</a>

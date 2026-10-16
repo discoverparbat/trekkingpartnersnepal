@@ -1,0 +1,59 @@
+---
+import Base from '../../../layouts/Base.astro';
+import NewsCard from '../../../components/NewsCard.astro';
+import { categories, getCategory } from '../../../data/news';
+import { getArticles } from '../../../lib/news';
+
+export function getStaticPaths() {
+  return categories.map((c) => ({ params: { category: c.slug } }));
+}
+
+const cat = getCategory(Astro.params.category!);
+const articles = (await getArticles()).filter((a) => a.data.category === cat.slug);
+const SITE = 'https://trekkingpartnersnepal.com';
+const url = `${SITE}/news/topic/${cat.slug}/`;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` },
+    { '@type': 'ListItem', position: 2, name: 'News & updates', item: `${SITE}/news/` },
+    { '@type': 'ListItem', position: 3, name: cat.name, item: url },
+  ],
+};
+---
+<Base
+  title={`${cat.name} – Nepal Trekking News | Trekking Partners Nepal`}
+  description={cat.intro.slice(0, 158)}
+  schema={schema}
+  noindex={articles.length === 0}
+>
+  <section class="page-hero" style="background-image:url('/images/hero.jpg')">
+    <div class="container">
+      <nav class="crumbs"><a href="/">Home</a> › <a href="/news/">News</a> › {cat.name}</nav>
+      <h1>{cat.name}</h1>
+      <p>{cat.intro}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <nav class="topic-chips" aria-label="News topics">
+        <a href="/news/" class="chip">All news</a>
+        {categories.map((c) => (
+          <a href={`/news/topic/${c.slug}/`} class:list={['chip', { active: c.slug === cat.slug }]} aria-current={c.slug === cat.slug ? 'page' : undefined}>{c.name}</a>
+        ))}
+      </nav>
+
+      {articles.length > 0 ? (
+        <div class="news-grid">{articles.map((a) => <NewsCard article={a} />)}</div>
+      ) : (
+        <div class="panel panel-dashed">
+          <h2>Nothing here yet</h2>
+          <p style="color:var(--muted)">No {cat.name.toLowerCase()} right now. <a href="/news/">See all news</a>.</p>
+        </div>
+      )}
+    </div>
+  </section>
+</Base>

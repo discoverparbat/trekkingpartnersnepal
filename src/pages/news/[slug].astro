@@ -1,0 +1,227 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import DepartureList from '../../components/DepartureList.astro';
+import { getCategory, trailStatusLabel } from '../../data/news';
+import { getTrek } from '../../data/treks';
+import { getRegion } from '../../data/regions';
+import { getArticles, articleImage, formatDate, isoDate, readingTime, type Article } from '../../lib/news';
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return articles.map((article) => ({ params: { slug: article.id }, props: { article, all: articles } }));
+}
+
+const { article, all } = Astro.props as { article: Article; all: Article[] };
+const { data } = article;
+const { Content } = await render(article);
+
+const SITE = 'https://trekkingpartnersnepal.com';
+const url = `${SITE}/news/${article.id}/`;
+const cat = getCategory(data.category);
+const image = articleImage(article);
+const imageAbs = new URL(image, SITE).href;
+const treks = data.treks.map(getTrek).filter((t) => !!t);
+const regionSlugs = [...new Set([...data.regions, ...treks.map((t) => t.region)])];
+const regions = regionSlugs.map(getRegion).filter((r) => !!r);
+const mainTrek = treks[0];
+const status = data.trailStatus ? trailStatusLabel[data.trailStatus] : null;
+const minutes = readingTime(article.body);
+
+// Related: shares a trek or region first, then same category.
+const score = (a: Article) =>
+  (a.data.treks.some((t) => data.treks.includes(t)) ? 4 : 0) +
+  (a.data.regions.some((r) => regionSlugs.includes(r)) || a.data.treks.some((t) => regionSlugs.includes(getTrek(t)?.region ?? '')) ? 2 : 0) +
+  (a.data.category === data.category ? 1 : 0);
+const related = all
+  .filter((a) => a.id !== article.id)
+  .map((a) => ({ a, s: score(a) }))
+  .sort((x, y) => y.s - x.s || y.a.data.date.valueOf() - x.a.data.date.valueOf())
+  .slice(0, 3)
+  .map((x) => x.a);
+
+const shareText = encodeURIComponent(data.title);
+const shareUrl = encodeURIComponent(url);
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` },
+      { '@type': 'ListItem', position: 2, name: 'News & updates', item: `${SITE}/news/` },
+      { '@type': 'ListItem', position: 3, name: cat.name, item: `${SITE}/news/topic/${cat.slug}/` },
+      { '@type': 'ListItem', position: 4, name: data.title, item: url },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: data.title,
+    description: data.description,
+    image: [imageAbs],
+    datePublished: isoDate(data.date),
+    dateModified: isoDate(data.updated ?? data.date),
+    mainEntityOfPage: url,
+    articleSection: cat.name,
+    keywords: [...treks.map((t) => `${t.name} trek`), ...regions.map((r) => `${r.name} region`), 'Nepal trekking'].join(', '),
+    author: { '@type': 'Organization', name: data.author, url: `${SITE}/about/` },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Trekking Partners Nepal',
+      url: `${SITE}/`,
+      logo: { '@type': 'ImageObject', url: `${SITE}/web-app-manifest-512x512.png` },
+    },
+  },
+];
+---
+<Base
+  title={`${data.title} | Trekking Partners Nepal`}
+  description={data.description}
+  image={image}
+  schema={schema}
+  article={{ published: data.date, modified: data.updated, section: cat.name, tags: [...treks.map((t) => t.name), ...regions.map((r) => r.name)] }}
+>
+  <section class="page-hero article-hero" style={`background-image:url('${image}')`}>
+    <div class="container">
+      <nav class="crumbs"><a href="/">Home</a> › <a href="/news/">News</a> › <a href={`/news/topic/${cat.slug}/`}>{cat.name}</a></nav>
+      <span class="hero-cat">{cat.name}</span>
+      <h1>{data.title}</h1>
+      <p class="article-meta">
+        <time datetime={isoDate(data.date)}>{formatDate(data.date)}</time>
+        {data.updated && <span>{' · '}Updated <time datetime={isoDate(data.updated)}>{formatDate(data.updated)}</time></span>}
+        {` · ${minutes} min read · By ${data.author}`}
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container article-layout">
+      <article>
+        {status && (
+          <div class={`trail-status trail-${data.trailStatus}`}>
+            <span class="trail-dot" aria-hidden="true"></span>
+            <div>
+              <strong>Trail status: {status.label}</strong>
+              <span>{status.text} Status as of {formatDate(data.updated ?? data.date)}.</span>
+            </div>
+          </div>
+        )}
+
+        <p class="lede">{data.description}</p>
+
+        <div class="prose"><Content /></div>
+
+        {(treks.length > 0 || regions.length > 0) && (
+          <div class="tagged">
+            <h2>Treks in this update</h2>
+            <div class="tag-links">
+              {treks.map((t) => <a href={`/${t.region}/${t.slug}/`} class="chip">{t.name} trek</a>)}
+              {regions.map((r) => <a href={`/${r.slug}/`} class="chip">{r.name} region</a>)}
+            </div>
+          </div>
+        )}
+
+        {data.sources.length > 0 && (
+          <div class="sources">
+            <h2>Sources</h2>
+            <ul>{data.sources.map((s) => <li><a href={s.url} target="_blank" rel="noopener nofollow">{s.title}</a></li>)}</ul>
+          </div>
+        )}
+
+        <div class="share">
+          <span>Share this update</span>
+          <a href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} target="_blank" rel="noopener" class="chip">Facebook</a>
+          <a href={`https://wa.me/?text=${shareText}%20${shareUrl}`} target="_blank" rel="noopener" class="chip">WhatsApp</a>
+          <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`} target="_blank" rel="noopener" class="chip">X</a>
+          <button type="button" class="chip copy-link" data-url={url}>Copy link</button>
+        </div>
+
+        <p class="disclaimer">Conditions in the mountains change quickly. Always double-check with your guide, lodge or the local checkpost before you set off.</p>
+      </article>
+
+      <aside>
+        <div class="side">
+          {mainTrek ? (
+            <>
+              <h3>Going to {mainTrek.name}?</h3>
+              <p class="side-text">See who else is planning this trek, or post your own dates.</p>
+              <a href={`/${mainTrek.region}/${mainTrek.slug}/`} class="btn btn-sun side-btn">Find a {mainTrek.name} partner</a>
+              <h3 class="side-sub">Fixed departures</h3>
+              <DepartureList trek={mainTrek.slug} stack />
+            </>
+          ) : (
+            <>
+              <h3>Don’t trek alone</h3>
+              <p class="side-text">Post your dates and meet other trekkers heading the same way, or join a small group.</p>
+              <a href="/find-partners/" class="btn btn-sun side-btn">Find a trekking partner</a>
+              <h3 class="side-sub">Upcoming fixed departures</h3>
+              <DepartureList limit={2} stack />
+            </>
+          )}
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head">
+          <h2>More news &amp; updates</h2>
+          <a href="/news/" class="link-arrow">All news →</a>
+        </div>
+        <div class="news-grid">{related.map((a) => <NewsCard article={a} />)}</div>
+      </div>
+    </section>
+  )}
+</Base>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.copy-link').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.url || location.href);
+        btn.textContent = 'Link copied ✓';
+        setTimeout(() => (btn.textContent = 'Copy link'), 2000);
+      } catch { /* clipboard blocked: ignore */ }
+    });
+  });
+</script>
+
+<style>
+  .article-hero { padding-bottom: 48px; }
+  .article-hero h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); max-width: 900px; }
+  .hero-cat { display: inline-block; background: var(--sun); color: var(--white); font-size: .74rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; margin-bottom: 14px; }
+  .article-meta { font-size: .95rem !important; color: #cfe3ff !important; margin: 0; }
+  .article-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 48px; align-items: start; }
+  .article-layout article { max-width: 740px; min-width: 0; }
+  .lede { font-size: 1.22rem; line-height: 1.6; color: var(--night-700); font-weight: 500; margin-bottom: 1.4em; }
+  .trail-status { display: flex; gap: 14px; align-items: flex-start; padding: 14px 18px; border-radius: 12px; margin-bottom: 26px; border: 1px solid; }
+  .trail-status strong { display: block; font-family: var(--font-head); font-size: 1.05rem; }
+  .trail-status span { font-size: .92rem; }
+  .trail-dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; flex: 0 0 auto; }
+  .trail-open { background: #e9f7ef; border-color: #bfe5cf; color: #14532d; }
+  .trail-open .trail-dot { background: #1b7a47; box-shadow: 0 0 0 4px #c9ecd8; }
+  .trail-caution { background: #fff6ee; border-color: #f7d6bd; color: #7a3410; }
+  .trail-caution .trail-dot { background: var(--sun-dark); box-shadow: 0 0 0 4px #fbe0cc; }
+  .trail-closed { background: #fdeeee; border-color: #f3c2c2; color: #7f1d1d; }
+  .trail-closed .trail-dot { background: #a8282d; box-shadow: 0 0 0 4px #f6cfcf; }
+  .tagged, .sources { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .tagged h2, .sources h2 { font-size: 1.1rem; margin-bottom: 12px; }
+  .tag-links { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sources ul { padding-left: 20px; margin: 0; display: grid; gap: 6px; font-size: .94rem; }
+  .share { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 32px; padding: 16px 18px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); }
+  .share > span { font-weight: 600; margin-right: 6px; font-size: .95rem; }
+  .share .chip { font-size: .85rem; padding: 6px 14px; cursor: pointer; font-family: var(--font-body); }
+  .disclaimer { font-size: .86rem; color: var(--muted); margin-top: 18px; }
+  .side { position: sticky; top: 90px; background: linear-gradient(180deg, var(--sky-100), var(--white)); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .side-text { color: var(--muted); font-size: .94rem; }
+  .side-btn { width: 100%; }
+  .side-sub { margin-top: 26px; }
+  @media (max-width: 960px) {
+    .article-layout { grid-template-columns: 1fr; }
+    .side { position: static; }
+  }
+</style>

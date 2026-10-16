@@ -1,0 +1,79 @@
+---
+import Base from '../../layouts/Base.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import { categories } from '../../data/news';
+import { getArticles } from '../../lib/news';
+
+const articles = await getArticles();
+const lead = articles.find((a) => a.data.featured) ?? articles[0];
+const rest = articles.filter((a) => a !== lead);
+const SITE = 'https://trekkingpartnersnepal.com';
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` },
+      { '@type': 'ListItem', position: 2, name: 'News & updates', item: `${SITE}/news/` },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Nepal Trekking News & Trail Updates',
+    url: `${SITE}/news/`,
+    hasPart: articles.slice(0, 20).map((a) => ({ '@type': 'NewsArticle', headline: a.data.title, url: `${SITE}/news/${a.id}/`, datePublished: a.data.date.toISOString() })),
+  },
+];
+---
+<Base
+  title="Nepal Trekking News & Trail Updates | Trekking Partners Nepal"
+  description="Latest Nepal trekking news from a local team: trail conditions, route closures, permit and guide rules, new treks and tourism updates for independent trekkers."
+  schema={schema}
+>
+  <section class="page-hero" style="background-image:url('/images/hero.jpg')">
+    <div class="container">
+      <nav class="crumbs"><a href="/">Home</a> › News &amp; updates</nav>
+      <h1>Nepal trekking news &amp; trail updates</h1>
+      <p>Trail conditions, permit changes, new routes and tourism news, checked by our local team in Nepal before you set off.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <nav class="topic-chips" aria-label="News topics">
+        <a href="/news/" class="chip active" aria-current="page">All news</a>
+        {categories.map((c) => <a href={`/news/topic/${c.slug}/`} class="chip">{c.name}</a>)}
+      </nav>
+
+      {lead ? (
+        <>
+          <div class="lead"><NewsCard article={lead} big /></div>
+          {rest.length > 0 && <div class="news-grid">{rest.map((a) => <NewsCard article={a} />)}</div>}
+        </>
+      ) : (
+        <div class="panel panel-dashed">
+          <h2>First updates coming soon</h2>
+          <p style="color:var(--muted)">We’re putting together the latest trail and permit news for this season. Meanwhile, ask other trekkers in our Facebook group.</p>
+          <a href="https://www.facebook.com/groups/887606059135821" class="btn btn-outline" target="_blank" rel="noopener">Facebook group</a>
+        </div>
+      )}
+
+      <div class="news-cta">
+        <div>
+          <h2>Heard about a trail change?</h2>
+          <p>Landslide, new road, closed lodge, permit surprise at the checkpost? Tell us and we’ll check it and share it with other trekkers.</p>
+        </div>
+        <div class="news-cta-actions">
+          <a href="mailto:hello@trekkingpartnersnepal.com?subject=Trail%20update" class="btn btn-sun">Send a trail update</a>
+          <a href="/news/rss.xml" class="btn btn-light">RSS feed</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .lead { margin-bottom: 28px; }
+</style>

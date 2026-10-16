@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import TrekCard from '../../components/TrekCard.astro';
 import DepartureList from '../../components/DepartureList.astro';
 import TrekPosts from '../../components/TrekPosts.astro';
+import RelatedNews from '../../components/RelatedNews.astro';
 import { treks, treksInRegion, type Trek } from '../../data/treks';
 import { getRegion, type Region } from '../../data/regions';
 
@@ -71,6 +72,8 @@ const schema = [
 
         <h2>Trekkers looking for partners</h2>
         <TrekPosts trek={trek.slug} label={trek.name} />
+
+        <RelatedNews trek={trek.slug} label={trek.name} />
       </div>
 
       <aside>

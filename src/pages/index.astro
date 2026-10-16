@@ -3,8 +3,12 @@ import Base from '../layouts/Base.astro';
 import DepartureList from '../components/DepartureList.astro';
 import OperatorBar from '../components/OperatorBar.astro';
 import LatestPosts from '../components/LatestPosts.astro';
+import NewsCard from '../components/NewsCard.astro';
+import { getArticles } from '../lib/news';
 import { regions } from '../data/regions';
 import { treks, treksInRegion } from '../data/treks';
+
+const latestNews = (await getArticles()).slice(0, 3);
 
 const schema = {
   '@context': 'https://schema.org',
@@ -57,6 +61,23 @@ const schema = {
 
   <!-- LATEST PARTNER POSTS (live from Supabase) -->
   <LatestPosts />
+
+  <!-- TRAIL NEWS (only shows once there are published articles) -->
+  {latestNews.length > 0 && (
+    <section class="section news-home">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Trail news</span>
+            <h2>Latest Nepal trekking updates</h2>
+            <p>Trail conditions, permit changes and new routes, from our team on the ground.</p>
+          </div>
+          <a href="/news/" class="link-arrow">All news →</a>
+        </div>
+        <div class="news-grid">{latestNews.map((a) => <NewsCard article={a} />)}</div>
+      </div>
+    </section>
+  )}
 
   <!-- HOW IT WORKS -->
   <section class="section how">
@@ -150,6 +171,7 @@ const schema = {
   .dep-panel { background: var(--white); border-radius: 20px; padding: 32px; box-shadow: 0 24px 60px -24px rgba(8,22,52,.45); border-top: 4px solid var(--sun); }
 
   /* How it works */
+  .news-home { padding-top: 40px; }
   .how .center { justify-content: center; text-align: center; }
   .steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; counter-reset: s; }
   .steps li { background: linear-gradient(180deg, var(--white), var(--sky-100)); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; }

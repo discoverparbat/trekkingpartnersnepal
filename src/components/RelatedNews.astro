@@ -1,0 +1,20 @@
+---
+// "Latest updates" box for trek and region pages. Renders nothing if there are no articles.
+import NewsCard from './NewsCard.astro';
+import { articlesForTrek, articlesForRegion } from '../lib/news';
+
+interface Props { trek?: string; region?: string; label: string; compact?: boolean }
+const { trek, region, label, compact = false } = Astro.props;
+const list = trek ? await articlesForTrek(trek, 3) : region ? await articlesForRegion(region, 3) : [];
+---
+{list.length > 0 && (
+  <div class="related-news">
+    <div class="section-head">
+      <h2>Latest updates for {label}</h2>
+      <a href="/news/" class="link-arrow">All news →</a>
+    </div>
+    <div class:list={['news-grid', { 'news-list': compact }]}>
+      {list.map((a) => <NewsCard article={a} compact={compact} />)}
+    </div>
+  </div>
+)}
