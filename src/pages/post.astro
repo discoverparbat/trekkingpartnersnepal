@@ -48,6 +48,16 @@ import Base from '../layouts/Base.astro';
           </div>
         </article>
 
+        <div id="share" class="share">
+          <span id="share-label" class="share-label">Know someone going this way? Share this post</span>
+          <div class="share-btns">
+            <button type="button" id="sh-native" class="sh sh-native" hidden>Share…</button>
+            <a id="sh-wa" class="sh sh-wa" target="_blank" rel="noopener">WhatsApp</a>
+            <a id="sh-fb" class="sh sh-fb" target="_blank" rel="noopener">Facebook</a>
+            <button type="button" id="sh-copy" class="sh">Copy link</button>
+          </div>
+        </div>
+
         <section class="replies">
           <h2 id="r-title">Replies</h2>
 
@@ -75,6 +85,12 @@ import Base from '../layouts/Base.astro';
             </form>
           </div>
         </section>
+
+        <section id="similar" class="similar" hidden>
+          <h2 id="similar-title">Other trekkers going around the same time</h2>
+          <div id="similar-list" class="post-grid"></div>
+          <a id="similar-more" class="link-arrow" href="/find-partners/">See all partner posts →</a>
+        </section>
       </div>
     </div>
   </section>
@@ -86,6 +102,22 @@ import Base from '../layouts/Base.astro';
   .crumbs-dark { font-size: .88rem; color: var(--muted); margin-bottom: 14px; }
   .crumbs-dark a { color: var(--sky-600); text-decoration: none; }
   #new-note { margin-bottom: 18px; }
+
+  .share { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 16px; padding: 14px 18px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); }
+  .share.owner-share { background: linear-gradient(90deg, #fff4ec, var(--white)); border-color: #f7c9a8; }
+  .share-label { font-weight: 600; font-size: .92rem; }
+  .share-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sh { display: inline-flex; align-items: center; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--white); color: var(--sky-700); font: 600 .86rem var(--font-body); text-decoration: none; cursor: pointer; }
+  .sh:hover { border-color: var(--sky-400); }
+  .sh-wa { background: #25d366; border-color: #25d366; color: #fff; }
+  .sh-wa:hover { background: #1ebe5a; border-color: #1ebe5a; }
+  .sh-fb { background: #1877f2; border-color: #1877f2; color: #fff; }
+  .sh-fb:hover { background: #0f66d8; border-color: #0f66d8; }
+  .sh-native { background: var(--sun); border-color: var(--sun); color: #fff; }
+
+  .similar { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--line); }
+  .similar h2 { font-size: 1.4rem; margin-bottom: 16px; }
+  .similar .post-grid { margin-bottom: 18px; }
 
   .trip { background: var(--white); border: 1px solid var(--line); border-radius: 18px; padding: 28px; box-shadow: var(--shadow); }
   .trip-top h1 { font-size: clamp(1.7rem, 4vw, 2.3rem); margin: 4px 0 12px; }
@@ -122,7 +154,7 @@ import Base from '../layouts/Base.astro';
 <script>
   import { supabase } from '../lib/supabase';
   import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../lib/auth';
-  import { fetchTrip, avatar, authorName, authorFacts, dateRange, timeAgo, paceLabel, el, type Author } from '../lib/posts';
+  import { fetchTrip, fetchTrips, postCard, avatar, authorName, authorFacts, dateRange, timeAgo, paceLabel, el, type Author, type Trip } from '../lib/posts';
   import { reportButton } from '../lib/report';
   import { getTrek } from '../data/treks';
   import { getRegion } from '../data/regions';
@@ -161,6 +193,8 @@ import Base from '../layouts/Base.astro';
     else $('t-treklink').hidden = true;
     $('new-note').hidden = !params.has('new');
     $('app').hidden = false;
+    setupShare(name, trip.start_date, trip.end_date);
+    loadSimilar(trip);
 
     // Who is viewing?
     const user = await getUser();
@@ -174,6 +208,7 @@ import Base from '../layouts/Base.astro';
 
     // Owner / admin controls
     const isOwner = user?.id === trip.user_id;
+    if (isOwner) markOwnerShare();
     if (!isOwner) {
       $('t-report').replaceChildren(reportButton('post', trip.id, 'Report post'));
       $('t-report').hidden = false;
@@ -299,6 +334,64 @@ import Base from '../layouts/Base.astro';
       item.append(avatar(a, 40), bodyBox);
       return item;
     }));
+  }
+
+  // ── Share ────────────────────────────────────────────────
+  function setupShare(trekName: string, start: string, end: string | null) {
+    const url = `${location.origin}/post/?id=${encodeURIComponent(id)}`;
+    const text = `Looking for trekking partners: ${trekName}, ${dateRange(start, end)}. Join or reply here:`;
+    ($('sh-wa') as HTMLAnchorElement).href = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+    ($('sh-fb') as HTMLAnchorElement).href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    const copy = $('sh-copy') as HTMLButtonElement;
+    copy.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(url); }
+      catch {
+        const t = document.createElement('textarea'); t.value = url; document.body.append(t); t.select();
+        try { document.execCommand('copy'); } catch {} t.remove();
+      }
+      copy.textContent = '✓ Link copied';
+      setTimeout(() => (copy.textContent = 'Copy link'), 2000);
+    });
+    if (typeof navigator.share === 'function') {
+      const native = $('sh-native') as HTMLButtonElement;
+      native.hidden = false;
+      native.addEventListener('click', () => navigator.share({ title: `${trekName} – trekking partner wanted`, text, url }).catch(() => {}));
+    }
+  }
+
+  function markOwnerShare() {
+    $('share').classList.add('owner-share');
+    $('share-label').textContent = params.has('new')
+      ? '📣 Share your post to find partners faster'
+      : 'Share your post in groups and chats to find partners faster';
+  }
+
+  // ── Similar posts ────────────────────────────────────────
+  async function loadSimilar(trip: Trip) {
+    let pool: Trip[] = [];
+    try {
+      const [sameTrek, sameRegion] = await Promise.all([
+        fetchTrips({ trek: trip.trek }),
+        fetchTrips({ region: trip.region }),
+      ]);
+      const seen = new Set<string>([trip.id]);
+      for (const t of [...sameTrek, ...sameRegion]) if (!seen.has(t.id)) { seen.add(t.id); pool.push(t); }
+    } catch { return; }
+    if (!pool.length) return;
+    // Same trek first, then closest start date
+    const day = (d: string) => new Date(d + 'T00:00:00').getTime();
+    const target = day(trip.start_date);
+    pool.sort((a, b) =>
+      (a.trek === trip.trek ? 0 : 1) - (b.trek === trip.trek ? 0 : 1) ||
+      Math.abs(day(a.start_date) - target) - Math.abs(day(b.start_date) - target));
+    const picks = pool.slice(0, 4);
+    const region = getRegion(trip.region);
+    $('similar-title').textContent = picks.every((t) => t.trek === trip.trek)
+      ? `Others trekking ${getTrek(trip.trek)?.name ?? ''} around the same time`
+      : `Others trekking in ${region?.name ?? 'this region'} around the same time`;
+    $('similar-list').replaceChildren(...picks.map(postCard));
+    if (region) ($('similar-more') as HTMLAnchorElement).href = `/${region.slug}/`;
+    $('similar').hidden = false;
   }
 
   start();
