@@ -31,7 +31,7 @@ export const treks: Trek[] = [
     summary: 'A quieter ridge with community lodges and a wide panorama of Dhaulagiri and Annapurna South, with an optional side trip to Khayer Lake.' },
   { slug: 'mohare-danda', region: 'annapurna-region', name: 'Mohare Danda', days: '4–6', maxAltitude: '3,300 m', difficulty: 'Easy', season: 'Oct–May',
     summary: 'A community eco-trek on a forested ridge with Dhaulagiri and Annapurna views, far quieter than nearby Poon Hill.' },
-  { slug: 'kokhe-danda', region: 'annapurna-region', name: 'Kokhe Danda', days: '3–5', maxAltitude: 'TBC', difficulty: 'Easy', season: 'Oct–May',
+  { slug: 'kokhe-danda', region: 'annapurna-region', name: 'Kokhe Danda', days: '3–5', maxAltitude: '3,309 m', difficulty: 'Easy', season: 'Oct–May',
     summary: 'A short, uncrowded trek in Parbat district with close views of Dhaulagiri and the Annapurna range.' },
   { slug: 'nar-phu-valley', region: 'annapurna-region', name: 'Nar Phu Valley', days: '10–14', maxAltitude: '5,320 m (Kang La)', difficulty: 'Challenging', season: 'Mar–May, Sep–Nov', restricted: true,
     summary: 'Hidden Tibetan-style villages, canyons and old monasteries in a restricted valley off the Annapurna Circuit, crossing the high Kang La.' },
