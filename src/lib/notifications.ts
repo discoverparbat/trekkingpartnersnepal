@@ -32,12 +32,16 @@ export async function fetchNotices(userId: string, limit = 20): Promise<NoticeVi
 
   const tripIds = [...new Set(data.map((n) => n.trip_id).filter(Boolean))] as string[];
   const actorIds = [...new Set(data.map((n) => n.actor_id).filter(Boolean))] as string[];
-  const [trips, actors] = await Promise.all([
+  const [trips, actors, admins] = await Promise.all([
     tripIds.length ? supabase.from('trips').select('id, trek').in('id', tripIds) : Promise.resolve({ data: [] as any[] }),
     actorIds.length ? supabase.from('public_profiles').select('id, display_name, avatar_url').in('id', actorIds) : Promise.resolve({ data: [] as any[] }),
+    actorIds.length ? supabase.rpc('admin_ids') : Promise.resolve({ data: [] as any[] }),
   ]);
   const trekOf = new Map((trips.data ?? []).map((t: any) => [t.id, getTrek(t.trek)?.name ?? t.trek]));
-  const actorOf = new Map((actors.data ?? []).map((a: any) => [a.id, a]));
+  const adminSet = new Set<string>((admins.data ?? []).map((r: any) => (typeof r === 'string' ? r : r.admin_ids ?? r.user_id)));
+  // Replies from the team account show the site name and logo, not the personal profile
+  const actorOf = new Map((actors.data ?? []).map((a: any) => [a.id,
+    adminSet.has(a.id) ? { display_name: 'Trekking Partners Nepal Admin', avatar_url: '/web-app-manifest-192x192.png', team: true } : a]));
 
   return data
     // reply notices for a post that no longer exists aren't useful
@@ -45,8 +49,8 @@ export async function fetchNotices(userId: string, limit = 20): Promise<NoticeVi
     .map((n) => describe(n as Notice, n.trip_id ? trekOf.get(n.trip_id) : undefined, n.actor_id ? actorOf.get(n.actor_id) : undefined));
 }
 
-function describe(n: Notice, trek?: string, actor?: { display_name: string | null; avatar_url: string | null }): NoticeView {
-  const who = actor?.display_name?.split(' ')[0] || 'A trekker';
+function describe(n: Notice, trek?: string, actor?: { display_name: string | null; avatar_url: string | null; team?: boolean }): NoticeView {
+  const who = (actor?.team ? actor.display_name : actor?.display_name?.split(' ')[0]) || 'A trekker';
   const post = n.trip_id ? `/post/?id=${encodeURIComponent(n.trip_id)}` : '/account/';
   switch (n.kind) {
     case 'welcome':
