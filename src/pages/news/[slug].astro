@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro';
 import NewsCard from '../../components/NewsCard.astro';
 import DepartureList from '../../components/DepartureList.astro';
 import { getCategory, trailStatusLabel } from '../../data/news';
-import { getTrek } from '../../data/treks';
+import { getTrek, trekTitle } from '../../data/treks';
 import { getRegion } from '../../data/regions';
 import { operator } from '../../data/operator';
 import { getArticles, articleImage, formatDate, isoDate, readingTime, type Article } from '../../lib/news';
@@ -66,7 +66,7 @@ const schema = [
     dateModified: isoDate(data.updated ?? data.date),
     mainEntityOfPage: url,
     articleSection: cat.name,
-    keywords: [...treks.map((t) => `${t.name} trek`), ...regions.map((r) => `${r.name} region`), 'Nepal trekking'].join(', '),
+    keywords: [...treks.map((t) => trekTitle(t, 'trek')), ...regions.map((r) => `${r.name} region`), 'Nepal trekking'].join(', '),
     author: { '@type': 'Person', name: data.author, worksFor: { '@type': 'TravelAgency', name: operator.name, url: operator.site } },
     publisher: {
       '@type': 'Organization',
@@ -118,7 +118,7 @@ const schema = [
           <div class="tagged">
             <h2>Treks in this update</h2>
             <div class="tag-links">
-              {treks.map((t) => <a href={`/${t.region}/${t.slug}/`} class="chip">{t.name} trek</a>)}
+              {treks.map((t) => <a href={`/${t.region}/${t.slug}/`} class="chip">{trekTitle(t, 'trek')}</a>)}
               {regions.map((r) => <a href={`/${r.slug}/`} class="chip">{r.name} region</a>)}
             </div>
           </div>

@@ -4,7 +4,7 @@ import TrekCard from '../../components/TrekCard.astro';
 import DepartureList from '../../components/DepartureList.astro';
 import TrekPosts from '../../components/TrekPosts.astro';
 import RelatedNews from '../../components/RelatedNews.astro';
-import { treks, treksInRegion, type Trek } from '../../data/treks';
+import { treks, treksInRegion, trekTitle, type Trek } from '../../data/treks';
 import { getRegion, type Region } from '../../data/regions';
 
 export function getStaticPaths() {
@@ -32,7 +32,7 @@ const schema = [
   {
     '@context': 'https://schema.org',
     '@type': 'TouristTrip',
-    name: `${trek.name} Trek`,
+    name: trekTitle(trek),
     description: trek.summary,
     url,
     image: new URL(image, 'https://trekkingpartnersnepal.com').href,
@@ -41,7 +41,7 @@ const schema = [
 ];
 ---
 <Base
-  title={`${trek.name} Trek – Find a Trekking Partner | Trekking Partners Nepal`}
+  title={`${trekTitle(trek)} – Find a Trekking Partner | Trekking Partners Nepal`}
   description={`Looking for a ${trek.name} trekking partner? ${trek.summary}`.slice(0, 158)}
   image={image}
   schema={schema}
@@ -49,7 +49,7 @@ const schema = [
   <section class="page-hero" style={`background-image:url('${image}')`}>
     <div class="container">
       <nav class="crumbs"><a href="/">Home</a> › <a href={`/${region.slug}/`}>{region.name}</a> › {trek.name}</nav>
-      <h1>{trek.name} Trek</h1>
+      <h1>{trekTitle(trek)}</h1>
       <p>{trek.summary}</p>
     </div>
   </section>

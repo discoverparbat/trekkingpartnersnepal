@@ -103,13 +103,13 @@ const year = new Date().getFullYear();
           <div>
             <h4>Regions</h4>
             <ul>
-              {regions.slice(0, 3).map((r) => <li><a href={`/${r.slug}/`}>{r.name}</a></li>)}
+              {regions.slice(0, Math.ceil(regions.length / 2)).map((r) => <li><a href={`/${r.slug}/`}>{r.name}</a></li>)}
             </ul>
           </div>
           <div>
             <h4>&nbsp;</h4>
             <ul>
-              {regions.slice(3).map((r) => <li><a href={`/${r.slug}/`}>{r.name}</a></li>)}
+              {regions.slice(Math.ceil(regions.length / 2)).map((r) => <li><a href={`/${r.slug}/`}>{r.name}</a></li>)}
             </ul>
           </div>
           <div>

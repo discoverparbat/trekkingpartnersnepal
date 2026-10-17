@@ -153,7 +153,7 @@ import { operator } from '../data/operator';
 
 <script>
   import { fetchDeparture } from '../data/departures';
-  import { getTrek } from '../data/treks';
+  import { getTrek, trekTitle } from '../data/treks';
   import { getRegion } from '../data/regions';
 
   const $ = (id: string) => document.getElementById(id)!;
@@ -195,7 +195,7 @@ import { operator } from '../data/operator';
     ($('hero') as HTMLElement).style.backgroundImage = `url('${trek.image ?? region.hero}')`;
     $('crumb').textContent = trek.name;
     $('h-region').textContent = `${region.name} · Fixed departure`;
-    $('h-title').textContent = `${trek.name} Trek`;
+    $('h-title').textContent = trekTitle(trek);
     $('h-dates').textContent = `${range} · ${d.days} days`;
 
     $('facts').append(
