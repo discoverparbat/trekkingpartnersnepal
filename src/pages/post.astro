@@ -152,6 +152,12 @@ import Base from '../layouts/Base.astro';
   .r-list :global(.reply-del) { background: none; border: 0; color: var(--muted); font: 500 .8rem var(--font-body); cursor: pointer; margin-left: auto; }
   .r-list :global(.reply-del:hover) { color: #b3261e; }
   .reply-form textarea { min-height: 110px; }
+  .r-list :global(.reply-edit) { margin-left: auto; }
+  .r-list :global(.reply-edit + .reply-del) { margin-left: 0; }
+  .r-list :global(.reply-edited) { display: block; margin-top: 4px; font-size: .78rem; color: var(--muted); font-style: italic; }
+  .r-list :global(.reply-editor) { margin-top: 8px; }
+  .r-list :global(.reply-editor textarea) { width: 100%; box-sizing: border-box; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; resize: vertical; min-height: 110px; }
+  .r-list :global(.reply-edit-row) { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
   .r-list :global(.reply.admin-reply) { border-color: var(--sky-200); background: var(--sky-50); }
   .r-list :global(.admin-avatar) { position: relative; flex: 0 0 auto; width: 40px; height: 40px; }
   .r-list :global(.admin-avatar .avatar) { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--white); border: 1px solid var(--line); }
@@ -315,7 +321,7 @@ import Base from '../layouts/Base.astro';
 
   async function loadReplies(myId: string, canModerate: boolean) {
     const { data: rows } = await supabase
-      .from('comments').select('id, user_id, body, created_at')
+      .from('comments').select('id, user_id, body, created_at, edited_at')
       .eq('trip_id', id).order('created_at', { ascending: true });
     const comments = rows ?? [];
     const ids = [...new Set(comments.map((c) => c.user_id))];
@@ -351,6 +357,12 @@ import Base from '../layouts/Base.astro';
         const facts = authorFacts(a);
         head.append(el('span', 'post-sub', [facts, timeAgo(c.created_at)].filter(Boolean).join(' · ')));
       }
+      if (c.user_id === myId && adminIds.has(myId)) {
+        const edit = el('button', 'reply-del reply-edit', 'Edit');
+        edit.type = 'button';
+        edit.addEventListener('click', () => openEditor());
+        head.append(edit);
+      }
       if (c.user_id === myId || canModerate) {
         const del = el('button', 'reply-del', 'Delete');
         del.type = 'button';
@@ -366,7 +378,39 @@ import Base from '../layouts/Base.astro';
         if (!(c.user_id === myId || canModerate)) rep.style.marginLeft = 'auto';
         head.append(rep);
       }
-      bodyBox.append(head, el('p', 'reply-text', c.body));
+      const text = el('p', 'reply-text', c.body);
+      bodyBox.append(head, text);
+      if (c.edited_at) bodyBox.append(el('span', 'reply-edited', 'Edited'));
+
+      function openEditor() {
+        if (bodyBox.querySelector('.reply-editor')) return;
+        const box = el('div', 'reply-editor');
+        const ta = el('textarea') as HTMLTextAreaElement;
+        ta.maxLength = 1000; ta.value = c.body; ta.rows = 5;
+        const err = el('p', 'form-note reply-edit-err'); err.hidden = true;
+        const row = el('div', 'reply-edit-row');
+        const cancel = el('button', 'btn btn-outline btn-sm', 'Cancel'); cancel.type = 'button';
+        const save = el('button', 'btn btn-sun btn-sm', 'Save'); save.type = 'button';
+        row.append(cancel, save);
+        box.append(ta, err, row);
+        text.hidden = true;
+        text.after(box);
+        ta.focus();
+        cancel.addEventListener('click', () => { box.remove(); text.hidden = false; });
+        save.addEventListener('click', async () => {
+          const v = ta.value.trim();
+          if (!v) { err.textContent = 'Reply can’t be empty.'; err.hidden = false; return; }
+          if (v === c.body) { box.remove(); text.hidden = false; return; }
+          save.disabled = true; save.textContent = 'Saving…';
+          const { error } = await supabase.from('comments').update({ body: v }).eq('id', c.id);
+          if (error) {
+            err.textContent = 'Could not save your edit. Please try again.'; err.hidden = false;
+            save.disabled = false; save.textContent = 'Save';
+            return;
+          }
+          loadReplies(myId, canModerate);
+        });
+      }
       item.append(isAdminReply ? adminAvatar() : avatar(a, 40), bodyBox);
       return item;
     }));
