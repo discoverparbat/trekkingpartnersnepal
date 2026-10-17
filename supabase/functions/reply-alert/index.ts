@@ -60,14 +60,18 @@ Deno.serve(async (req) => {
   const ids = [...new Set([trip.user_id, ...(earlier ?? []).map((r) => r.user_id)])].filter((id) => id !== c.user_id);
   if (!ids.length) return new Response('nobody to tell');
 
-  const [{ data: people }, { data: replier }, { data: bans }, { data: recent }] = await Promise.all([
+  const [{ data: people }, { data: replier }, { data: adminRow }, { data: bans }, { data: recent }] = await Promise.all([
     db.from('profiles').select('id, display_name, email_replies, unsub_token').in('id', ids),
     db.from('profiles').select('display_name').eq('id', c.user_id).maybeSingle(),
+    db.from('admins').select('user_id').eq('user_id', c.user_id).maybeSingle(),
     db.from('bans').select('user_id').in('user_id', ids),
     db.from('reply_emails').select('user_id').eq('trip_id', trip.id).in('user_id', ids)
       .gte('sent_at', new Date(Date.now() - QUIET_MINUTES * 60_000).toISOString()),
   ]);
   const skip = new Set([...(bans ?? []).map((b) => b.user_id), ...(recent ?? []).map((r) => r.user_id)]);
+
+  // Replies from the team account show the site name, not the personal profile
+  const replierName = adminRow ? 'Trekking Partners Nepal Admin' : (replier?.display_name || 'A trekker');
 
   const trek = trekName(trip.trek);
   const postUrl = `${SITE}/post/?id=${trip.id}`;
@@ -88,11 +92,11 @@ Deno.serve(async (req) => {
         to: [to],
         reply_to: REPLY_TO,
         subject: isOwner
-          ? `${replier?.display_name || 'A trekker'} replied to your ${trek} post`
+          ? `${replierName} replied to your ${trek} post`
           : `New reply on the ${trek} post`,
         html: emailHtml({
           name: (p.display_name || 'trekker').split(' ')[0],
-          replier: replier?.display_name || 'A trekker',
+          replier: replierName,
           trek, excerpt: short(c.body), postUrl, unsubUrl, isOwner,
         }),
         headers: { 'List-Unsubscribe': `<${unsubUrl}>, <mailto:${REPLY_TO}?subject=unsubscribe>` },
