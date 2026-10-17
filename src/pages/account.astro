@@ -65,7 +65,7 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
           </div>
         </form>
 
-        <div class="form-card email-card">
+        <div class="form-card email-card" id="email-alerts">
           <h2 class="form-title">Email alerts</h2>
           <label class="check-field"><input type="checkbox" id="email-replies" /> Email me when someone replies to my posts, or to a post I replied on</label>
           <p class="muted small">Sent to <span id="email-to"></span>. At most one email per post every 30 minutes.</p>
@@ -101,7 +101,7 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
   .hint-note { font-size: .82rem; color: var(--muted); margin: -8px 0 0; }
   #welcome { margin-bottom: 20px; }
   .my-posts { margin-top: 48px; }
-  .email-card { margin-top: 24px; display: grid; gap: 10px; }
+  .email-card { margin-top: 24px; display: grid; gap: 10px; scroll-margin-top: 90px; }
   .small { font-size: .86rem; margin: 0; }
   .my-list { display: grid; gap: 12px; }
   .my-list :global(.mine) { display: flex; justify-content: space-between; align-items: center; gap: 16px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; flex-wrap: wrap; }

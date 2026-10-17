@@ -62,7 +62,6 @@ const year = new Date().getFullYear();
           <img src="/logo.jpg" alt="" width="36" height="36" />
           Trekking Partners Nepal
         </a>
-        <button class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
         <nav class="nav">
           <a href="/#regions">Regions</a>
           <a href="/fixed-departures/">Fixed departures</a>
@@ -71,6 +70,21 @@ const year = new Date().getFullYear();
           <a href="https://www.facebook.com/groups/887606059135821" target="_blank" rel="noopener">Facebook group</a>
           <a href="/login/" class="btn btn-sun" id="nav-login">Log in</a>
         </nav>
+        <div class="bell-wrap" id="bell-wrap" hidden>
+          <button type="button" class="bell" id="bell" aria-label="Notifications" aria-expanded="false" aria-controls="bell-panel">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-1.7 1.7A1 1 0 0 0 4 19.4h16a1 1 0 0 0 .7-1.7L19 16Z"/></svg>
+            <span class="bell-count" id="bell-count" hidden></span>
+          </button>
+          <div class="bell-panel" id="bell-panel" role="region" aria-label="Notifications" hidden>
+            <div class="bell-head">
+              <strong>Notifications</strong>
+              <button type="button" id="bell-all" class="bell-all" hidden>Mark all as read</button>
+            </div>
+            <div class="bell-list" id="bell-list"><p class="bell-empty">Loading…</p></div>
+            <a class="bell-foot" href="/account/#email-alerts">Email settings</a>
+          </div>
+        </div>
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
       </div>
     </header>
 
@@ -135,6 +149,107 @@ const year = new Date().getFullYear();
           link.append(img);
         }
         link.append('My account');
+      });
+    </script>
+
+    <script>
+      // Notification bell: welcome, first post and reply notifications for signed-in members.
+      import { supabase } from '../lib/supabase';
+      import { fetchNotices, unreadCount, markRead, markAllRead, markTripRead, watchNotices, type NoticeView } from '../lib/notifications';
+      import { timeAgo } from '../lib/posts';
+
+      const wrap = document.getElementById('bell-wrap')!;
+      const bell = document.getElementById('bell') as HTMLButtonElement;
+      const panel = document.getElementById('bell-panel')!;
+      const list = document.getElementById('bell-list')!;
+      const badge = document.getElementById('bell-count')!;
+      const allBtn = document.getElementById('bell-all') as HTMLButtonElement;
+
+      function setCount(n: number) {
+        badge.hidden = n === 0;
+        badge.textContent = n > 9 ? '9+' : String(n);
+        bell.setAttribute('aria-label', n ? `Notifications, ${n} unread` : 'Notifications');
+        allBtn.hidden = n === 0;
+      }
+
+      function row(n: NoticeView, userId: string) {
+        const a = document.createElement('a');
+        a.className = 'bell-item' + (n.read_at ? '' : ' unread');
+        a.href = n.href;
+        let pic: HTMLElement;
+        if (n.actorAvatar) {
+          const img = document.createElement('img');
+          img.src = n.actorAvatar; img.alt = ''; img.width = 36; img.height = 36;
+          img.referrerPolicy = 'no-referrer'; img.loading = 'lazy';
+          pic = img;
+        } else {
+          pic = document.createElement('span');
+          pic.textContent = n.icon;
+        }
+        pic.classList.add('bell-pic');
+        const body = document.createElement('span');
+        body.className = 'bell-body';
+        const msg = document.createElement('span');
+        const b = document.createElement('strong');
+        b.textContent = n.strong;
+        msg.append(b, n.text);
+        const when = document.createElement('span');
+        when.className = 'bell-when';
+        when.textContent = timeAgo(n.created_at);
+        body.append(msg, when);
+        a.append(pic, body);
+        a.addEventListener('click', () => { if (!n.read_at) markRead([n.id]); });
+        return a;
+      }
+
+      async function render(userId: string) {
+        const items = await fetchNotices(userId);
+        if (!items.length) {
+          const p = document.createElement('p');
+          p.className = 'bell-empty';
+          p.textContent = 'No notifications yet. We’ll let you know here when someone replies to your posts.';
+          list.replaceChildren(p);
+        } else {
+          list.replaceChildren(...items.map((n) => row(n, userId)));
+        }
+      }
+
+      function close() {
+        panel.hidden = true;
+        bell.setAttribute('aria-expanded', 'false');
+      }
+
+      supabase.auth.getSession().then(async ({ data: { session } }) => {
+        if (!session) return;
+        const userId = session.user.id;
+        wrap.hidden = false;
+
+        // Opening a post marks its notifications as read
+        const params = new URLSearchParams(location.search);
+        if (location.pathname.startsWith('/post/') && params.get('id')) {
+          await markTripRead(userId, params.get('id')!);
+        }
+
+        const refresh = async () => {
+          setCount(await unreadCount(userId));
+          if (!panel.hidden) render(userId);
+        };
+        await refresh();
+        watchNotices(userId, refresh);
+
+        bell.addEventListener('click', () => {
+          const open = panel.hidden;
+          panel.hidden = !open;
+          bell.setAttribute('aria-expanded', String(open));
+          if (open) render(userId);
+        });
+        allBtn.addEventListener('click', async () => {
+          await markAllRead(userId);
+          setCount(0);
+          render(userId);
+        });
+        document.addEventListener('click', (e) => { if (!wrap.contains(e.target as Node)) close(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { close(); bell.focus(); } });
       });
     </script>
 

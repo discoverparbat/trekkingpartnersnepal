@@ -58,7 +58,7 @@ import Base from '../layouts/Base.astro';
           </div>
         </div>
 
-        <section class="replies">
+        <section class="replies" id="replies">
           <h2 id="r-title">Replies</h2>
 
           <!-- Not signed in / no profile -->
@@ -97,6 +97,9 @@ import Base from '../layouts/Base.astro';
 </Base>
 
 <style>
+  .replies { scroll-margin-top: 90px; }
+  :global(.reply-flash) { animation: reply-flash 2.4s ease-out; border-radius: 12px; }
+  @keyframes reply-flash { from { background: #ffe8d9; } to { background: transparent; } }
   .narrow { max-width: 760px; }
   .muted { color: var(--muted); }
   .crumbs-dark { font-size: .88rem; color: var(--muted); margin-bottom: 14px; }
@@ -308,6 +311,7 @@ import Base from '../layouts/Base.astro';
     $('r-list').replaceChildren(...comments.map((c) => {
       const a = byId.get(c.user_id);
       const item = el('div', c.user_id === myId ? 'reply mine' : 'reply');
+      item.id = `c-${c.id}`;
       const bodyBox = el('div', 'reply-body');
       const head = el('div', 'reply-head');
       const nameLink = el('a', 'reply-name', authorName(a));
@@ -334,7 +338,16 @@ import Base from '../layouts/Base.astro';
       item.append(avatar(a, 40), bodyBox);
       return item;
     }));
+
+    // Came from a notification? Jump to the replies once they're on the page.
+    if (!jumped && location.hash === '#replies') {
+      jumped = true;
+      const last = $('r-list').lastElementChild as HTMLElement | null;
+      (last ?? $('replies')).scrollIntoView({ block: 'center' });
+      last?.classList.add('reply-flash');
+    }
   }
+  let jumped = false;
 
   // ── Share ────────────────────────────────────────────────
   function setupShare(trekName: string, start: string, end: string | null) {

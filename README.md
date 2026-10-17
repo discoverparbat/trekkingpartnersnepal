@@ -40,3 +40,14 @@ Run `supabase/schema.sql` once in Supabase → SQL Editor. It creates the profil
 Authentication → URL Configuration → Redirect URLs must include:
 - https://trekkingpartnersnepal.com/login/
 - http://localhost:4321/login/
+
+## Notifications (update 8)
+The bell in the header shows a welcome message on sign-up, a "your first post is live" message on a member's
+first post, and replies on their posts or posts they replied on (grouped per post until read).
+A welcome email and a first-post email are also sent.
+
+1. Supabase → Edge Functions → deploy `supabase/functions/member-email/index.ts` as **member-email**,
+   with the same settings as `reply-alert` (JWT verification **off**; it uses the existing `RESEND_API_KEY` secret).
+2. Run `supabase/update-8-notifications.sql` in the SQL Editor (needs update 5 to have been run first).
+3. Database → Replication (Publications): check that `notifications` is ticked under `supabase_realtime`
+   so the bell updates live. Without it the bell still updates on every page load.
