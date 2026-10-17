@@ -1,12 +1,18 @@
 ---
+import fs from 'node:fs';
 import { trekTitle, type Trek } from '../data/treks';
 import { getRegion } from '../data/regions';
 interface Props { trek: Trek }
 const { trek } = Astro.props;
 const region = getRegion(trek.region)!;
+
+// Card picture: public/images/treks/<trek-slug>.webp if it exists (replace a file there to change it),
+// otherwise the trek's own image, otherwise the region photo.
+const cardFile = `/images/treks/${trek.slug}.webp`;
+const cardImg = fs.existsSync(`public${cardFile}`) ? cardFile : trek.image ?? region.card;
 ---
 <a class="card" href={`/${region.slug}/${trek.slug}/`}>
-  <img class="card-img" src={trek.image ?? region.card} alt={trekTitle(trek, 'trek')} loading="lazy" width="800" height="500" />
+  <img class="card-img" src={cardImg} alt={trekTitle(trek, 'trek')} loading="lazy" width="800" height="500" />
   <div class="card-body">
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
       <span class={`badge badge-${trek.difficulty}`}>{trek.difficulty}</span>

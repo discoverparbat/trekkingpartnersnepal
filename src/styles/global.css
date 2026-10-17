@@ -128,7 +128,7 @@ p { margin: 0 0 1em; }
   transition: transform .2s ease, box-shadow .2s ease;
 }
 .card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-.card-img { aspect-ratio: 16/10; object-fit: cover; width: 100%; background: var(--sky-100); }
+.card-img { aspect-ratio: 16/10; object-fit: cover; width: 100%; height: auto; background: var(--sky-100); }
 .card-body { padding: 18px 20px 20px; display: flex; flex-direction: column; flex: 1; }
 .card-body p { color: var(--muted); font-size: 0.94rem; }
 
