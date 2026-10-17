@@ -11,6 +11,7 @@ import { categories } from '../data/news';
       <!-- Sign-in / access check -->
       <div id="gate" class="panel gate">
         <p id="gate-msg">Checking your access…</p>
+        <div id="gsi-btn" style="display:flex;justify-content:center;margin:8px 0"></div>
         <button id="signin" type="button" class="btn btn-sun" hidden>Sign in with Google</button>
         <button id="gate-signout" type="button" class="btn btn-outline" hidden>Sign out</button>
       </div>
@@ -393,6 +394,7 @@ import { categories } from '../data/news';
 
 <script>
   import { supabase } from '../lib/supabase';
+  import { mountGoogleButton } from '../lib/googleSignIn';
   import { getTrek } from '../data/treks';
   import { initModeration } from '../lib/moderation';
   import { initNewsAdmin } from '../lib/newsAdmin';
@@ -420,6 +422,10 @@ import { categories } from '../data/news';
     if (!session) {
       gateMsg.textContent = 'Sign in with your admin Google account to manage departures.';
       $('signin').hidden = false;
+      mountGoogleButton($('gsi-btn'), {
+        onSignedIn: () => location.reload(),
+        onError: (msg) => { gateMsg.textContent = 'Sign-in error: ' + msg; },
+      });   // the old sign-in button stays as a backup
       return;
     }
     const { data: isAdmin, error } = await supabase.rpc('is_admin');

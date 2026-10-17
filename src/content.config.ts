@@ -39,8 +39,12 @@ const supabaseNews: Loader = {
       throw new Error(`Could not load news from Supabase: ${e.message ?? e}`);
     }
     store.clear();
+    // Photos uploaded before Oct 2026 were saved with the supabase.co address, which some networks block.
+    // Serve them through our own domain instead (functions/storage/v1 forwards them).
+    const ownDomain = (u: string) => u.replaceAll('https://waorryrsgdfvhujreuvq.supabase.co/storage/v1/', 'https://trekkingpartnersnepal.com/storage/v1/');
     for (const r of rows) {
-      const body = r.body ?? '';
+      if (r.image) r.image = ownDomain(r.image);
+      const body = ownDomain(r.body ?? '');
       const data = await parseData({
         id: r.slug,
         data: {
