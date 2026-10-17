@@ -152,6 +152,12 @@ import Base from '../layouts/Base.astro';
   .r-list :global(.reply-del) { background: none; border: 0; color: var(--muted); font: 500 .8rem var(--font-body); cursor: pointer; margin-left: auto; }
   .r-list :global(.reply-del:hover) { color: #b3261e; }
   .reply-form textarea { min-height: 110px; }
+  .r-list :global(.reply.admin-reply) { border-color: var(--sky-200); background: var(--sky-50); }
+  .r-list :global(.admin-avatar) { position: relative; flex: 0 0 auto; width: 40px; height: 40px; }
+  .r-list :global(.admin-avatar .avatar) { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--white); border: 1px solid var(--line); }
+  .r-list :global(.admin-badge) { position: absolute; right: -3px; bottom: -3px; width: 18px; height: 18px; border-radius: 50%; background: var(--sky-600); color: #fff; display: grid; place-items: center; border: 2px solid var(--white); }
+  .r-list :global(.admin-who) { display: flex; flex-direction: column; line-height: 1.25; }
+  .r-list :global(.admin-tag) { align-self: flex-start; margin-top: 3px; font: 600 .72rem var(--font-body); letter-spacing: .04em; text-transform: uppercase; color: var(--sky-600); background: var(--white); border: 1px solid var(--sky-200); border-radius: 999px; padding: 1px 8px; }
 </style>
 
 <script>
@@ -295,30 +301,56 @@ import Base from '../layouts/Base.astro';
     });
   }
 
+  function adminAvatar() {
+    const wrap = el('span', 'admin-avatar');
+    const img = el('img', 'avatar');
+    img.src = '/web-app-manifest-192x192.png'; img.alt = 'Trekking Partners Nepal'; img.width = 40; img.height = 40;
+    wrap.append(img);
+    const badge = el('span', 'admin-badge');
+    badge.title = 'Admin';
+    badge.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Zm-1.2 14.2-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4-6 6Z"/></svg>';
+    wrap.append(badge);
+    return wrap;
+  }
+
   async function loadReplies(myId: string, canModerate: boolean) {
     const { data: rows } = await supabase
       .from('comments').select('id, user_id, body, created_at')
       .eq('trip_id', id).order('created_at', { ascending: true });
     const comments = rows ?? [];
     const ids = [...new Set(comments.map((c) => c.user_id))];
-    const { data: people } = ids.length
-      ? await supabase.from('public_profiles').select('id, display_name, avatar_url, nationality, gender, age').in('id', ids)
-      : { data: [] as Author[] };
+    const [{ data: people }, { data: adminRows }] = await Promise.all([
+      ids.length
+        ? supabase.from('public_profiles').select('id, display_name, avatar_url, nationality, gender, age').in('id', ids)
+        : Promise.resolve({ data: [] as Author[] }),
+      supabase.rpc('admin_ids'),
+    ]);
     const byId = new Map((people ?? []).map((p: Author) => [p.id, p]));
+    const adminIds = new Set<string>((adminRows ?? []).map((r: any) => (typeof r === 'string' ? r : r.admin_ids ?? r.user_id)));
 
     $('r-title').textContent = comments.length === 1 ? '1 reply' : `${comments.length} replies`;
     $('r-none').hidden = comments.length > 0;
     $('r-list').replaceChildren(...comments.map((c) => {
       const a = byId.get(c.user_id);
-      const item = el('div', c.user_id === myId ? 'reply mine' : 'reply');
+      const isAdminReply = adminIds.has(c.user_id);
+      const item = el('div', ['reply', c.user_id === myId ? 'mine' : '', isAdminReply ? 'admin-reply' : ''].filter(Boolean).join(' '));
       item.id = `c-${c.id}`;
       const bodyBox = el('div', 'reply-body');
       const head = el('div', 'reply-head');
-      const nameLink = el('a', 'reply-name', authorName(a));
-      nameLink.href = `/trekker/?id=${encodeURIComponent(c.user_id)}`;
-      head.append(nameLink);
-      const facts = authorFacts(a);
-      head.append(el('span', 'post-sub', [facts, timeAgo(c.created_at)].filter(Boolean).join(' · ')));
+      if (isAdminReply) {
+        // Team account: show the site identity instead of the personal profile
+        const who = el('div', 'admin-who');
+        const nameLink = el('a', 'reply-name', 'Trekking Partners Nepal');
+        nameLink.href = '/about/';
+        who.append(nameLink, el('span', 'admin-tag', 'Admin'));
+        head.append(who, el('span', 'post-sub', timeAgo(c.created_at)));
+      } else {
+        const nameLink = el('a', 'reply-name', authorName(a));
+        nameLink.href = `/trekker/?id=${encodeURIComponent(c.user_id)}`;
+        head.append(nameLink);
+        const facts = authorFacts(a);
+        head.append(el('span', 'post-sub', [facts, timeAgo(c.created_at)].filter(Boolean).join(' · ')));
+      }
       if (c.user_id === myId || canModerate) {
         const del = el('button', 'reply-del', 'Delete');
         del.type = 'button';
@@ -329,13 +361,13 @@ import Base from '../layouts/Base.astro';
         });
         head.append(del);
       }
-      if (c.user_id !== myId) {
+      if (c.user_id !== myId && !isAdminReply) {
         const rep = reportButton('reply', c.id);
         if (!(c.user_id === myId || canModerate)) rep.style.marginLeft = 'auto';
         head.append(rep);
       }
       bodyBox.append(head, el('p', 'reply-text', c.body));
-      item.append(avatar(a, 40), bodyBox);
+      item.append(isAdminReply ? adminAvatar() : avatar(a, 40), bodyBox);
       return item;
     }));
 
