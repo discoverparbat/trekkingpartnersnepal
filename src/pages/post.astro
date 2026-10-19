@@ -278,6 +278,8 @@ import Base from '../layouts/Base.astro';
         btn.addEventListener('click', () => goToAccount());
       }
       locked.hidden = false;
+      // Came from a card's "reply" button? Show the sign-in box.
+      if (location.hash === '#reply') locked.scrollIntoView({ block: 'center' });
       return;
     }
 
@@ -287,6 +289,11 @@ import Base from '../layouts/Base.astro';
     const form = $('r-form') as HTMLFormElement;
     const body = form.elements.namedItem('body') as HTMLTextAreaElement;
     body.addEventListener('input', () => { $('r-counter').textContent = `${body.value.length} / 1000`; });
+    // Came from a card's "reply" button? Jump to the reply box, ready to type.
+    if (location.hash === '#reply') {
+      form.scrollIntoView({ block: 'center' });
+      body.focus({ preventScroll: true });
+    }
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       $('r-error').hidden = true;
@@ -421,6 +428,11 @@ import Base from '../layouts/Base.astro';
       const last = $('r-list').lastElementChild as HTMLElement | null;
       (last ?? $('replies')).scrollIntoView({ block: 'center' });
       last?.classList.add('reply-flash');
+    }
+    // Came from a card's "reply" button? Replies have pushed the form down, so scroll to it again.
+    if (!jumped && location.hash === '#reply') {
+      jumped = true;
+      $('r-form').scrollIntoView({ block: 'center' });
     }
   }
   let jumped = false;
