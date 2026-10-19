@@ -135,6 +135,9 @@ export function avatar(a: Author | undefined, size = 40) {
 export const paceLabel = (p: string | null) => (p ? `${p[0].toUpperCase()}${p.slice(1)} pace` : '');
 
 // ── Card ────────────────────────────────────────────────────
+const CHAT_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
+const ARROW_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
 export function postCard(t: Trip) {
   const trek = getTrek(t.trek);
   const region = getRegion(t.region);
@@ -159,9 +162,29 @@ export function postCard(t: Trip) {
   if (t.pace) tags.append(el('span', 'badge', paceLabel(t.pace)));
   if (t.status === 'closed') tags.append(el('span', 'badge badge-warn', 'Closed'));
 
+  // Footer: reply count + posted time on the left, orange "reply" button on the right.
+  // The whole card is already a link, so the button is a <span> that jumps
+  // straight to the reply box (/post/?id=…#reply) instead of the top of the post.
   const foot = el('div', 'post-foot');
-  foot.append(el('span', '', timeAgo(t.created_at)));
-  foot.append(el('span', 'post-replies', t.replies === 1 ? '💬 1 reply' : `💬 ${t.replies} replies`));
+  const footMeta = el('div', 'post-foot-meta');
+  const count = el('span', 'post-replies');
+  count.innerHTML = CHAT_ICON; // fixed icon markup, no user text
+  count.append(t.replies === 0 ? 'No replies yet' : t.replies === 1 ? '1 reply' : `${t.replies} replies`);
+  footMeta.append(count, el('span', 'post-ago', 'Posted ' + timeAgo(t.created_at)));
+
+  const replyBtn = el('span', 'post-reply-btn', t.replies === 0 ? 'Be first to reply' : 'Join the chat');
+  replyBtn.insertAdjacentHTML('beforeend', ARROW_ICON);
+  replyBtn.setAttribute('role', 'link');
+  replyBtn.tabIndex = 0;
+  const goReply = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    location.href = `${a.href.split('#')[0]}#reply`;
+  };
+  replyBtn.addEventListener('click', goReply);
+  replyBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') goReply(e); });
+
+  foot.append(footMeta, replyBtn);
 
   a.append(who, head, dates, el('p', 'post-text', t.description), tags, foot);
   return a;
