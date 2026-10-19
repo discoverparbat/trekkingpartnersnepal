@@ -231,8 +231,23 @@ a.post:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-co
 }
 .post-text { font-size: .9rem; color: var(--muted); margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .post-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.post-foot { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); }
-.post-replies { font-weight: 600; color: var(--sky-700); }
+.post-foot {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: .8rem; color: var(--muted); margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line);
+}
+.post-foot-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.post-replies { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; font-size: .85rem; color: var(--ink); }
+.post-ago { font-size: .78rem; color: var(--muted); }
+.post-reply-btn {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px;
+  border-radius: 999px; background: var(--sun); color: var(--white);
+  font-weight: 700; font-size: .85rem; white-space: nowrap; cursor: pointer;
+  box-shadow: 0 8px 20px -8px rgba(240,113,44,.7);
+  transition: background .15s ease, transform .15s ease;
+}
+.post-reply-btn:hover, a.post:hover .post-reply-btn { background: var(--sun-dark); }
+.post-reply-btn:hover { transform: translateY(-1px); }
+.post-reply-btn:focus-visible { outline: 3px solid var(--night-800); outline-offset: 2px; }
 .skeleton {
   background: linear-gradient(100deg, var(--white) 30%, var(--sky-50) 50%, var(--white) 70%) !important;
   background-size: 200% 100% !important; animation: shimmer 1.4s linear infinite;
