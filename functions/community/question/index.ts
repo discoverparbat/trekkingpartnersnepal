@@ -67,7 +67,9 @@ export async function onRequestGet(context: any) {
     answers = Array.isArray(ans) ? ans : [];
     team = new Set((Array.isArray(admins) ? admins : []).map((r: any) => (typeof r === 'string' ? r : r.admin_ids ?? r.user_id)));
     const ids = [...new Set([q.user_id, ...answers.map((a) => a.user_id)])];
-    const profs = await rest(env, `public_profiles?id=in.(${ids.join(',')})&select=id,display_name,nationality`);
+    // member_profiles() (update 13) takes up to 50 ids; the old view until that update has run
+    let profs = await rest(env, 'rpc/member_profiles', { method: 'POST', body: JSON.stringify({ ids: ids.slice(0, 50) }) });
+    if (!Array.isArray(profs)) profs = await rest(env, `public_profiles?id=in.(${ids.join(',')})&select=id,display_name,nationality`);
     people = new Map((Array.isArray(profs) ? profs : []).map((p: any) => [p.id, p]));
   } catch {}
   if (!q) return page;

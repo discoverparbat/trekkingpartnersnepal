@@ -87,3 +87,9 @@ To send another announcement later, run this in the SQL Editor (the link must be
 select public.announce('Headline (max 120 characters)', 'Short text (max 400 characters)', '/community/');
 ```
 It returns how many members it was sent to. Banned members don't get it.
+
+## Private member list (update 13)
+Run `supabase/update-13-private-members.sql` once (after update 10). Afterwards nobody can download the
+member list: profiles are looked up by id, at most 50 at a time, and only for members who already appear
+on the site (a partner post, reply, question or answer). Members who haven't posted are hidden from others.
+Emails were never public. It also clears Supabase's "Security Definer View" warning on `public_profiles`.

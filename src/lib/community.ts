@@ -1,7 +1,7 @@
 // Community: trek questions, answers and admin trail notes (browser only).
 // All user text is inserted with textContent, never as HTML.
 import { supabase } from './supabase';
-import { el, avatar, authorName, authorFacts, timeAgo, type Author } from './posts';
+import { el, avatar, authorName, authorFacts, timeAgo, fetchProfiles, type Author } from './posts';
 import { getTrek } from '../data/treks';
 import { getRegion } from '../data/regions';
 import { GENERAL, GENERAL_LABEL, topicLabel, noteLabel } from '../data/community';
@@ -45,7 +45,6 @@ export interface Note {
 }
 
 const Q_COLS = 'id, user_id, trek, region, topic, title, body, status, pinned, best_answer_id, answers_count, last_activity_at, created_at';
-const AUTHOR_COLS = 'id, display_name, avatar_url, nationality, gender, age';
 
 export const questionUrl = (id: string) => `/community/question/?id=${encodeURIComponent(id)}`;
 export const trekName = (slug: string) => (slug === GENERAL ? GENERAL_LABEL : getTrek(slug)?.name ?? slug);
@@ -75,8 +74,8 @@ export async function amIAdmin() {
 async function authors(ids: string[]) {
   const unique = [...new Set(ids)];
   if (!unique.length) return new Map<string, Author>();
-  const { data } = await supabase.from('public_profiles').select(AUTHOR_COLS).in('id', unique);
-  return new Map((data ?? []).map((a: Author) => [a.id, a]));
+  const data = await fetchProfiles(unique);
+  return new Map(data.map((a: Author) => [a.id, a]));
 }
 
 // ── Loading ─────────────────────────────────────────────────

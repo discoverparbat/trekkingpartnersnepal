@@ -3,6 +3,7 @@
 // supabase/update-10-community.sql (Community answers) and update-12-announcements.sql (site news).
 import { supabase } from './supabase';
 import { getTrek } from '../data/treks';
+import { fetchProfiles } from './posts';
 
 export interface Notice {
   id: string;
@@ -47,7 +48,7 @@ export async function fetchNotices(userId: string, limit = 20): Promise<NoticeVi
   const [trips, questions, actors, admins] = await Promise.all([
     tripIds.length ? supabase.from('trips').select('id, trek').in('id', tripIds) : Promise.resolve({ data: [] as any[] }),
     questionIds.length ? supabase.from('questions').select('id, title, trek').in('id', questionIds) : Promise.resolve({ data: [] as any[] }),
-    actorIds.length ? supabase.from('public_profiles').select('id, display_name, avatar_url').in('id', actorIds) : Promise.resolve({ data: [] as any[] }),
+    actorIds.length ? fetchProfiles(actorIds).then((data) => ({ data: data as any[] })) : Promise.resolve({ data: [] as any[] }),
     actorIds.length ? supabase.rpc('admin_ids') : Promise.resolve({ data: [] as any[] }),
   ]);
   const trekOf = new Map((trips.data ?? []).map((t: any) => [t.id, getTrek(t.trek)?.name ?? t.trek]));

@@ -171,7 +171,7 @@ import Base from '../layouts/Base.astro';
 <script>
   import { supabase } from '../lib/supabase';
   import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../lib/auth';
-  import { fetchTrip, fetchTrips, postCard, avatar, authorName, authorFacts, dateRange, timeAgo, paceLabel, el, type Author, type Trip } from '../lib/posts';
+  import { fetchTrip, fetchTrips, fetchProfiles, postCard, avatar, authorName, authorFacts, dateRange, timeAgo, paceLabel, el, type Author, type Trip } from '../lib/posts';
   import { reportButton } from '../lib/report';
   import { showTrekAlerts } from '../lib/community';
   import { getTrek } from '../data/treks';
@@ -338,7 +338,7 @@ import Base from '../layouts/Base.astro';
     const ids = [...new Set(comments.map((c) => c.user_id))];
     const [{ data: people }, { data: adminRows }] = await Promise.all([
       ids.length
-        ? supabase.from('public_profiles').select('id, display_name, avatar_url, nationality, gender, age').in('id', ids)
+        ? fetchProfiles(ids).then((data) => ({ data }))
         : Promise.resolve({ data: [] as Author[] }),
       supabase.rpc('admin_ids'),
     ]);

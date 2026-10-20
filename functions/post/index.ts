@@ -33,6 +33,18 @@ async function rest(env: any, path: string) {
   return Array.isArray(rows) ? rows[0] ?? null : null;
 }
 
+// One member's public details via member_profiles() (update 13); the old view until that has run
+async function profile(env: any, userId: string) {
+  const base = env?.SUPABASE_URL || SUPABASE_URL;
+  const headers = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, Accept: 'application/json', 'Content-Type': 'application/json' };
+  const res = await fetch(`${base}/rest/v1/rpc/member_profiles`, { method: 'POST', headers, body: JSON.stringify({ ids: [userId] }) });
+  if (res.ok) {
+    const rows = await res.json();
+    return Array.isArray(rows) ? rows[0] ?? null : null;
+  }
+  return rest(env, `public_profiles?id=eq.${userId}&select=display_name,nationality`);
+}
+
 class SetAttr {
   constructor(private value: string) {}
   element(el: any) { el.setAttribute('content', this.value); }
@@ -59,7 +71,7 @@ export async function onRequestGet(context: any) {
   if (!trip) return page;
 
   let author: any = null;
-  try { author = await rest(env, `public_profiles?id=eq.${trip.user_id}&select=display_name,nationality`); } catch {}
+  try { author = await profile(env, trip.user_id); } catch {}
 
   const trek = getTrek(trip.trek);
   const region = getRegion(trip.region);

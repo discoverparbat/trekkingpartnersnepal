@@ -34,12 +34,30 @@ const TRIP_COLS = 'id, user_id, region, trek, start_date, end_date, flexible, gr
 export const today = () => new Date().toISOString().slice(0, 10);
 
 // ── Loading ─────────────────────────────────────────────────
+/**
+ * Public profile details for a set of member ids, at most 50 per request.
+ * Uses member_profiles() (update-13), which never lists all members and hides people who haven't posted.
+ * Falls back to the old public_profiles view until that update has run.
+ */
+export async function fetchProfiles(ids: (string | null | undefined)[]): Promise<Author[]> {
+  const unique = [...new Set(ids.filter(Boolean) as string[])];
+  const out: Author[] = [];
+  for (let i = 0; i < unique.length; i += 50) {
+    const chunk = unique.slice(i, i + 50);
+    const { data, error } = await supabase.rpc('member_profiles', { ids: chunk });
+    if (!error) { out.push(...((data ?? []) as Author[])); continue; }
+    const old = await supabase.from('public_profiles').select('*').in('id', chunk);
+    out.push(...((old.data ?? []) as Author[]));
+  }
+  return out;
+}
+
 export async function attachExtras(trips: any[]): Promise<Trip[]> {
   if (!trips.length) return [];
   const userIds = [...new Set(trips.map((t) => t.user_id))];
   const tripIds = trips.map((t) => t.id);
   const [authors, counts] = await Promise.all([
-    supabase.from('public_profiles').select('id, display_name, avatar_url, nationality, gender, age').in('id', userIds),
+    fetchProfiles(userIds).then((data) => ({ data })),
     supabase.from('trip_comment_counts').select('trip_id, replies').in('trip_id', tripIds),
   ]);
   const byId = new Map((authors.data ?? []).map((a: Author) => [a.id, a]));
