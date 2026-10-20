@@ -94,3 +94,12 @@ Run `supabase/update-13-private-members.sql` once (after update 10). Afterwards 
 member list: profiles are looked up by id, at most 50 at a time, and only for members who already appear
 on the site (a partner post, reply, question or answer). Members who haven't posted are hidden from others.
 Emails were never public. It also clears Supabase's "Security Definer View" warning on `public_profiles`.
+
+## Answer emails (update 14)
+Emails the asker when their Community question gets an answer. One email per question until they've read
+the answers on the site (more answers in between are grouped in the bell). Uses the same "reply emails"
+setting and unsubscribe link as reply emails.
+
+1. Supabase → Edge Functions → deploy `supabase/functions/answer-alert/index.ts` as **answer-alert**,
+   with the same settings as `reply-alert` (JWT verification **off**; it uses the existing `RESEND_API_KEY` secret).
+2. Run `supabase/update-14-answer-emails.sql` in the SQL Editor.
