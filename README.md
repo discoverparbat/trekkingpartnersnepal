@@ -77,3 +77,13 @@ How it works:
   as a banner at the top of that trek's page and on its partner posts until it expires. Closures show in red.
 - Every trek page has a "Questions about <trek>" box with the latest 3 questions and an "Ask about this trek" button.
   `/community/?trek=<slug>` lists all questions for one trek.
+
+## Site announcements (update 12)
+Run `supabase/update-12-announcements.sql` once (after update 10). It sends every member a 🔔 notification
+about the new Community and trek alerts (only once, even if run again).
+
+To send another announcement later, run this in the SQL Editor (the link must be a page on the site):
+```sql
+select public.announce('Headline (max 120 characters)', 'Short text (max 400 characters)', '/community/');
+```
+It returns how many members it was sent to. Banned members don't get it.

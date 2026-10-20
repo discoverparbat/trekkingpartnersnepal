@@ -1,14 +1,17 @@
 // On-site notifications (the bell in the header). Browser only.
 // Rows are created by database triggers – see supabase/update-8-notifications.sql
-// and supabase/update-10-community.sql (Community answers).
+// supabase/update-10-community.sql (Community answers) and update-12-announcements.sql (site news).
 import { supabase } from './supabase';
 import { getTrek } from '../data/treks';
 
 export interface Notice {
   id: string;
-  kind: 'welcome' | 'first_post' | 'reply' | 'thread_reply' | 'answer' | 'thread_answer' | 'best_answer' | 'moved_to_partners';
+  kind: 'welcome' | 'first_post' | 'reply' | 'thread_reply' | 'answer' | 'thread_answer' | 'best_answer' | 'moved_to_partners' | 'announcement';
   trip_id: string | null;
   question_id: string | null;
+  title?: string | null;   // announcements only
+  body?: string | null;
+  link?: string | null;
   comment_id: string | null;
   actor_id: string | null;
   count: number;
@@ -31,8 +34,9 @@ export async function fetchNotices(userId: string, limit = 20): Promise<NoticeVi
   const load = (cols: string) => supabase
     .from('notifications').select(cols)
     .eq('user_id', userId).order('created_at', { ascending: false }).limit(limit);
-  let res = await load(COLS);
-  // Before update-10-community.sql has run there is no question_id column: fall back to the old list
+  // Newest columns first; fall back while update-12 (title, body, link) or update-10 (question_id) hasn't run yet
+  let res = await load(COLS + ', title, body, link');
+  if (res.error) res = await load(COLS);
   if (res.error) res = await load(COLS.replace('question_id, ', ''));
   if (res.error || !res.data) return [];
   const data = res.data as unknown as (Notice & { question_id: string | null })[];
@@ -58,9 +62,18 @@ export async function fetchNotices(userId: string, limit = 20): Promise<NoticeVi
     .filter((n) => !(n.kind === 'reply' || n.kind === 'thread_reply') || trekOf.has(n.trip_id))
     // …and the same for questions that were deleted
     .filter((n) => !QUESTION_KINDS.includes(n.kind) || questionOf.has(n.question_id))
-    .map((n) => QUESTION_KINDS.includes(n.kind)
+    .map((n) => n.kind === 'announcement'
+      ? announcement(n as Notice)
+      : QUESTION_KINDS.includes(n.kind)
       ? describeQuestion(n as Notice, questionOf.get(n.question_id)!, n.actor_id ? actorOf.get(n.actor_id) : undefined)
       : describe(n as Notice, n.trip_id ? trekOf.get(n.trip_id) : undefined, n.actor_id ? actorOf.get(n.actor_id) : undefined));
+}
+
+/** Site news sent with public.announce(): headline, text and an on-site link */
+function announcement(n: Notice): NoticeView {
+  const link = n.link && n.link.startsWith('/') && !n.link.startsWith('//') ? n.link : '/';
+  return { ...n, icon: '📣', strong: n.title || 'News from Trekking Partners Nepal',
+    text: n.body ? ' ' + n.body : '', href: link, actorAvatar: null };
 }
 
 const clip = (t: string, n = 60) => (t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t);
