@@ -409,3 +409,19 @@ a.q-by-name:hover { color: var(--sky-600); text-decoration: underline; }
 .q-mod button.move { border-color: #f6d39f; color: #8a4b08; background: #fff6e8; }
 .q-mod button.danger { border-color: #f3c0b9; color: #a3291c; }
 .q-mod button:disabled { opacity: .5; cursor: default; }
+.note-trek { color: var(--sky-600); font-weight: 600; text-decoration: none; }
+.note-trek:hover { text-decoration: underline; }
+
+/* Admin note shown on a trek page / partner post (notes linked to that trek) */
+.trek-alerts { display: grid; gap: 10px; margin-bottom: 24px; }
+.trek-alert { display: flex; gap: 12px; align-items: flex-start; border-radius: 12px; padding: 14px 16px; border: 1px solid #f6d39f; background: #fff6e8; color: #5c3205; }
+.trek-alert .ta-icon { font-size: 1.15rem; line-height: 1.4; }
+.trek-alert .ta-body { flex: 1; min-width: 0; }
+.trek-alert .ta-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-size: .78rem; margin-bottom: 2px; }
+.trek-alert .ta-kind { font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.trek-alert .ta-when { color: var(--muted); }
+.trek-alert p { margin: 0; font-size: .95rem; overflow-wrap: anywhere; }
+.trek-alert.ta-closure { background: #fdecea; border-color: #f3c0b9; border-left: 4px solid #c0392b; color: #7a1f14; }
+.trek-alert.ta-weather { background: var(--sky-50); border-color: var(--sky-200); color: var(--night-700); }
+.trek-alert.ta-trail { background: #eefaf2; border-color: #bfe6cc; color: #17532e; }
+.trek-alert.ta-site { background: #f5f0ff; border-color: #ddd0fb; color: #43277a; }

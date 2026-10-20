@@ -16,6 +16,8 @@ import Base from '../layouts/Base.astro';
       <div id="app" hidden>
         <p id="new-note" class="form-note" hidden>✓ Your post is live. Other trekkers can now find it and reply. You can close it from <a href="/account/">My account</a> once you’ve found partners.</p>
 
+        <div id="trek-alerts" class="trek-alerts" hidden></div>
+
         <article class="trip">
           <div class="trip-top">
             <span id="t-region" class="post-region"></span>
@@ -171,6 +173,7 @@ import Base from '../layouts/Base.astro';
   import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../lib/auth';
   import { fetchTrip, fetchTrips, postCard, avatar, authorName, authorFacts, dateRange, timeAgo, paceLabel, el, type Author, type Trip } from '../lib/posts';
   import { reportButton } from '../lib/report';
+  import { showTrekAlerts } from '../lib/community';
   import { getTrek } from '../data/treks';
   import { getRegion } from '../data/regions';
 
@@ -208,6 +211,7 @@ import Base from '../layouts/Base.astro';
     else $('t-treklink').hidden = true;
     $('new-note').hidden = !params.has('new');
     $('app').hidden = false;
+    showTrekAlerts($('trek-alerts'), trip.trek);
     setupShare(name, trip.start_date, trip.end_date);
     loadSimilar(trip);
 

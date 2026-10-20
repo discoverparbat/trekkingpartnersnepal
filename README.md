@@ -70,3 +70,10 @@ How it works:
 - Reports on questions and answers appear in Admin → Moderation with the other reports.
 - `functions/community/question/` writes each question and its answers into the page for Google (QAPage schema),
   and `functions/community/sitemap.xml.ts` lists every question at `/community/sitemap.xml` (linked from robots.txt).
+
+### Trek alerts and trek questions (update 11)
+- Run `supabase/update-11-note-treks.sql` once (after update 10).
+- Admin notes can now be linked to one trek (the **Trek** field in "+ Add update"). A linked note also shows
+  as a banner at the top of that trek's page and on its partner posts until it expires. Closures show in red.
+- Every trek page has a "Questions about <trek>" box with the latest 3 questions and an "Ask about this trek" button.
+  `/community/?trek=<slug>` lists all questions for one trek.

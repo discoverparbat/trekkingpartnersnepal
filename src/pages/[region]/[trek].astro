@@ -4,6 +4,8 @@ import TrekCard from '../../components/TrekCard.astro';
 import DepartureList from '../../components/DepartureList.astro';
 import TrekPosts from '../../components/TrekPosts.astro';
 import RelatedNews from '../../components/RelatedNews.astro';
+import TrekAlerts from '../../components/TrekAlerts.astro';
+import TrekQuestions from '../../components/TrekQuestions.astro';
 import { treks, treksInRegion, trekTitle, type Trek } from '../../data/treks';
 import { getRegion, type Region } from '../../data/regions';
 
@@ -57,6 +59,8 @@ const schema = [
   <section class="section">
     <div class="container layout">
       <div>
+        <TrekAlerts trek={trek.slug} />
+
         <ul class="factbox">
           <li><span>Duration</span><strong>{trek.days} days</strong></li>
           <li><span>Highest point</span><strong>{trek.maxAltitude}</strong></li>
@@ -72,6 +76,8 @@ const schema = [
 
         <h2>Trekkers looking for partners</h2>
         <TrekPosts trek={trek.slug} label={trek.name} />
+
+        <TrekQuestions trek={trek.slug} label={trek.name} />
 
         <RelatedNews trek={trek.slug} label={trek.name} />
       </div>

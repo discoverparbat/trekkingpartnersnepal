@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { regions } from '../../data/regions';
+import { treksInRegion } from '../../data/treks';
 import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
 ---
 <Base
@@ -36,6 +37,16 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
                 <select name="expiry">{NOTE_EXPIRY.map((e) => <option value={e.days} selected={e.days === 7}>{e.label}</option>)}</select>
               </label>
             </div>
+            <label class="field">Trek <span class="hint">optional – the update also shows as a banner on that trek’s page and its partner posts</span>
+              <select name="trek">
+                <option value="">Not about one trek</option>
+                {regions.map((r) => (
+                  <optgroup label={r.name}>
+                    {treksInRegion(r.slug).map((t) => <option value={t.slug}>{t.name}</option>)}
+                  </optgroup>
+                ))}
+              </select>
+            </label>
             <label class="field">Headline <span class="hint">optional, shown in bold – e.g. Thorong La</span>
               <input name="headline" maxlength="80" />
             </label>
@@ -65,6 +76,7 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
           <button type="button" class="chip" data-topic="unanswered">Unanswered</button>
         </div>
 
+        <p id="trek-filter" class="trek-filter" hidden>Showing questions about <strong id="trek-filter-name"></strong> <button type="button" id="trek-filter-clear" aria-label="Show all treks">✕ All treks</button></p>
         <p id="q-count" class="q-count-line" aria-live="polite"></p>
         <div id="q-list" class="q-list">
           {[1, 2, 3].map(() => <div class="q-card skeleton" style="height:150px" aria-hidden="true"></div>)}
@@ -128,6 +140,9 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
   .topic-chips .chip { cursor: pointer; font-family: var(--font-body); padding: 6px 14px; font-size: .86rem; }
   .q-count-line { color: var(--muted); font-size: .88rem; margin: 0 0 10px; min-height: 1.3em; }
   .more { text-align: center; margin-top: 18px; }
+  .trek-filter { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; font-size: .92rem; color: var(--night-700); }
+  .trek-filter button { background: var(--white); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font: 500 .82rem var(--font-body); color: var(--muted); cursor: pointer; }
+  .trek-filter button:hover { border-color: var(--sky-400); color: var(--sky-700); }
 
   .side-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 16px; }
   .side-card h3 { margin-bottom: 8px; font-size: 1.05rem; }
@@ -153,6 +168,7 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
 
   const params = new URLSearchParams(location.search);
   let topic = params.get('topic') ?? '';
+  let trek = params.get('trek') ?? '';
   search.value = params.get('q') ?? '';
   region.value = params.get('region') ?? '';
   if (!chips.some((c) => c.dataset.topic === topic)) topic = '';
@@ -166,6 +182,7 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
   const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
   function matches(q: Question) {
+    if (trek && q.trek !== trek) return false;
     if (region.value && q.region !== region.value) return false;
     if (topic === 'unanswered' && q.answers_count > 0) return false;
     if (topic && topic !== 'unanswered' && q.topic !== topic) return false;
@@ -182,13 +199,16 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
     $('q-empty').hidden = found.length > 0;
     $('q-empty-title').textContent = all.length ? 'No questions match' : 'No questions yet';
     $('q-more').hidden = found.length <= shown;
-    const filtered = !!(search.value.trim() || region.value || topic);
+    $('trek-filter').hidden = !trek;
+    if (trek) $('trek-filter-name').textContent = trekName(trek);
+    const filtered = !!(search.value.trim() || region.value || topic || trek);
     $('q-count').textContent = all.length && filtered ? `${found.length} of ${all.length} questions` : '';
 
     const q = new URLSearchParams();
     if (search.value.trim()) q.set('q', search.value.trim());
     if (region.value) q.set('region', region.value);
     if (topic) q.set('topic', topic);
+    if (trek) q.set('trek', trek);
     history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
   }
 
@@ -231,13 +251,21 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
       err.hidden = true;
       if (v('body').length < 5) { err.textContent = 'Please write the update.'; err.hidden = false; return; }
       const days = Number(v('expiry'));
-      const { error } = await supabase.from('admin_notes').insert({
+      const row: Record<string, unknown> = {
         kind: v('kind'),
         headline: v('headline') || null,
         body: v('body'),
         expires_at: days ? new Date(Date.now() + days * 86400000).toISOString() : null,
-      });
-      if (error) { err.textContent = 'Could not publish: ' + error.message; err.hidden = false; return; }
+      };
+      if (v('trek')) row.trek = v('trek');
+      const { error } = await supabase.from('admin_notes').insert(row);
+      if (error) {
+        err.textContent = /trek/.test(error.message)
+          ? 'Linking an update to a trek needs supabase/update-11-note-treks.sql to be run first.'
+          : 'Could not publish: ' + error.message;
+        err.hidden = false;
+        return;
+      }
       form.reset();
       form.hidden = true;
       add.hidden = false;
@@ -256,6 +284,7 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
     render();
   }));
   $('q-more').addEventListener('click', () => { shown += PAGE; render(); });
+  $('trek-filter-clear').addEventListener('click', () => { trek = ''; shown = PAGE; render(); });
 
   (async () => {
     [admin, team] = await Promise.all([amIAdmin(), adminIds()]);

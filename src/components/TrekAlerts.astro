@@ -1,0 +1,12 @@
+---
+// Current admin notes linked to this trek (closures, weather, trail changes), loaded live.
+// Shows nothing when there are none.
+interface Props { trek: string; }
+const { trek } = Astro.props;
+---
+<div class="trek-alerts" data-trek-alerts={trek} hidden></div>
+
+<script>
+  import { showTrekAlerts } from '../lib/community';
+  document.querySelectorAll<HTMLElement>('[data-trek-alerts]').forEach((box) => showTrekAlerts(box, box.dataset.trekAlerts!));
+</script>

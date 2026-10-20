@@ -1,0 +1,85 @@
+---
+// "Questions about <trek>": the latest 3 Community questions for one trek, loaded live.
+interface Props {
+  trek: string;      // trek slug
+  label: string;     // trek name
+}
+const { trek, label } = Astro.props;
+const ask = `/community/ask/?trek=${trek}`;
+const all = `/community/?trek=${trek}`;
+---
+<section class="trek-qs" data-trek={trek}>
+  <div class="tq-head">
+    <div>
+      <h2>Questions about {label}</h2>
+      <p>Trail conditions, permits and gear, answered by trekkers who were just there and our local team.</p>
+    </div>
+    <a href={ask} class="btn btn-sun btn-sm">Ask about this trek</a>
+  </div>
+  <div class="tq-list" data-list>
+    <div class="tq-row skeleton" aria-hidden="true"></div>
+    <div class="tq-row skeleton" aria-hidden="true"></div>
+  </div>
+  <p class="tq-empty" data-empty hidden>No questions about {label} yet. Wondering about snow, permits or teahouses? Ask – we’ll answer.</p>
+  <a href={all} class="link-arrow tq-all" data-all hidden>All {label} questions →</a>
+</section>
+
+<style>
+  .trek-qs { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin: 36px 0 8px; }
+  .tq-head { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; margin-bottom: 6px; }
+  .tq-head h2 { font-size: 1.35rem; margin: 0 0 4px; }
+  .tq-head p { margin: 0; color: var(--muted); font-size: .92rem; max-width: 480px; }
+  .tq-list :global(.tq-row) { display: block; padding: 12px 0; border-top: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+  .tq-list :global(.tq-row:first-child) { border-top: 0; }
+  .tq-list :global(.tq-row.skeleton) { height: 52px; border-radius: 10px; margin: 8px 0; border: 0; }
+  .tq-list :global(.tq-row strong) { display: block; font-weight: 600; font-size: .97rem; line-height: 1.35; overflow-wrap: anywhere; }
+  .tq-list :global(a.tq-row:hover strong) { color: var(--sky-600); }
+  .tq-list :global(.tq-row small) { display: block; margin-top: 3px; color: var(--muted); font-size: .8rem; }
+  .tq-list :global(.tq-row small b) { color: var(--sky-700); font-weight: 600; }
+  .tq-list :global(.tq-row small b.none) { color: #8a4b08; }
+  .tq-list :global(.tq-row small i) { color: #1b6b3a; font-style: normal; font-weight: 600; }
+  .tq-empty { color: var(--muted); font-size: .92rem; margin: 12px 0 0; }
+  .tq-all { display: inline-block; margin-top: 10px; }
+</style>
+
+<script>
+  import { fetchQuestions, questionUrl, answersLabel } from '../lib/community';
+  import { topicLabel } from '../data/community';
+  import { timeAgo } from '../lib/posts';
+
+  document.querySelectorAll<HTMLElement>('.trek-qs').forEach(async (box) => {
+    const list = box.querySelector<HTMLElement>('[data-list]')!;
+    const empty = box.querySelector<HTMLElement>('[data-empty]')!;
+    const all = box.querySelector<HTMLElement>('[data-all]')!;
+    try {
+      const qs = await fetchQuestions({ trek: box.dataset.trek, limit: 4 });
+      list.replaceChildren(...qs.slice(0, 3).map((q) => {
+        const a = document.createElement('a');
+        a.className = 'tq-row';
+        a.href = questionUrl(q.id);
+        const t = document.createElement('strong');
+        t.textContent = q.title;
+        const meta = document.createElement('small');
+        meta.append(`${topicLabel(q.topic)} · ${timeAgo(q.created_at)} · `);
+        const n = document.createElement('b');
+        n.textContent = answersLabel(q.answers_count);
+        if (!q.answers_count) n.className = 'none';
+        meta.append(n);
+        if (q.best_answer_id) {
+          const ok = document.createElement('i');
+          ok.textContent = ' · ✓ Answered';
+          meta.append(ok);
+        }
+        a.append(t, meta);
+        return a;
+      }));
+      list.hidden = qs.length === 0;
+      empty.hidden = qs.length > 0;
+      all.hidden = qs.length < 4;      // only when there are more than the 3 shown
+    } catch (e: any) {
+      console.error('Trek questions:', e.message);
+      list.hidden = true;
+      empty.hidden = false;
+    }
+  });
+</script>

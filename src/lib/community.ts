@@ -37,6 +37,7 @@ export interface Answer {
 export interface Note {
   id: string;
   kind: string;
+  trek?: string | null;    // optional trek the note is about (update 11)
   headline: string | null;
   body: string;
   expires_at: string | null;
@@ -119,12 +120,22 @@ export async function myVotes(answerIds: string[]) {
   return new Set((data ?? []).map((v: any) => v.answer_id as string));
 }
 
-export async function fetchNotes(limit = 10): Promise<Note[]> {
-  const { data } = await supabase.from('admin_notes')
-    .select('id, kind, headline, body, expires_at, created_at')
-    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-    .order('created_at', { ascending: false }).limit(limit);
-  return (data ?? []) as Note[];
+/** Current admin notes, newest first. Pass a trek to get only the notes about that trek. */
+export async function fetchNotes(limit = 10, trek?: string): Promise<Note[]> {
+  const load = (cols: string) => {
+    let q = supabase.from('admin_notes').select(cols)
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+      .order('created_at', { ascending: false }).limit(limit);
+    if (trek) q = q.eq('trek', trek);
+    return q;
+  };
+  let res = await load('id, kind, trek, headline, body, expires_at, created_at');
+  // Before update-11-note-treks.sql has run there is no trek column
+  if (res.error) {
+    if (trek) return [];
+    res = await load('id, kind, headline, body, expires_at, created_at');
+  }
+  return ((res.data ?? []) as unknown) as Note[];
 }
 
 // ── Admin actions ───────────────────────────────────────────
@@ -232,7 +243,7 @@ export function adminRow(q: Question, done: () => void) {
   return row;
 }
 
-/** One admin note: coloured tag, optional bold headline, text and time */
+/** One admin note: coloured tag, optional bold headline, text, linked trek and time */
 export function noteRow(n: Note, onDelete?: (n: Note) => void) {
   const row = el('div', 'note');
   row.append(el('span', `note-tag nt-${n.kind}`, noteLabel(n.kind)));
@@ -240,6 +251,12 @@ export function noteRow(n: Note, onDelete?: (n: Note) => void) {
   if (n.headline) text.append(el('strong', '', n.headline + ': '));
   text.append(n.body);
   const small = el('small', '', timeAgo(n.created_at));
+  const trekHref = n.trek ? trekUrl(n.trek) : null;
+  if (n.trek && trekHref) {
+    const t = el('a', 'note-trek', trekName(n.trek));
+    t.href = trekHref;
+    small.append(' · ', t);
+  }
   if (onDelete) {
     if (n.expires_at) small.append(` · until ${new Date(n.expires_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`);
     const del = el('button', 'note-del', 'Delete');
@@ -249,4 +266,34 @@ export function noteRow(n: Note, onDelete?: (n: Note) => void) {
   }
   row.append(text, small);
   return row;
+}
+
+/** Warning banner for a trek page or partner post: every current note about that trek. */
+export function trekAlerts(notes: Note[]) {
+  return notes.map((n) => {
+    const box = el('div', `trek-alert ta-${n.kind}`);
+    box.setAttribute('role', n.kind === 'closure' ? 'alert' : 'status');
+    const icon = el('span', 'ta-icon', n.kind === 'closure' ? '⚠' : n.kind === 'weather' ? '☁' : 'ℹ');
+    icon.setAttribute('aria-hidden', 'true');
+    const body = el('div', 'ta-body');
+    const head = el('div', 'ta-head');
+    head.append(el('span', 'ta-kind', `${noteLabel(n.kind)} update`), el('span', 'ta-when', timeAgo(n.created_at)));
+    const p = el('p');
+    if (n.headline) p.append(el('strong', '', n.headline + ': '));
+    p.append(n.body);
+    body.append(head, p);
+    box.append(icon, body);
+    return box;
+  });
+}
+
+/** Fill a container with the current alerts for one trek (hidden when there are none). */
+export async function showTrekAlerts(box: HTMLElement, trek: string) {
+  try {
+    const notes = await fetchNotes(5, trek);
+    box.replaceChildren(...trekAlerts(notes));
+    box.hidden = notes.length === 0;
+  } catch {
+    box.hidden = true;
+  }
 }
