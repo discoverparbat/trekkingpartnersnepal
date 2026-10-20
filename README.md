@@ -10,11 +10,11 @@ npm run build    # outputs to dist/
 ## public/ folder
 ```
 public/
-├── images/        hero.jpg + 12 region photos (easternnepal.webp and manaslu1.webp are .webp)
-├── _headers
-├── robots.txt
-├── logo.png       (also used as the favicon)
-└── login-test.html (delete before launch)
+├── images/        hero.jpg, region photos, and images/treks/ (one photo per trek)
+├── _headers       security headers
+├── _redirects     301s for treks that moved region
+├── robots.txt     links both sitemaps (site + /community/sitemap.xml)
+├── logo.jpg, favicon.ico, favicon-96x96.png, apple-touch-icon.png, web-app-manifest-*.png, site.webmanifest
 ```
 Pages like the homepage, privacy, terms, 404, login and the sitemap are built by Astro –
 don't put .html or sitemap files for them in public/.
@@ -22,10 +22,11 @@ don't put .html or sitemap files for them in public/.
 If you change an image's file type, update its path in `src/data/regions.ts`.
 
 ## Where to edit
-- `src/data/regions.ts` – the 6 regions (text + images)
+- `src/data/regions.ts` – the 7 regions (text + images)
 - `src/data/treks.ts` – all treks; adding one creates its page automatically
-- `src/data/departures.ts` – fixed departures (SAMPLE dates – replace with real ones)
+- Fixed departures – add and edit them at /admin/ (stored in Supabase)
 - `src/lib/supabase.ts` – Supabase URL and publishable key
+- `src/data/community.ts` – Community topics, admin note types and the partner-request check
 - `src/pages/privacy.astro`, `src/pages/terms.astro` – legal pages
 
 ## Cloudflare Pages settings
