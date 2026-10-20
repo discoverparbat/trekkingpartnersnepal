@@ -1,4 +1,5 @@
-// Admin → Moderation tab: reports, recent posts and replies, members (browser only).
+// Admin → Moderation tab: reports (posts, replies, Community questions and answers),
+// recent posts and replies, members (browser only).
 // All user text is inserted with textContent, never as HTML.
 import { supabase } from './supabase';
 import { el, timeAgo } from './posts';
@@ -15,7 +16,7 @@ const REASON: Record<string, string> = {
   spam: 'Spam / advertising', scam: 'Scam / fake / money', harassment: 'Harassment / offensive',
   unsafe: 'Unsafe', other: 'Other',
 };
-const KIND: Record<string, string> = { post: 'Post', reply: 'Reply', profile: 'Trekker' };
+const KIND: Record<string, string> = { post: 'Post', reply: 'Reply', profile: 'Trekker', question: 'Question', answer: 'Answer' };
 
 let toast: Toast = () => {};
 let members = new Map<string, Member>();
@@ -26,6 +27,7 @@ const $ = (id: string) => document.getElementById(id)!;
 const nameOf = (id: string) => members.get(id)?.display_name || 'Trekker';
 const short = (t: string, n = 160) => (t.length > n ? t.slice(0, n - 1) + '…' : t);
 const postUrl = (id: string) => `/post/?id=${encodeURIComponent(id)}`;
+const questionUrl = (id: string) => `/community/question/?id=${encodeURIComponent(id)}`;
 const trekkerUrl = (id: string) => `/trekker/?id=${encodeURIComponent(id)}`;
 
 function link(text: string, href: string, cls = '') {
@@ -42,8 +44,10 @@ function btn(label: string, onClick: () => void, cls = '') {
 }
 
 // ── Actions ─────────────────────────────────────────────────
-async function deleteContent(kind: 'post' | 'reply', id: string) {
-  const { error } = await supabase.from(kind === 'post' ? 'trips' : 'comments').delete().eq('id', id);
+const TABLE = { post: 'trips', reply: 'comments', question: 'questions', answer: 'answers' } as const;
+
+async function deleteContent(kind: keyof typeof TABLE, id: string) {
+  const { error } = await supabase.from(TABLE[kind]).delete().eq('id', id);
   if (error) { toast('Error: ' + error.message); return false; }
   // close every open report about this item
   await supabase.from('reports').update({ status: 'resolved' }).eq('kind', kind).eq('target_id', id).eq('status', 'open');
@@ -56,9 +60,11 @@ async function ban(userId: string) {
   const reason = prompt('Reason (only you see this):', 'Broke the rules') ?? '';
   const { error } = await supabase.from('bans').upsert({ user_id: userId, reason: reason.slice(0, 300) || null });
   if (error) return toast('Error: ' + error.message);
-  if (confirm(`Also delete all of ${name}’s posts and replies?`)) {
+  if (confirm(`Also delete all of ${name}’s posts, replies, questions and answers?`)) {
     await supabase.from('comments').delete().eq('user_id', userId);
     await supabase.from('trips').delete().eq('user_id', userId);
+    await supabase.from('answers').delete().eq('user_id', userId);
+    await supabase.from('questions').delete().eq('user_id', userId);
   }
   await supabase.from('reports').update({ status: 'resolved' }).eq('kind', 'profile').eq('target_id', userId).eq('status', 'open');
   toast(`${name} is banned`);
@@ -90,12 +96,18 @@ async function loadReports() {
 
   const postIds = list.filter((r) => r.kind === 'post').map((r) => r.target_id);
   const replyIds = list.filter((r) => r.kind === 'reply').map((r) => r.target_id);
-  const [posts, replies] = await Promise.all([
+  const questionIds = list.filter((r) => r.kind === 'question').map((r) => r.target_id);
+  const answerIds = list.filter((r) => r.kind === 'answer').map((r) => r.target_id);
+  const [posts, replies, questions, answers] = await Promise.all([
     postIds.length ? supabase.from('trips').select('id, user_id, trek, description').in('id', postIds) : { data: [] },
     replyIds.length ? supabase.from('comments').select('id, user_id, trip_id, body').in('id', replyIds) : { data: [] },
+    questionIds.length ? supabase.from('questions').select('id, user_id, title, body, status').in('id', questionIds) : { data: [] },
+    answerIds.length ? supabase.from('answers').select('id, user_id, question_id, body').in('id', answerIds) : { data: [] },
   ]);
   const postById = new Map((posts.data ?? []).map((p: any) => [p.id, p]));
   const replyById = new Map((replies.data ?? []).map((c: any) => [c.id, c]));
+  const questionById = new Map((questions.data ?? []).map((q: any) => [q.id, q]));
+  const answerById = new Map((answers.data ?? []).map((a: any) => [a.id, a]));
 
   const { count } = await supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'open');
   const badge = $('open-count');
@@ -137,6 +149,26 @@ async function loadReports() {
           if (confirm('Delete this reply?') && await deleteContent('reply', c.id)) { toast('Reply deleted'); refresh(); }
         }, 'danger'));
       } else target.append(el('p', 'muted', 'This reply has already been deleted.'));
+    } else if (r.kind === 'question') {
+      const q = questionById.get(r.target_id);
+      if (q) {
+        authorId = q.user_id;
+        target.append(el('div', 'mod-title', `Question by ${nameOf(q.user_id)}${q.status === 'moved' ? ' · moved to Find partners' : ''}`), el('p', '', short(`${q.title} – ${q.body}`)));
+        actions.append(link('View question', questionUrl(q.id), 'mod-link'));
+        actions.append(btn('Delete question', async () => {
+          if (confirm('Delete this question and its answers?') && await deleteContent('question', q.id)) { toast('Question deleted'); refresh(); }
+        }, 'danger'));
+      } else target.append(el('p', 'muted', 'This question has already been deleted.'));
+    } else if (r.kind === 'answer') {
+      const a = answerById.get(r.target_id);
+      if (a) {
+        authorId = a.user_id;
+        target.append(el('div', 'mod-title', `Answer by ${nameOf(a.user_id)}`), el('p', '', short(a.body)));
+        actions.append(link('View question', questionUrl(a.question_id), 'mod-link'));
+        actions.append(btn('Delete answer', async () => {
+          if (confirm('Delete this answer?') && await deleteContent('answer', a.id)) { toast('Answer deleted'); refresh(); }
+        }, 'danger'));
+      } else target.append(el('p', 'muted', 'This answer has already been deleted.'));
     } else {
       authorId = r.target_id;
       const m = members.get(r.target_id);

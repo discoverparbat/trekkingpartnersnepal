@@ -1,0 +1,459 @@
+---
+import Base from '../../layouts/Base.astro';
+// One question with its answers: /community/question/?id=…
+// The content loads in the browser. functions/community/question/index.ts also writes the
+// question and answers into the page on Cloudflare, so Google and link previews can read them.
+---
+<Base title="Trekking question | Trekking Partners Nepal" description="A trekking question from the Trekking Partners Nepal community." noindex>
+  <section class="section q-page">
+    <div class="container c-layout">
+      <div class="c-main">
+        <nav class="crumbs-dark"><a href="/community/">Community</a> › <span id="crumb">Question</span></nav>
+
+        <div id="ssr"></div>
+
+        <div id="loading" class="panel" style="text-align:center"><p class="muted" style="margin:0">Loading…</p></div>
+        <div id="missing" class="panel panel-dashed" hidden>
+          <h3>Question not found</h3>
+          <p class="muted">It may have been deleted or moved.</p>
+          <a href="/community/" class="btn btn-sun">Browse the Community</a>
+        </div>
+
+        <div id="app" hidden>
+          <p id="new-note" class="form-note" hidden>✓ Your question is live. We’ll let you know in the 🔔 when someone answers. When an answer solves it, mark it as the best answer.</p>
+          <div id="moved-note" class="moved-note" hidden>
+            <strong>This question was moved out of the Community.</strong>
+            <p>It looks like a partner request, so only you can see it now. Post your dates on Find partners so other trekkers can join you.</p>
+            <a id="moved-go" href="/find-partners/new/" class="btn btn-sun btn-sm">Post on Find partners</a>
+          </div>
+
+          <article class="question">
+            <div id="q-chips" class="q-meta"></div>
+            <h1 id="q-title"></h1>
+            <div id="q-by"></div>
+            <p id="q-body" class="q-body"></p>
+            <div class="q-actions">
+              <span id="q-report"></span>
+              <button id="q-delete" type="button" class="btn btn-outline btn-sm danger" hidden>Delete my question</button>
+            </div>
+            <div id="q-admin"></div>
+          </article>
+
+          <section class="answers" id="answers">
+            <h2 id="a-title">Answers</h2>
+            <div id="a-list" class="a-list"></div>
+            <p id="a-none" class="muted" hidden>No answers yet. Know the answer? Recent first-hand info helps most.</p>
+
+            <div id="a-locked" class="panel locked" hidden>
+              <h3 id="a-locked-title"></h3>
+              <p class="muted" id="a-locked-text"></p>
+              <button id="a-locked-btn" type="button" class="btn btn-sun" hidden></button>
+            </div>
+
+            <form id="a-form" class="form-card form-grid answer-form" novalidate hidden>
+              <label class="field">Your answer
+                <textarea name="body" required maxlength="2000" placeholder="Know the answer? Share what you saw and when you were there – recent first-hand info helps most."></textarea>
+                <span class="counter" id="a-counter">0 / 2000</span>
+              </label>
+              <p class="form-note">Answers are public. Keep it about the trek, and don’t share contact details here. Looking for people to trek with? Use <a href="/find-partners/">Find partners</a>.</p>
+              <p id="a-error" class="form-error" hidden></p>
+              <div style="display:flex;justify-content:flex-end"><button type="submit" id="a-send" class="btn btn-sun">Post your answer</button></div>
+            </form>
+          </section>
+        </div>
+      </div>
+
+      <aside class="c-side" id="side" hidden>
+        <div class="side-card" id="trek-card" hidden>
+          <h3>Related trek</h3>
+          <p id="trek-facts" class="muted small"></p>
+          <a id="trek-link" class="link-arrow" href="#">Trek page →</a>
+        </div>
+        <div class="side-card" id="partners-card" hidden>
+          <h3>Planning this trek?</h3>
+          <p id="partners-text" class="muted small"></p>
+          <a id="partners-link" class="link-arrow" href="/find-partners/">See partner posts →</a>
+        </div>
+        <div class="side-card" id="more-card" hidden>
+          <h3 id="more-title">More questions</h3>
+          <ul id="more-list" class="more-list"></ul>
+        </div>
+        <div class="side-card">
+          <h3>Have your own question?</h3>
+          <p class="muted small">Trekkers and our local team answer.</p>
+          <a id="ask-link" href="/community/ask/" class="btn btn-sun btn-sm">Ask a question</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .q-page { padding-top: 40px; }
+  .c-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start; }
+  @media (max-width: 920px) { .c-layout { grid-template-columns: 1fr; } }
+  .muted { color: var(--muted); }
+  .small { font-size: .88rem; margin: 0 0 10px; }
+  .crumbs-dark { font-size: .88rem; color: var(--muted); margin-bottom: 14px; }
+  .crumbs-dark a { color: var(--sky-600); text-decoration: none; }
+  #new-note { margin-bottom: 18px; }
+  .moved-note { background: #fff6e8; border: 1px solid #f6d39f; border-radius: var(--radius); padding: 16px 18px; color: #6b3a06; margin-bottom: 18px; }
+  .moved-note p { margin: 6px 0 12px; font-size: .92rem; }
+
+  .question { background: var(--white); border: 1px solid var(--line); border-radius: 18px; padding: 26px 28px; box-shadow: var(--shadow); }
+  .question h1 { font-size: clamp(1.5rem, 3.6vw, 2rem); margin: 6px 0 12px; overflow-wrap: anywhere; }
+  .q-body { white-space: pre-wrap; font-size: 1.02rem; line-height: 1.7; margin: 16px 0; overflow-wrap: anywhere; }
+  .q-actions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+  .danger { color: #b3261e !important; }
+
+  .answers { margin-top: 36px; scroll-margin-top: 90px; }
+  .answers h2 { font-size: 1.35rem; }
+  .a-list { display: grid; gap: 12px; margin-bottom: 22px; }
+  .a-list :global(.answer) { display: flex; gap: 12px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; scroll-margin-top: 100px; }
+  .a-list :global(.answer.best) { border-color: #bfe6cc; background: #f3fbf6; }
+  .a-list :global(.answer.team) { border-color: var(--sky-200); }
+  .a-list :global(.answer.best.team) { border-color: #bfe6cc; }
+  .a-list :global(.answer > .avatar), .a-list :global(.answer > img) { width: 40px; height: 40px; border-radius: 50%; flex: 0 0 auto; }
+  .a-list :global(.a-body) { flex: 1; min-width: 0; }
+  .a-list :global(.a-head) { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .a-list :global(.a-name) { font-weight: 600; color: var(--ink); text-decoration: none; }
+  .a-list :global(a.a-name:hover) { color: var(--sky-600); text-decoration: underline; }
+  .a-list :global(.a-best-tag) { font: 600 .74rem var(--font-body); color: #1b6b3a; background: #e3f6ea; border-radius: 999px; padding: 2px 9px; }
+  .a-list :global(.a-text) { white-space: pre-wrap; margin: 6px 0 0; overflow-wrap: anywhere; }
+  .a-list :global(.a-edited) { display: block; margin-top: 4px; font-size: .78rem; color: var(--muted); font-style: italic; }
+  .a-list :global(.a-foot) { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+  .a-list :global(.a-btn) { background: none; border: 0; padding: 0; color: var(--muted); font: 500 .82rem var(--font-body); cursor: pointer; }
+  .a-list :global(.a-btn:hover) { color: var(--sky-600); }
+  .a-list :global(.a-btn.voted) { color: var(--sky-700); font-weight: 600; }
+  .a-list :global(.a-btn.mark) { color: #1b6b3a; font-weight: 600; }
+  .a-list :global(.a-btn.del:hover) { color: #b3261e; }
+  .a-list :global(.a-foot .report-btn) { margin-left: auto; }
+  .a-list :global(.a-editor textarea) { width: 100%; box-sizing: border-box; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; resize: vertical; min-height: 100px; margin-top: 8px; }
+  .a-list :global(.a-edit-row) { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+  .a-list :global(.flash) { animation: a-flash 2.4s ease-out; }
+  @keyframes a-flash { from { background: #ffe8d9; } }
+  .answer-form textarea { min-height: 110px; }
+  .locked { text-align: center; padding: 28px 22px; background: linear-gradient(180deg, var(--sky-100), var(--white)); }
+
+  .side-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 16px; }
+  .side-card h3 { margin-bottom: 8px; font-size: 1.05rem; }
+  .more-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .more-list :global(a) { color: var(--ink); text-decoration: none; font-weight: 500; font-size: .92rem; line-height: 1.35; display: block; }
+  .more-list :global(a:hover) { color: var(--sky-600); }
+  .more-list :global(small) { color: var(--muted); font-size: .78rem; }
+
+  /* Server-written copy for search engines, replaced once the page loads */
+  #ssr :global(.ssr-q) { background: var(--white); border: 1px solid var(--line); border-radius: 18px; padding: 26px 28px; }
+  #ssr :global(.ssr-a) { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; margin-top: 12px; white-space: pre-wrap; }
+  #ssr :global(.ssr-q p) { white-space: pre-wrap; }
+</style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+  import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../../lib/auth';
+  import { el, avatar, authorName, authorFacts, timeAgo, fetchTrips } from '../../lib/posts';
+  import { reportButton } from '../../lib/report';
+  import {
+    fetchQuestion, fetchAnswers, fetchQuestions, myVotes, adminIds, adminRow, byline, setBestAnswer,
+    deleteQuestion, trekName, trekUrl, questionUrl, answersLabel, type Question, type Answer,
+  } from '../../lib/community';
+  import { topicLabel, GENERAL } from '../../data/community';
+  import { getTrek } from '../../data/treks';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id') ?? '';
+
+  let q: Question;
+  let me: { id: string; member: boolean; banned: boolean; admin: boolean } = { id: '', member: false, banned: false, admin: false };
+  let team = new Set<string>();
+  let jumped = false;
+
+  async function start() {
+    const found = /^[0-9a-f-]{36}$/i.test(id) ? await fetchQuestion(id) : null;
+    $('loading').hidden = true;
+    $('ssr').replaceChildren();          // the browser version takes over from here
+    if (!found) { $('missing').hidden = false; return; }
+    q = found;
+
+    const user = await getUser();
+    const [profile, adminRes, bannedRes, teamIds] = await Promise.all([
+      user ? getMyProfile(user.id) : Promise.resolve(null),
+      user ? supabase.rpc('is_admin') : Promise.resolve({ data: false }),
+      user ? supabase.rpc('is_banned') : Promise.resolve({ data: false }),
+      adminIds(),
+    ]);
+    me = { id: user?.id ?? '', member: isComplete(profile), banned: !!bannedRes.data, admin: !!adminRes.data };
+    team = teamIds;
+
+    renderQuestion();
+    $('app').hidden = false;
+    loadSide();
+    await loadAnswers();
+    setupForm();
+  }
+
+  function renderQuestion() {
+    const name = trekName(q.trek);
+    document.title = `${q.title} | Trekking Partners Nepal`;
+    $('crumb').textContent = name;
+
+    const chips = $('q-chips');
+    chips.replaceChildren(el('span', 'q-trek', name), el('span', 'q-topic', topicLabel(q.topic)));
+    if (q.pinned) chips.append(el('span', 'q-flag q-pinned', '📌 Pinned'));
+    if (q.status === 'closed') chips.append(el('span', 'q-flag q-closed', 'Closed for new answers'));
+    if (q.best_answer_id) chips.append(el('span', 'q-flag', '✓ Answered'));
+
+    $('q-title').textContent = q.title;
+    $('q-by').replaceChildren(byline(q.author, q.user_id, team.has(q.user_id), 'asked ' + timeAgo(q.created_at)));
+    $('q-body').textContent = q.body;
+
+    const isOwner = me.id === q.user_id;
+    $('new-note').hidden = !(params.has('new') && isOwner);
+    if (q.status === 'moved') {
+      $('moved-note').hidden = false;
+      if (q.trek !== GENERAL) ($('moved-go') as HTMLAnchorElement).href = `/find-partners/new/?trek=${encodeURIComponent(q.trek)}`;
+    }
+    if (!isOwner && !team.has(q.user_id)) $('q-report').replaceChildren(reportButton('question', q.id, 'Report question'));
+    if (isOwner) {
+      const del = $('q-delete') as HTMLButtonElement;
+      del.hidden = false;
+      del.onclick = async () => { if (await deleteQuestion(q)) location.href = '/community/'; };
+    }
+    if (me.admin) {
+      $('q-admin').replaceChildren(adminRow(q, async () => {
+        const fresh = await fetchQuestion(q.id);
+        if (!fresh) { location.href = '/community/'; return; }
+        q = fresh;
+        renderQuestion();
+        setupForm();
+      }));
+    }
+  }
+
+  function teamAvatar() {
+    const img = el('img', 'avatar');
+    img.src = '/web-app-manifest-192x192.png'; img.alt = 'Trekking Partners Nepal'; img.width = 40; img.height = 40;
+    return img;
+  }
+
+  async function loadAnswers() {
+    const answers = await fetchAnswers(q.id);
+    const voted = me.member ? await myVotes(answers.map((a) => a.id)) : new Set<string>();
+    // Best answer first, then oldest to newest
+    answers.sort((a, b) => (a.id === q.best_answer_id ? -1 : b.id === q.best_answer_id ? 1 : 0));
+
+    $('a-title').textContent = answers.length ? answersLabel(answers.length) : 'Answers';
+    $('a-none').hidden = answers.length > 0;
+    $('a-list').replaceChildren(...answers.map((a) => answerItem(a, voted.has(a.id))));
+
+    if (!jumped && location.hash === '#answers' && answers.length) {
+      jumped = true;
+      const last = [...$('a-list').children].pop() as HTMLElement;
+      last.scrollIntoView({ block: 'center' });
+      last.classList.add('flash');
+    }
+  }
+
+  function answerItem(a: Answer, voted: boolean) {
+    const isTeam = team.has(a.user_id);
+    const isBest = a.id === q.best_answer_id;
+    const mine = a.user_id === me.id;
+    const item = el('div', ['answer', isBest ? 'best' : '', isTeam ? 'team' : ''].filter(Boolean).join(' '));
+    item.id = `a-${a.id}`;
+
+    const body = el('div', 'a-body');
+    const head = el('div', 'a-head');
+    if (isTeam) {
+      const n = el('a', 'a-name', 'Trekking Partners Nepal');
+      n.href = '/about/';
+      head.append(n, el('span', 'admin-tag', 'Admin'));
+    } else {
+      const n = el('a', 'a-name', authorName(a.author));
+      n.href = `/trekker/?id=${encodeURIComponent(a.user_id)}`;
+      head.append(n);
+      const facts = authorFacts(a.author);
+      if (facts) head.append(el('span', 'post-sub', facts));
+    }
+    head.append(el('span', 'post-sub', timeAgo(a.created_at)));
+    if (isBest) head.append(el('span', 'a-best-tag', '✓ Best answer'));
+
+    const text = el('p', 'a-text', a.body);
+    body.append(head, text);
+    if (a.edited_at) body.append(el('span', 'a-edited', 'Edited'));
+
+    const foot = el('div', 'a-foot');
+    // Helpful
+    const help = el('button', 'a-btn' + (voted ? ' voted' : ''), `👍 Helpful${a.helpful ? ' · ' + a.helpful : ''}`);
+    help.type = 'button';
+    if (mine) {
+      help.disabled = true;
+      help.title = 'You can’t vote on your own answer';
+    }
+    help.addEventListener('click', async () => {
+      if (!me.id) return goToLogin();
+      if (!me.member) return goToAccount();
+      help.disabled = true;
+      const { error } = voted
+        ? await supabase.from('answer_votes').delete().eq('answer_id', a.id).eq('user_id', me.id)
+        : await supabase.from('answer_votes').insert({ answer_id: a.id });
+      if (error) { help.disabled = false; return alert('Could not save your vote: ' + error.message); }
+      loadAnswers();
+    });
+    foot.append(help);
+
+    // Best answer: the asker or an admin chooses
+    if (me.id === q.user_id || me.admin) {
+      const mark = el('button', 'a-btn mark', isBest ? 'Remove best answer' : '✓ Mark as best answer');
+      mark.type = 'button';
+      mark.addEventListener('click', async () => {
+        if (await setBestAnswer(q.id, isBest ? null : a.id)) {
+          q.best_answer_id = isBest ? null : a.id;
+          renderQuestion();
+          loadAnswers();
+        }
+      });
+      foot.append(mark);
+    }
+    if (mine) {
+      const edit = el('button', 'a-btn', 'Edit');
+      edit.type = 'button';
+      edit.addEventListener('click', () => openEditor(a, body, text));
+      foot.append(edit);
+    }
+    if (mine || me.admin) {
+      const del = el('button', 'a-btn del', 'Delete');
+      del.type = 'button';
+      del.addEventListener('click', async () => {
+        if (!confirm('Delete this answer?')) return;
+        const { error } = await supabase.from('answers').delete().eq('id', a.id);
+        if (error) return alert('Could not delete: ' + error.message);
+        await supabase.from('reports').update({ status: 'resolved' }).eq('kind', 'answer').eq('target_id', a.id).eq('status', 'open');
+        if (isBest) q.best_answer_id = null;
+        q.answers_count = Math.max(q.answers_count - 1, 0);
+        renderQuestion();
+        loadAnswers();
+      });
+      foot.append(del);
+    }
+    if (!mine && !isTeam) foot.append(reportButton('answer', a.id));
+    body.append(foot);
+
+    item.append(isTeam ? teamAvatar() : avatar(a.author, 40), body);
+    return item;
+  }
+
+  function openEditor(a: Answer, body: HTMLElement, text: HTMLElement) {
+    if (body.querySelector('.a-editor')) return;
+    const box = el('div', 'a-editor');
+    const ta = el('textarea') as HTMLTextAreaElement;
+    ta.maxLength = 2000; ta.value = a.body; ta.rows = 5;
+    const err = el('p', 'form-error'); err.hidden = true;
+    const row = el('div', 'a-edit-row');
+    const cancel = el('button', 'btn btn-outline btn-sm', 'Cancel'); cancel.type = 'button';
+    const save = el('button', 'btn btn-sun btn-sm', 'Save'); save.type = 'button';
+    row.append(cancel, save);
+    box.append(ta, err, row);
+    text.hidden = true;
+    text.after(box);
+    ta.focus();
+    cancel.addEventListener('click', () => { box.remove(); text.hidden = false; });
+    save.addEventListener('click', async () => {
+      const v = ta.value.trim();
+      if (v.length < 2) { err.textContent = 'Answer can’t be empty.'; err.hidden = false; return; }
+      if (v === a.body) { box.remove(); text.hidden = false; return; }
+      save.disabled = true;
+      const { error } = await supabase.from('answers').update({ body: v }).eq('id', a.id);
+      if (error) { err.textContent = 'Could not save: ' + error.message; err.hidden = false; save.disabled = false; return; }
+      loadAnswers();
+    });
+  }
+
+  // ── Answer form, or why you can't answer ───────────────────
+  function setupForm() {
+    const form = $('a-form') as HTMLFormElement;
+    const locked = $('a-locked');
+    const btn = $('a-locked-btn') as HTMLButtonElement;
+    form.hidden = true;
+    locked.hidden = true;
+    btn.hidden = true;
+
+    const lock = (title: string, text: string, label?: string, action?: () => void) => {
+      $('a-locked-title').textContent = title;
+      $('a-locked-text').textContent = text;
+      if (label && action) { btn.textContent = label; btn.onclick = action; btn.hidden = false; }
+      locked.hidden = false;
+    };
+
+    if (q.status === 'moved') return;
+    if (q.status === 'closed' && !me.admin) {
+      return lock('This question is closed for new answers', 'Have a similar question? Ask it in the Community.', 'Ask a question', () => (location.href = '/community/ask/'));
+    }
+    if (!me.id) return lock('Sign in to answer', 'Anyone can read answers. To answer, sign in with Google – it takes a few seconds.', 'Sign in with Google', () => goToLogin(location.pathname + location.search + '#answer'));
+    if (me.banned) return lock('Your account can’t post answers', 'It was suspended for breaking our rules. If you think this is a mistake, email hello@trekkingpartnersnepal.com.');
+    if (!me.member) return lock('Complete your profile to answer', 'Add your name, age and nationality so other trekkers know who is answering.', 'Complete my profile', () => goToAccount(location.pathname + location.search + '#answer'));
+
+    form.hidden = false;
+    if (form.dataset.ready) return;
+    form.dataset.ready = '1';
+    const ta = form.elements.namedItem('body') as HTMLTextAreaElement;
+    ta.addEventListener('input', () => { $('a-counter').textContent = `${ta.value.length} / 2000`; });
+    if (location.hash === '#answer') { form.scrollIntoView({ block: 'center' }); ta.focus({ preventScroll: true }); }
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = $('a-error');
+      err.hidden = true;
+      const text = ta.value.trim();
+      if (text.length < 2) return;
+      const send = $('a-send') as HTMLButtonElement;
+      send.disabled = true;
+      const { error } = await supabase.from('answers').insert({ question_id: q.id, body: text });
+      send.disabled = false;
+      if (error) { err.textContent = 'Could not post: ' + error.message; err.hidden = false; return; }
+      ta.value = '';
+      $('a-counter').textContent = '0 / 2000';
+      q.answers_count += 1;
+      await loadAnswers();
+      const last = [...$('a-list').children].pop() as HTMLElement | undefined;
+      last?.scrollIntoView({ block: 'center' });
+      last?.classList.add('flash');
+    });
+  }
+
+  // ── Sidebar ────────────────────────────────────────────────
+  async function loadSide() {
+    $('side').hidden = false;
+    const trek = getTrek(q.trek);
+    if (trek) {
+      $('trek-facts').textContent = `${trek.name}: ${trek.days} days, max ${trek.maxAltitude}, ${trek.difficulty.toLowerCase()}.`;
+      ($('trek-link') as HTMLAnchorElement).href = trekUrl(trek.slug)!;
+      $('trek-card').hidden = false;
+      ($('ask-link') as HTMLAnchorElement).href = `/community/ask/?trek=${encodeURIComponent(trek.slug)}`;
+      try {
+        const trips = await fetchTrips({ trek: trek.slug });
+        $('partners-text').textContent = trips.length
+          ? `${trips.length} ${trips.length === 1 ? 'trekker has' : 'trekkers have'} posted upcoming ${trek.name} dates.`
+          : `No one has posted ${trek.name} dates yet. Post yours and others will find you.`;
+        ($('partners-link') as HTMLAnchorElement).href = trips.length ? trekUrl(trek.slug)! : `/find-partners/new/?trek=${encodeURIComponent(trek.slug)}`;
+        $('partners-link').textContent = trips.length ? 'See partner posts →' : 'Post your dates →';
+        $('partners-card').hidden = false;
+      } catch {}
+    }
+    try {
+      const more = (await fetchQuestions({ trek: q.trek, limit: 6 })).filter((x) => x.id !== q.id).slice(0, 4);
+      if (more.length) {
+        $('more-title').textContent = q.trek === GENERAL ? 'More general questions' : `More about ${trekName(q.trek)}`;
+        $('more-list').replaceChildren(...more.map((m) => {
+          const li = el('li');
+          const a = el('a', '', m.title);
+          a.href = questionUrl(m.id);
+          li.append(a, el('small', '', answersLabel(m.answers_count)));
+          return li;
+        }));
+        $('more-card').hidden = false;
+      }
+    } catch {}
+  }
+
+  start();
+</script>

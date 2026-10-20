@@ -1,9 +1,9 @@
-// "Report" button and dialog for posts, replies and trekker profiles (browser only).
+// "Report" button and dialog for posts, replies, Community questions/answers and trekker profiles (browser only).
 import { supabase } from './supabase';
 import { getUser, goToLogin } from './auth';
 import { el } from './posts';
 
-export type ReportKind = 'post' | 'reply' | 'profile';
+export type ReportKind = 'post' | 'reply' | 'profile' | 'question' | 'answer';
 
 const REASONS: [string, string][] = [
   ['spam', 'Spam or advertising'],
@@ -13,7 +13,7 @@ const REASONS: [string, string][] = [
   ['other', 'Something else'],
 ];
 
-const WHAT: Record<ReportKind, string> = { post: 'post', reply: 'reply', profile: 'trekker' };
+const WHAT: Record<ReportKind, string> = { post: 'post', reply: 'reply', profile: 'trekker', question: 'question', answer: 'answer' };
 
 let dlg: HTMLDialogElement | null = null;
 

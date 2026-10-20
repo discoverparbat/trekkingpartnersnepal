@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import DepartureList from '../components/DepartureList.astro';
 import OperatorBar from '../components/OperatorBar.astro';
 import LatestPosts from '../components/LatestPosts.astro';
+import CommunityHome from '../components/CommunityHome.astro';
 import NewsCard from '../components/NewsCard.astro';
 import { getArticles } from '../lib/news';
 import { regions } from '../data/regions';
@@ -62,23 +63,6 @@ const schema = {
   <!-- LATEST PARTNER POSTS (live from Supabase) -->
   <LatestPosts />
 
-  <!-- TRAIL NEWS (only shows once there are published articles) -->
-  {latestNews.length > 0 && (
-    <section class="section news-home">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <span class="eyebrow">Trail news</span>
-            <h2>Latest Nepal trekking updates</h2>
-            <p>Trail conditions, permit changes and new routes, from our team on the ground.</p>
-          </div>
-          <a href="/news/" class="link-arrow">All news →</a>
-        </div>
-        <div class="news-grid">{latestNews.map((a) => <NewsCard article={a} />)}</div>
-      </div>
-    </section>
-  )}
-
   <!-- HOW IT WORKS -->
   <section class="section how">
     <div class="container">
@@ -107,6 +91,26 @@ const schema = {
       </ol>
     </div>
   </section>
+
+  <!-- COMMUNITY: admin trail notes + latest questions (live from Supabase) -->
+  <CommunityHome />
+
+  <!-- TRAIL NEWS (only shows once there are published articles) -->
+  {latestNews.length > 0 && (
+    <section class="section news-home">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Trail news</span>
+            <h2>Latest Nepal trekking updates</h2>
+            <p>Trail conditions, permit changes and new routes, from our team on the ground.</p>
+          </div>
+          <a href="/news/" class="link-arrow">All news →</a>
+        </div>
+        <div class="news-grid">{latestNews.map((a) => <NewsCard article={a} />)}</div>
+      </div>
+    </section>
+  )}
 
   <!-- REGIONS -->
   <section id="regions" class="section regions">

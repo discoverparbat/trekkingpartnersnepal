@@ -1,0 +1,178 @@
+---
+import Base from '../../layouts/Base.astro';
+import { regions } from '../../data/regions';
+import { treksInRegion } from '../../data/treks';
+import { TOPICS, GENERAL, GENERAL_LABEL } from '../../data/community';
+---
+<Base title="Ask a question | Trekking Partners Nepal" description="Ask the Trekking Partners Nepal community about trail conditions, permits, gear and teahouses." noindex>
+  <section class="section">
+    <div class="container narrow">
+      <nav class="crumbs-dark"><a href="/community/">Community</a> › Ask a question</nav>
+      <h1>Ask a question</h1>
+      <p class="muted lead">Ask about a trek: trail and snow conditions, permits, gear, teahouses or transport. Trekkers who were just there, and our local team, will answer.</p>
+
+      <div id="gate" class="panel" style="text-align:center">
+        <p class="muted" style="margin:0">Checking your account…</p>
+      </div>
+
+      <form id="ask" class="form-card form-grid" novalidate hidden>
+        <div class="field-row">
+          <label class="field">Trek
+            <select name="trek" required>
+              <option value="">Choose a trek…</option>
+              <option value={GENERAL}>{GENERAL_LABEL}</option>
+              {regions.map((r) => (
+                <optgroup label={r.name}>
+                  {treksInRegion(r.slug).map((t) => <option value={t.slug}>{t.name}</option>)}
+                </optgroup>
+              ))}
+            </select>
+          </label>
+          <label class="field">Topic
+            <select name="topic" required>
+              <option value="">Choose a topic…</option>
+              {TOPICS.map((t) => <option value={t.value}>{t.label}</option>)}
+            </select>
+          </label>
+        </div>
+
+        <label class="field">Your question
+          <span class="hint">One clear sentence, e.g. “Is there snow on Mardi Himal High Camp right now?”</span>
+          <input name="title" required minlength="10" maxlength="140" />
+          <span class="counter" id="t-counter">0 / 140</span>
+        </label>
+
+        <label class="field">Details
+          <span class="hint">Your dates, what you already know, and what would help you decide.</span>
+          <textarea name="body" required minlength="20" maxlength="3000"
+            placeholder="E.g. I’m planning to go up on 28 October with a guide. Do I need microspikes for the section between High Camp and View Point, or is it dry? Are the teahouses at High Camp open?"></textarea>
+          <span class="counter" id="b-counter">0 / 3000</span>
+        </label>
+
+        <!-- Shown when the text looks like a partner request -->
+        <div id="partner-warn" class="partner-warn" hidden>
+          <strong>This sounds like you’re looking for trek partners.</strong>
+          <p>The Community is for trek questions only. Partner requests go on Find partners, where people heading the same way can find you by trek and dates.</p>
+          <div class="pw-actions">
+            <a id="pw-go" href="/find-partners/new/" class="btn btn-sun btn-sm">Post on Find partners</a>
+            <button type="button" id="pw-anyway" class="btn btn-outline btn-sm">It’s a trek question – publish anyway</button>
+          </div>
+        </div>
+
+        <p class="form-note">🌍 Questions and answers are public, so don’t share your phone number or email here. Looking for people to trek with? <a href="/find-partners/new/">Post on Find partners</a> instead.</p>
+
+        <p id="error" class="form-error" hidden></p>
+
+        <div class="form-actions">
+          <a href="/community/" class="btn btn-outline">Cancel</a>
+          <button type="submit" id="submit" class="btn btn-sun">Publish question</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .narrow { max-width: 720px; }
+  .muted { color: var(--muted); }
+  .lead { font-size: 1.05rem; margin-bottom: 24px; }
+  h1 { font-size: 2.2rem; }
+  .crumbs-dark { font-size: .88rem; color: var(--muted); margin-bottom: 10px; }
+  .crumbs-dark a { color: var(--sky-600); text-decoration: none; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .partner-warn { background: #fff6e8; border: 1px solid #f6d39f; border-radius: 12px; padding: 16px 18px; color: #6b3a06; }
+  .partner-warn p { margin: 6px 0 12px; font-size: .92rem; }
+  .pw-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+</style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+  import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../../lib/auth';
+  import { getTrek } from '../../data/treks';
+  import { GENERAL, looksLikePartnerRequest } from '../../data/community';
+  import { questionUrl } from '../../lib/community';
+
+  const form = document.getElementById('ask') as HTMLFormElement;
+  const f = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+  const errorBox = document.getElementById('error')!;
+  const warn = document.getElementById('partner-warn')!;
+  let partnerOk = false;
+
+  function showError(msg: string) {
+    errorBox.textContent = msg;
+    errorBox.hidden = false;
+  }
+
+  async function start() {
+    const user = await getUser();
+    if (!user) return goToLogin();
+    const profile = await getMyProfile(user.id);
+    if (!isComplete(profile)) return goToAccount();
+    const { data: banned } = await supabase.rpc('is_banned');
+    const gate = document.getElementById('gate')!;
+    if (banned) {
+      gate.replaceChildren();
+      const p = document.createElement('p');
+      p.className = 'banned-note';
+      p.textContent = 'Your account has been suspended for breaking our rules, so you can’t ask questions. If you think this is a mistake, email hello@trekkingpartnersnepal.com.';
+      gate.append(p);
+      gate.style.textAlign = 'left';
+      return;
+    }
+    const pre = new URLSearchParams(location.search).get('trek');
+    if (pre && (pre === GENERAL || getTrek(pre))) f('trek').value = pre;
+    gate.hidden = true;
+    form.hidden = false;
+  }
+
+  const counter = (input: HTMLInputElement, out: string, max: number) =>
+    input.addEventListener('input', () => { document.getElementById(out)!.textContent = `${input.value.length} / ${max}`; });
+  counter(f('title'), 't-counter', 140);
+  counter(f('body'), 'b-counter', 3000);
+
+  // Changing the text after the warning means we check again
+  f('title').addEventListener('input', () => { partnerOk = false; });
+  f('body').addEventListener('input', () => { partnerOk = false; });
+
+  document.getElementById('pw-anyway')!.addEventListener('click', () => {
+    partnerOk = true;
+    warn.hidden = true;
+    form.requestSubmit();
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.hidden = true;
+    const trek = f('trek').value;
+    const topic = f('topic').value;
+    const title = f('title').value.trim();
+    const body = f('body').value.trim();
+    if (!trek) return showError('Please choose a trek, or “General / any trek”.');
+    if (!topic) return showError('Please choose a topic.');
+    if (title.length < 10) return showError('Please write your question in at least 10 characters.');
+    if (body.length < 20) return showError('Please add a few details (at least 20 characters).');
+
+    if (!partnerOk && looksLikePartnerRequest(`${title}\n${body}`)) {
+      const go = document.getElementById('pw-go') as HTMLAnchorElement;
+      go.href = trek !== GENERAL ? `/find-partners/new/?trek=${encodeURIComponent(trek)}` : '/find-partners/new/';
+      warn.hidden = false;
+      warn.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      return;
+    }
+
+    const btn = document.getElementById('submit') as HTMLButtonElement;
+    btn.disabled = true;
+    btn.textContent = 'Publishing…';
+    const { data, error } = await supabase.from('questions')
+      .insert({ trek, region: trek === GENERAL ? null : getTrek(trek)?.region ?? null, topic, title, body })
+      .select('id').single();
+    if (error || !data) {
+      btn.disabled = false;
+      btn.textContent = 'Publish question';
+      return showError('Could not publish: ' + (error?.message ?? 'please try again.'));
+    }
+    location.href = questionUrl(data.id) + '&new=1';
+  });
+
+  start();
+</script>

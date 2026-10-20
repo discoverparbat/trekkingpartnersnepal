@@ -51,3 +51,22 @@ A welcome email and a first-post email are also sent.
 2. Run `supabase/update-8-notifications.sql` in the SQL Editor (needs update 5 to have been run first).
 3. Database → Replication (Publications): check that `notifications` is ticked under `supabase_realtime`
    so the bell updates live. Without it the bell still updates on every page load.
+
+## Community (update 10)
+Trek questions and answers at `/community/`, plus the pinned **Admin notes & trail updates** box
+(also shown on the homepage under "On the trail right now").
+
+1. Run `supabase/update-10-community.sql` in the SQL Editor (needs update 8 first). Until it's run,
+   the Community pages and the homepage section show as empty.
+2. That's it – no new Edge Function or secret.
+
+How it works:
+- Anyone can read questions and answers. Asking, answering and "Helpful" votes need a complete profile (banned members can't).
+- The asker (or an admin) can mark one **best answer**. Answers from the admin account show as "Trekking Partners Nepal · Admin".
+- Signed in as admin, the Community page shows **+ Add update** for admin notes (each one expires after the time you pick),
+  and every question gets **Pin to top / Close answers / Move to Find partners / Delete**.
+- **Move to Find partners** hides the question and sends the member a bell notification asking them to post on Find partners.
+- The ask form warns members when their text looks like a partner request, before they publish.
+- Reports on questions and answers appear in Admin → Moderation with the other reports.
+- `functions/community/question/` writes each question and its answers into the page for Google (QAPage schema),
+  and `functions/community/sitemap.xml.ts` lists every question at `/community/sitemap.xml` (linked from robots.txt).

@@ -1,0 +1,266 @@
+---
+import Base from '../../layouts/Base.astro';
+import { regions } from '../../data/regions';
+import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
+---
+<Base
+  title="Nepal Trekking Questions & Trail Conditions | Trekking Partners Nepal"
+  description="Ask about trail conditions, snow, permits, gear, teahouses and transport on Nepal treks. Answers from trekkers who were just there and our local team."
+>
+  <section class="page-hero" style="background-image:url('/images/hero.jpg')">
+    <div class="container">
+      <nav class="crumbs"><a href="/">Home</a> › Community</nav>
+      <h1>Ask the trail</h1>
+      <p>Questions about routes, trail conditions, permits, gear and teahouses. Trekkers who were just there, and our local team, answer.</p>
+      <ul class="rules">
+        <li>✓ Trek questions only</li><li>✓ Recent conditions</li><li>✓ Gear &amp; permits</li><li>✕ Partner requests go to Find partners</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section community">
+    <div class="container c-layout">
+      <div class="c-main">
+        <!-- Admin notes: always at the top -->
+        <div class="notes" id="notes">
+          <div class="notes-head">
+            <h2><span class="notes-pin">Pinned</span> Admin notes &amp; trail updates</h2>
+            <button type="button" id="note-add" class="btn btn-outline btn-sm" hidden>+ Add update</button>
+          </div>
+          <form id="note-form" class="note-form" hidden>
+            <div class="field-row">
+              <label class="field">Type
+                <select name="kind">{NOTE_KINDS.map((k) => <option value={k.value}>{k.label}</option>)}</select>
+              </label>
+              <label class="field">Show for
+                <select name="expiry">{NOTE_EXPIRY.map((e) => <option value={e.days} selected={e.days === 7}>{e.label}</option>)}</select>
+              </label>
+            </div>
+            <label class="field">Headline <span class="hint">optional, shown in bold – e.g. Thorong La</span>
+              <input name="headline" maxlength="80" />
+            </label>
+            <label class="field">Update
+              <textarea name="body" required minlength="5" maxlength="500" rows="3" placeholder="E.g. Pass closed 19–20 Oct after fresh snow. Teahouses advise waiting in Thorong Phedi."></textarea>
+            </label>
+            <p id="note-error" class="form-error" hidden></p>
+            <div class="note-actions">
+              <button type="button" id="note-cancel" class="btn btn-outline btn-sm">Cancel</button>
+              <button type="submit" class="btn btn-sun btn-sm">Publish update</button>
+            </div>
+          </form>
+          <div id="note-list"><p class="notes-empty">Loading updates…</p></div>
+        </div>
+
+        <div class="toolbar">
+          <input id="f-search" type="search" placeholder="Search questions, e.g. Mardi Himal snow" aria-label="Search questions" />
+          <select id="f-region" aria-label="Region">
+            <option value="">All regions</option>
+            {regions.map((r) => <option value={r.slug}>{r.name}</option>)}
+          </select>
+          <a href="/community/ask/" class="btn btn-sun">Ask a question</a>
+        </div>
+        <div class="topic-chips" id="f-topics" role="group" aria-label="Topic">
+          <button type="button" class="chip active" data-topic="">All</button>
+          {TOPICS.map((t) => <button type="button" class="chip" data-topic={t.value}>{t.label}</button>)}
+          <button type="button" class="chip" data-topic="unanswered">Unanswered</button>
+        </div>
+
+        <p id="q-count" class="q-count-line" aria-live="polite"></p>
+        <div id="q-list" class="q-list">
+          {[1, 2, 3].map(() => <div class="q-card skeleton" style="height:150px" aria-hidden="true"></div>)}
+        </div>
+        <div id="q-empty" class="panel panel-dashed" hidden>
+          <h3 id="q-empty-title">No questions yet</h3>
+          <p class="muted">Be the first to ask. Trekkers and our local team will answer.</p>
+          <a href="/community/ask/" class="btn btn-sun">Ask a question</a>
+        </div>
+        <div class="more"><button type="button" id="q-more" class="btn btn-outline" hidden>Show more questions</button></div>
+      </div>
+
+      <aside class="c-side">
+        <div class="side-card">
+          <h3>What to ask here</h3>
+          <ul class="ok">
+            <li>Current trail and snow conditions</li>
+            <li>Gear and clothing</li>
+            <li>Permits, TIMS and entry rules</li>
+            <li>Teahouses, food, water, transport</li>
+          </ul>
+        </div>
+        <div class="side-card">
+          <h3>Not here</h3>
+          <ul class="no">
+            <li>Looking for trek partners</li>
+            <li>Selling guiding or tours</li>
+            <li>Off-topic chat</li>
+          </ul>
+          <p class="muted small">Posts that break these rules are moved or removed.</p>
+        </div>
+        <div class="side-card dark">
+          <h3>Looking for company?</h3>
+          <p>Partner requests belong on Find partners, where trekkers can filter by trek and dates.</p>
+          <a href="/find-partners/new/" class="btn btn-sun btn-sm">Post on Find partners</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .rules { list-style: none; padding: 0; margin: 14px 0 0; display: flex; gap: 8px; flex-wrap: wrap; }
+  .rules li { font-size: .82rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 999px; padding: 4px 12px; color: #e4efff; }
+  .community { padding-top: 32px; }
+  .c-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start; }
+  @media (max-width: 920px) { .c-layout { grid-template-columns: 1fr; } }
+  .muted { color: var(--muted); }
+  .small { font-size: .84rem; margin: 8px 0 0; }
+
+  .notes { margin-bottom: 26px; }
+  .note-form { display: grid; gap: 12px; background: var(--white); border: 1px solid #f6d39f; border-radius: 12px; padding: 16px; margin: 12px 0; }
+  .note-form textarea { min-height: 80px; }
+  .note-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .toolbar input, .toolbar select { font: inherit; font-size: .95rem; padding: 11px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); color: var(--ink); }
+  .toolbar input { flex: 1; min-width: 200px; }
+  .toolbar input:focus, .toolbar select:focus { outline: 2px solid var(--sky-400); outline-offset: 1px; }
+  .topic-chips { margin-bottom: 16px; }
+  .topic-chips .chip { cursor: pointer; font-family: var(--font-body); padding: 6px 14px; font-size: .86rem; }
+  .q-count-line { color: var(--muted); font-size: .88rem; margin: 0 0 10px; min-height: 1.3em; }
+  .more { text-align: center; margin-top: 18px; }
+
+  .side-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 16px; }
+  .side-card h3 { margin-bottom: 8px; font-size: 1.05rem; }
+  .side-card ul { margin: 0; padding-left: 20px; font-size: .9rem; color: var(--muted); }
+  .side-card li { margin-bottom: 4px; }
+  .side-card .ok li::marker { content: '✓  '; color: #1b6b3a; }
+  .side-card .no li::marker { content: '✕  '; color: #a3291c; }
+  .side-card.dark { background: var(--night-800); border-color: var(--night-800); color: #cfe3ff; }
+  .side-card.dark h3 { color: var(--white); }
+  .side-card.dark p { font-size: .9rem; }
+</style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+  import { fetchQuestions, fetchNotes, questionCard, noteRow, adminIds, amIAdmin, trekName, type Question, type Note } from '../../lib/community';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const list = $('q-list');
+  const search = $('f-search') as HTMLInputElement;
+  const region = $('f-region') as HTMLSelectElement;
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('#f-topics .chip')];
+  const PAGE = 20;
+
+  const params = new URLSearchParams(location.search);
+  let topic = params.get('topic') ?? '';
+  search.value = params.get('q') ?? '';
+  region.value = params.get('region') ?? '';
+  if (!chips.some((c) => c.dataset.topic === topic)) topic = '';
+  chips.forEach((c) => c.classList.toggle('active', c.dataset.topic === topic));
+
+  let all: Question[] = [];
+  let shown = PAGE;
+  let admin = false;
+  let team = new Set<string>();
+
+  const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+  function matches(q: Question) {
+    if (region.value && q.region !== region.value) return false;
+    if (topic === 'unanswered' && q.answers_count > 0) return false;
+    if (topic && topic !== 'unanswered' && q.topic !== topic) return false;
+    const words = norm(search.value).split(/\s+/).filter(Boolean);
+    if (!words.length) return true;
+    const hay = norm(`${q.title} ${q.body} ${trekName(q.trek)}`);
+    return words.every((w) => hay.includes(w));
+  }
+
+  function render() {
+    const found = all.filter(matches);
+    list.replaceChildren(...found.slice(0, shown).map((q) => questionCard(q, { admin, team, onChange: load })));
+    list.hidden = found.length === 0;
+    $('q-empty').hidden = found.length > 0;
+    $('q-empty-title').textContent = all.length ? 'No questions match' : 'No questions yet';
+    $('q-more').hidden = found.length <= shown;
+    const filtered = !!(search.value.trim() || region.value || topic);
+    $('q-count').textContent = all.length && filtered ? `${found.length} of ${all.length} questions` : '';
+
+    const q = new URLSearchParams();
+    if (search.value.trim()) q.set('q', search.value.trim());
+    if (region.value) q.set('region', region.value);
+    if (topic) q.set('topic', topic);
+    history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
+  }
+
+  async function load() {
+    try { all = await fetchQuestions(); } catch (e: any) { console.error('Community:', e.message); all = []; }
+    render();
+  }
+
+  // ── Admin notes ────────────────────────────────────────────
+  async function loadNotes() {
+    const notes = await fetchNotes(admin ? 20 : 8);
+    const box = $('note-list');
+    if (!notes.length) {
+      const p = document.createElement('p');
+      p.className = 'notes-empty';
+      p.textContent = 'No current updates. Our team posts trail closures and weather changes here.';
+      box.replaceChildren(p);
+      return;
+    }
+    box.replaceChildren(...notes.map((n) => noteRow(n, admin ? removeNote : undefined)));
+  }
+
+  async function removeNote(n: Note) {
+    if (!confirm('Delete this update?')) return;
+    const { error } = await supabase.from('admin_notes').delete().eq('id', n.id);
+    if (error) return alert('Could not delete: ' + error.message);
+    loadNotes();
+  }
+
+  function setupNoteForm() {
+    const form = $('note-form') as HTMLFormElement;
+    const add = $('note-add');
+    add.hidden = false;
+    add.addEventListener('click', () => { form.hidden = false; add.hidden = true; (form.elements.namedItem('body') as HTMLElement).focus(); });
+    $('note-cancel').addEventListener('click', () => { form.hidden = true; add.hidden = false; form.reset(); });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const v = (n: string) => (form.elements.namedItem(n) as HTMLInputElement).value.trim();
+      const err = $('note-error');
+      err.hidden = true;
+      if (v('body').length < 5) { err.textContent = 'Please write the update.'; err.hidden = false; return; }
+      const days = Number(v('expiry'));
+      const { error } = await supabase.from('admin_notes').insert({
+        kind: v('kind'),
+        headline: v('headline') || null,
+        body: v('body'),
+        expires_at: days ? new Date(Date.now() + days * 86400000).toISOString() : null,
+      });
+      if (error) { err.textContent = 'Could not publish: ' + error.message; err.hidden = false; return; }
+      form.reset();
+      form.hidden = true;
+      add.hidden = false;
+      loadNotes();
+    });
+  }
+
+  // ── Filters ────────────────────────────────────────────────
+  let typing: number | undefined;
+  search.addEventListener('input', () => { clearTimeout(typing); typing = window.setTimeout(() => { shown = PAGE; render(); }, 150); });
+  region.addEventListener('change', () => { shown = PAGE; render(); });
+  chips.forEach((c) => c.addEventListener('click', () => {
+    topic = c.dataset.topic ?? '';
+    chips.forEach((x) => x.classList.toggle('active', x === c));
+    shown = PAGE;
+    render();
+  }));
+  $('q-more').addEventListener('click', () => { shown += PAGE; render(); });
+
+  (async () => {
+    [admin, team] = await Promise.all([amIAdmin(), adminIds()]);
+    if (admin) setupNoteForm();
+    loadNotes();
+    load();
+  })();
+</script>

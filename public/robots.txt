@@ -3,3 +3,4 @@ Allow: /
 Disallow: /admin/
 
 Sitemap: https://trekkingpartnersnepal.com/sitemap-index.xml
+Sitemap: https://trekkingpartnersnepal.com/community/sitemap.xml

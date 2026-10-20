@@ -66,6 +66,7 @@ const year = new Date().getFullYear();
           <a href="/#regions">Regions</a>
           <a href="/fixed-departures/">Fixed departures</a>
           <a href="/find-partners/">Find partners</a>
+          <a href="/community/">Community</a>
           <a href="/news/">News</a>
           <a href="https://www.facebook.com/groups/887606059135821" target="_blank" rel="noopener">Facebook group</a>
           <a href="/login/" class="btn btn-sun" id="nav-login">Log in</a>
@@ -117,6 +118,7 @@ const year = new Date().getFullYear();
             <ul>
               <li><a href="/fixed-departures/">Fixed departures</a></li>
               <li><a href="/find-partners/">Find partners</a></li>
+              <li><a href="/community/">Community Q&amp;A</a></li>
               <li><a href="/news/">News &amp; updates</a></li>
               <li><a href="/safety/">Safety tips</a></li>
               <li><a href="/about/">About us</a></li>
@@ -155,7 +157,7 @@ const year = new Date().getFullYear();
     <script>
       // Notification bell: welcome, first post and reply notifications for signed-in members.
       import { supabase } from '../lib/supabase';
-      import { fetchNotices, unreadCount, markRead, markAllRead, markTripRead, watchNotices, type NoticeView } from '../lib/notifications';
+      import { fetchNotices, unreadCount, markRead, markAllRead, markTripRead, markQuestionRead, watchNotices, type NoticeView } from '../lib/notifications';
       import { timeAgo } from '../lib/posts';
 
       const wrap = document.getElementById('bell-wrap')!;
@@ -207,7 +209,7 @@ const year = new Date().getFullYear();
         if (!items.length) {
           const p = document.createElement('p');
           p.className = 'bell-empty';
-          p.textContent = 'No notifications yet. We’ll let you know here when someone replies to your posts.';
+          p.textContent = 'No notifications yet. We’ll let you know here when someone replies to your posts or answers your questions.';
           list.replaceChildren(p);
         } else {
           list.replaceChildren(...items.map((n) => row(n, userId)));
@@ -228,6 +230,10 @@ const year = new Date().getFullYear();
         const params = new URLSearchParams(location.search);
         if (location.pathname.startsWith('/post/') && params.get('id')) {
           await markTripRead(userId, params.get('id')!);
+        }
+        // …and opening a Community question marks its answer notifications as read
+        if (location.pathname.startsWith('/community/question/') && params.get('id')) {
+          await markQuestionRead(userId, params.get('id')!);
         }
 
         const refresh = async () => {
