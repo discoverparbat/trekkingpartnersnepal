@@ -7,7 +7,7 @@ import { fetchProfiles } from './posts';
 
 export interface Notice {
   id: string;
-  kind: 'welcome' | 'first_post' | 'reply' | 'thread_reply' | 'answer' | 'thread_answer' | 'best_answer' | 'moved_to_partners' | 'announcement';
+  kind: 'welcome' | 'first_post' | 'reply' | 'thread_reply' | 'answer' | 'thread_answer' | 'best_answer' | 'moved_to_partners' | 'announcement' | 'new_question';
   trip_id: string | null;
   question_id: string | null;
   title?: string | null;   // announcements only
@@ -29,7 +29,7 @@ export interface NoticeView extends Notice {
 }
 
 const COLS = 'id, kind, trip_id, question_id, comment_id, actor_id, count, read_at, created_at';
-const QUESTION_KINDS = ['answer', 'thread_answer', 'best_answer', 'moved_to_partners'];
+const QUESTION_KINDS = ['answer', 'thread_answer', 'best_answer', 'moved_to_partners', 'new_question'];
 
 export async function fetchNotices(userId: string, limit = 20): Promise<NoticeView[]> {
   const load = (cols: string) => supabase
@@ -92,6 +92,10 @@ function describeQuestion(n: Notice, q: { id: string; title: string; trek: strin
       return { ...n, icon: '💬', strong: n.count > 1 ? `${n.count} new answers` : who,
         text: n.count > 1 ? ` on ${title}, which you answered · latest from ${who}` : ` also answered ${title}`,
         href: url + '#answers', actorAvatar: actor?.avatar_url ?? null };
+    case 'new_question':
+      return { ...n, icon: '🙋', strong: 'New question',
+        text: ` from ${who}: ${title} – answer it while it’s fresh.`,
+        href: url + '#answer', actorAvatar: actor?.avatar_url ?? null };
     case 'best_answer':
       return { ...n, icon: '✅', strong: 'Your answer was marked best',
         text: ` on ${title}. Thanks for helping a fellow trekker!`,

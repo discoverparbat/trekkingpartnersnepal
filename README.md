@@ -103,3 +103,7 @@ setting and unsubscribe link as reply emails.
 1. Supabase → Edge Functions → deploy `supabase/functions/answer-alert/index.ts` as **answer-alert**,
    with the same settings as `reply-alert` (JWT verification **off**; it uses the existing `RESEND_API_KEY` secret).
 2. Run `supabase/update-14-answer-emails.sql` in the SQL Editor.
+
+## New-question alerts (update 15)
+Run `supabase/update-15-new-question-alerts.sql` once. Every admin gets a 🔔 when a member asks a
+Community question (linking straight to the answer box), and Admin → Moderation lists unanswered questions.

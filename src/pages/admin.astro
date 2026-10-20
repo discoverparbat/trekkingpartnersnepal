@@ -72,6 +72,15 @@ import { categories } from '../data/news';
           <div id="report-list" class="mod-list"></div>
           <p id="none-reports" class="muted" hidden>No open reports.</p>
 
+          <div class="mod-section-head mod-gap">
+            <h2 class="list-title">Unanswered questions <span id="unanswered-count" class="muted"></span></h2>
+            <a href="/community/?topic=unanswered" class="mod-link" target="_blank" rel="noopener">Open in Community →</a>
+          </div>
+          <div class="table-wrap"><table><thead><tr>
+            <th>Asked</th><th>By</th><th>Question</th><th></th>
+          </tr></thead><tbody id="unanswered"></tbody></table></div>
+          <p id="none-unanswered" class="muted" hidden>Every question has an answer. 🎉</p>
+
           <h2 class="list-title mod-gap">Latest posts</h2>
           <div class="table-wrap"><table><thead><tr>
             <th>Posted</th><th>By</th><th>Post</th><th></th>

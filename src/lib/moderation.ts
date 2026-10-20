@@ -222,6 +222,32 @@ async function loadRecent() {
   $('none-replies').hidden = (replies.data ?? []).length > 0;
 }
 
+// ── Unanswered Community questions ─────────────────────────
+async function loadUnanswered() {
+  const { data, error } = await supabase.from('questions')
+    .select('id, user_id, trek, title, body, created_at')
+    .eq('status', 'open').eq('answers_count', 0)
+    .order('created_at', { ascending: false }).limit(50);
+  if (error) {   // Community not set up yet (update 10)
+    $('unanswered').replaceChildren();
+    $('none-unanswered').hidden = true;
+    return;
+  }
+  const rows = data ?? [];
+  $('unanswered-count').textContent = rows.length ? `(${rows.length})` : '';
+  $('none-unanswered').hidden = rows.length > 0;
+  $('unanswered').replaceChildren(...rows.map((q: any) => {
+    const tr = document.createElement('tr');
+    const text = el('td', 'mod-text');
+    const trek = q.trek === 'general' ? 'General' : getTrek(q.trek)?.name ?? q.trek;
+    text.append(el('strong', '', q.title), el('div', 'muted', `${trek} · ${short(q.body, 110)}`));
+    const actions = el('td', 'actions');
+    actions.append(link('Answer', questionUrl(q.id) + '#answer'));
+    tr.append(el('td', 'nowrap', timeAgo(q.created_at)), el('td', '', nameOf(q.user_id)), text, actions);
+    return tr;
+  }));
+}
+
 // ── Members ────────────────────────────────────────────────
 async function loadMembers() {
   const { data, error } = await supabase.rpc('admin_members');
@@ -253,7 +279,7 @@ function renderMembers() {
 
 async function refresh() {
   await loadMembers();
-  await Promise.all([loadReports(), loadRecent()]);
+  await Promise.all([loadReports(), loadUnanswered(), loadRecent()]);
 }
 
 let started = false;
