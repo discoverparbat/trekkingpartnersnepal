@@ -8,9 +8,15 @@ import Base from '../layouts/Base.astro';
 
       <div id="loading" class="panel" style="text-align:center"><p class="muted" style="margin:0">Loading…</p></div>
       <div id="missing" class="panel panel-dashed" hidden>
-        <h3>Trekker not found</h3>
-        <a href="/find-partners/" class="btn btn-sun">Browse partner posts</a>
+        <h3>This profile isn’t public yet</h3>
+        <p class="muted">Trekker profiles appear once someone posts a trek, a reply, a question or an answer. If the link was shared with you, they may not have posted anything yet.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <a href="/find-partners/" class="btn btn-sun">Browse partner posts</a>
+          <a href="/community/" class="btn btn-outline">Visit the Community</a>
+        </div>
       </div>
+
+      <p id="private-note" class="form-note private-note" hidden>🔒 Only you can see your profile right now. Other trekkers will see it once you post a trek, a reply, a question or an answer.</p>
 
       <div id="app" hidden>
         <div class="profile-card">
@@ -48,6 +54,7 @@ import Base from '../layouts/Base.astro';
   .p-info .p-bio { margin-top: 14px; font-size: 1rem; line-height: 1.6; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; max-width: 60ch; }
   .p-report { align-self: flex-start; }
   .posts-title { font-size: 1.4rem; margin: 40px 0 16px; }
+  .private-note { margin-bottom: 18px; }
 </style>
 
 <script>
@@ -83,6 +90,7 @@ import Base from '../layouts/Base.astro';
 
     const me = await getUser();
     $('p-edit').hidden = me?.id !== p.id;
+    if (me?.id === p.id) showPrivateNote(p.id);
     if (me?.id !== p.id) {
       $('p-report').replaceChildren(reportButton('profile', p.id, 'Report trekker'));
       $('p-report').hidden = false;
@@ -92,6 +100,19 @@ import Base from '../layouts/Base.astro';
     try { trips = await fetchTrips({ userId: p.id }); } catch {}
     $('posts').replaceChildren(...trips.map(postCard));
     $('no-posts').hidden = trips.length > 0;
+  }
+
+  // Your own profile is hidden from others until you have something on the site (see update-13)
+  async function showPrivateNote(userId: string) {
+    const count = (table: string, extra?: (q: any) => any) => {
+      let q: any = supabase.from(table).select('id', { count: 'exact', head: true }).eq('user_id', userId);
+      if (extra) q = extra(q);
+      return Promise.resolve(q).then((r: any) => r.count ?? 0).catch(() => 0);
+    };
+    const [trips, replies, questions, answers] = await Promise.all([
+      count('trips'), count('comments'), count('questions', (q) => q.neq('status', 'moved')), count('answers'),
+    ]);
+    $('private-note').hidden = trips + replies + questions + answers > 0;
   }
 
   start();
