@@ -107,3 +107,14 @@ setting and unsubscribe link as reply emails.
 ## New-question alerts (update 15)
 Run `supabase/update-15-new-question-alerts.sql` once. Every admin gets a 🔔 when a member asks a
 Community question (linking straight to the answer box), and Admin → Moderation lists unanswered questions.
+
+## News and greeting emails (update 17)
+Sends one-off emails (festival greetings, site news) to every member who hasn't turned them off. Each email
+has a "Turn off news emails" link; reply and answer emails are not affected. Campaigns are written in
+`supabase/functions/news-email/index.ts`, and nobody gets the same campaign twice.
+
+1. Supabase → Edge Functions → deploy `supabase/functions/news-email/index.ts` as **news-email**,
+   with the same settings as `reply-alert` (JWT verification **off**; it uses the existing `RESEND_API_KEY` secret).
+2. Run `supabase/update-17-news-emails.sql` in the SQL Editor. Its last line sends the Vijaya Dashami 2083 email.
+3. To send a future campaign: add it to `CAMPAIGNS` in the function, redeploy, then run
+   `select public.send_news_email('campaign-name');`

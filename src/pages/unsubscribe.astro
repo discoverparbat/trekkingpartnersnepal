@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="Email settings | Trekking Partners Nepal" description="Turn off reply emails." noindex>
+<Base title="Email settings | Trekking Partners Nepal" description="Turn off reply or news emails." noindex>
   <section class="section">
     <div class="container" style="max-width:560px">
       <div class="panel" style="text-align:center">
@@ -16,12 +16,18 @@ import Base from '../layouts/Base.astro';
 <script>
   import { supabase } from '../lib/supabase';
   const $ = (id: string) => document.getElementById(id)!;
-  const token = new URLSearchParams(location.search).get('t') ?? '';
+  const params = new URLSearchParams(location.search);
+  const token = params.get('t') ?? '';
+  const news = params.get('list') === 'news';
+  if (news) $('u-title').textContent = 'Turning off news emails…';
 
   (async () => {
     const valid = /^[0-9a-f-]{36}$/i.test(token);
-    const { data } = valid ? await supabase.rpc('unsubscribe_replies', { token }) : { data: false };
-    if (data) {
+    const { data } = valid ? await supabase.rpc(news ? 'unsubscribe_news' : 'unsubscribe_replies', { token }) : { data: false };
+    if (data && news) {
+      $('u-title').textContent = 'News emails turned off';
+      $('u-text').textContent = 'You won’t get news or greeting emails any more. Emails about replies and answers to your own posts are not affected.';
+    } else if (data) {
       $('u-title').textContent = 'Reply emails turned off';
       $('u-text').textContent = 'You won’t get emails about replies or answers any more. You can turn them back on any time in My account.';
     } else {
