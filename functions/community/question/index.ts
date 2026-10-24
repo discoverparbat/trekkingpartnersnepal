@@ -56,6 +56,7 @@ export async function onRequestGet(context: any) {
   let answers: any[] = [];
   let people = new Map<string, any>();
   let team = new Set<string>();
+  let helpful = new Map<string, number>();
   try {
     const rows = await rest(env, `questions?id=eq.${id}&select=id,user_id,trek,title,body,status,best_answer_id,answers_count,created_at,last_activity_at`);
     q = Array.isArray(rows) ? rows[0] ?? null : null;
@@ -65,6 +66,11 @@ export async function onRequestGet(context: any) {
       rest(env, 'rpc/admin_ids', { method: 'POST', body: '{}' }),
     ]);
     answers = Array.isArray(ans) ? ans : [];
+    // "Helpful" votes (public view) become upvoteCount in the QAPage schema
+    if (answers.length) {
+      const votes = await rest(env, `answer_vote_counts?answer_id=in.(${answers.map((a) => a.id).join(',')})&select=answer_id,helpful`);
+      helpful = new Map((Array.isArray(votes) ? votes : []).map((v: any) => [v.answer_id, Number(v.helpful) || 0]));
+    }
     team = new Set((Array.isArray(admins) ? admins : []).map((r: any) => (typeof r === 'string' ? r : r.admin_ids ?? r.user_id)));
     const ids = [...new Set([q.user_id, ...answers.map((a) => a.user_id)])];
     // member_profiles() (update 13) takes up to 50 ids; the old view until that update has run
@@ -99,6 +105,8 @@ export async function onRequestGet(context: any) {
     '@type': 'Answer',
     text: clip(a.body, 2000),
     dateCreated: a.created_at,
+    datePublished: a.created_at,
+    upvoteCount: helpful.get(a.id) ?? 0,
     url: `${url}#a-${a.id}`,
     author: team.has(a.user_id)
       ? { '@type': 'Organization', name: TEAM, url: SITE }
@@ -113,6 +121,7 @@ export async function onRequestGet(context: any) {
       text: clip(q.body, 2000),
       answerCount: n,
       dateCreated: q.created_at,
+      datePublished: q.created_at,
       author: team.has(q.user_id) ? { '@type': 'Organization', name: TEAM, url: SITE } : { '@type': 'Person', name: nameOf(q.user_id) },
       ...(best ? { acceptedAnswer: answerLd(best) } : {}),
       ...(n ? { suggestedAnswer: answers.filter((a) => a !== best).slice(0, 20).map(answerLd) } : {}),
