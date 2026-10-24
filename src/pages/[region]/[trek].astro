@@ -8,6 +8,7 @@ import TrekAlerts from '../../components/TrekAlerts.astro';
 import TrekQuestions from '../../components/TrekQuestions.astro';
 import { treks, treksInRegion, trekTitle, type Trek } from '../../data/treks';
 import { getRegion, type Region } from '../../data/regions';
+import { operator } from '../../data/operator';
 
 export function getStaticPaths() {
   return treks.map((trek) => ({
@@ -74,6 +75,12 @@ const schema = [
           </div>
         )}
 
+        {trek.operatorPage && (
+          <p class="operator-note">
+            Prefer to go with a local guide? The full <a href={trek.operatorPage} target="_blank" rel="noopener">{trekTitle(trek)}</a> itinerary, cost and dates are on {operator.name}, the Parbat-based company that runs our fixed departures.
+          </p>
+        )}
+
         <h2>Trekkers looking for partners</h2>
         <TrekPosts trek={trek.slug} label={trek.name} />
 
@@ -111,6 +118,8 @@ const schema = [
   .factbox li:last-child { border-right: 0; }
   .factbox span { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
   .factbox strong { font-family: var(--font-head); font-size: 1.05rem; }
+  .operator-note { background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--sky-500); border-radius: 10px; padding: 14px 18px; margin: 0 0 32px; line-height: 1.6; }
+  .operator-note a { font-weight: 600; }
   .notice { background: #fff6ee; border: 1px solid #f7d6bd; border-left: 4px solid var(--sun); border-radius: 10px; padding: 14px 18px; margin-bottom: 32px; }
   .side { position: sticky; top: 90px; background: linear-gradient(180deg, var(--sky-100), var(--white)); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
   @media (max-width: 960px) {

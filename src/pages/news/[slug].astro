@@ -124,6 +124,14 @@ const schema = [
           </div>
         )}
 
+        {treks.filter((t) => t.operatorPage).length > 0 && (
+          <p class="operator-note">
+            Planning to trek with a local guide? See the {treks.filter((t) => t.operatorPage).map((t, i, all) => (
+              <>{i > 0 && (i === all.length - 1 ? ' and ' : ', ')}<a href={t.operatorPage} target="_blank" rel="noopener">{trekTitle(t)}</a></>
+            ))} {treks.filter((t) => t.operatorPage).length > 1 ? 'itineraries' : 'itinerary'}, cost and dates on {operator.name}.
+          </p>
+        )}
+
         {data.sources.length > 0 && (
           <div class="sources">
             <h2>Sources</h2>
@@ -213,6 +221,8 @@ const schema = [
   .trail-caution .trail-dot { background: var(--sun-dark); box-shadow: 0 0 0 4px #fbe0cc; }
   .trail-closed { background: #fdeeee; border-color: #f3c2c2; color: #7f1d1d; }
   .trail-closed .trail-dot { background: #a8282d; box-shadow: 0 0 0 4px #f6cfcf; }
+  .operator-note { margin: 28px 0 0; padding: 14px 18px; background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--sky-500); border-radius: 10px; line-height: 1.6; }
+  .operator-note a { font-weight: 600; }
   .tagged, .sources { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line); }
   .tagged h2, .sources h2 { font-size: 1.1rem; margin-bottom: 12px; }
   .tag-links { display: flex; gap: 8px; flex-wrap: wrap; }

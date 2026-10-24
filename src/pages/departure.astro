@@ -55,6 +55,8 @@ import { operator } from '../data/operator';
             <a id="trek-link-2" class="link-arrow" href="#">Read about this trek →</a>
           </div>
 
+          <p id="dp-note" class="dp-note" hidden>Full itinerary, cost and FAQs: <a id="dp-link" href="#" target="_blank" rel="noopener"></a> by {operator.name}.</p>
+
           <a id="trek-link" class="link-arrow" href="#">More about this trek →</a>
         </div>
 
@@ -100,6 +102,8 @@ import { operator } from '../data/operator';
   .dep-hero h1 { margin-bottom: 6px; }
   .dep-hero #h-dates { font-size: 1.15rem; font-weight: 500; }
   .dep-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 40px; align-items: start; }
+  .dp-note { margin: 0 0 14px; line-height: 1.6; }
+  .dp-note a { font-weight: 600; }
   .dep-body > .link-arrow { display: inline-block; margin-top: 8px; }
   .factbox { list-style: none; padding: 0; margin: 0 0 32px; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
   .factbox :global(li) { padding: 16px 18px; border-right: 1px solid var(--line); }
@@ -231,6 +235,12 @@ import { operator } from '../data/operator';
     const trekUrl = `/${region.slug}/${trek.slug}/`;
     ($('trek-link') as HTMLAnchorElement).href = trekUrl;
     ($('trek-link-2') as HTMLAnchorElement).href = trekUrl;
+    if (trek.operatorPage) {
+      const dp = $('dp-link') as HTMLAnchorElement;
+      dp.href = trek.operatorPage;
+      dp.textContent = trekTitle(trek);
+      $('dp-note').hidden = false;
+    }
     const noDetails = !d.overview && !days.length && !inc.length && !exc.length;
     $('s-nodetails').hidden = !noDetails;
     $('trek-link').hidden = noDetails;

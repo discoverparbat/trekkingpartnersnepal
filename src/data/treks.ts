@@ -15,23 +15,24 @@ export interface Trek {
   restricted?: boolean;    // restricted-area permit: guide + min. 2 trekkers
   summary: string;
   image?: string;          // optional; falls back to the region image
+  operatorPage?: string;   // optional; this trek's page on discoverparbat.com (itinerary, cost, booking)
 }
 
 export const treks: Trek[] = [
   // ── Annapurna ─────────────────────────────────────────────
-  { slug: 'annapurna-base-camp', region: 'annapurna-region', name: 'Annapurna Base Camp', days: '7–12', maxAltitude: '4,130 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Nov',
+  { slug: 'annapurna-base-camp', operatorPage: 'https://discoverparbat.com/annapurna-base-camp-trek', region: 'annapurna-region', name: 'Annapurna Base Camp', days: '7–12', maxAltitude: '4,130 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Nov',
     summary: 'Walk through Gurung villages and bamboo forest into the Annapurna Sanctuary, a natural amphitheatre ringed by Annapurna I, Machapuchare and Hiunchuli.' },
-  { slug: 'annapurna-circuit', region: 'annapurna-region', name: 'Annapurna Circuit', days: '12–18', maxAltitude: '5,416 m (Thorong La)', difficulty: 'Challenging', season: 'Mar–May, Oct–Nov',
+  { slug: 'annapurna-circuit', operatorPage: 'https://discoverparbat.com/annapurna-circuit-trek', region: 'annapurna-region', name: 'Annapurna Circuit', days: '12–18', maxAltitude: '5,416 m (Thorong La)', difficulty: 'Challenging', season: 'Mar–May, Oct–Nov',
     summary: 'The classic loop around the Annapurna massif, from subtropical valleys through Manang to the Thorong La pass and down to Muktinath.' },
-  { slug: 'poon-hill', region: 'annapurna-region', name: 'Ghorepani Poon Hill', days: '4–5', maxAltitude: '3,210 m', difficulty: 'Easy', season: 'Oct–May',
+  { slug: 'poon-hill', operatorPage: 'https://discoverparbat.com/poonhill-trek', region: 'annapurna-region', name: 'Ghorepani Poon Hill', days: '4–5', maxAltitude: '3,210 m', difficulty: 'Easy', season: 'Oct–May',
     summary: 'A short trek through rhododendron forest to the famous Poon Hill sunrise over Dhaulagiri and Annapurna. Great for first-timers.' },
-  { slug: 'mardi-himal', region: 'annapurna-region', name: 'Mardi Himal', days: '5–7', maxAltitude: '4,500 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Nov',
+  { slug: 'mardi-himal', operatorPage: 'https://discoverparbat.com/mardi-himal-trek', region: 'annapurna-region', name: 'Mardi Himal', days: '5–7', maxAltitude: '4,500 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Nov',
     summary: 'A ridge trail climbing above the forest to close-up views of Machapuchare (Fishtail) and Mardi Himal.' },
-  { slug: 'khopra-danda', region: 'annapurna-region', name: 'Khopra Danda', days: '6–8', maxAltitude: '3,660 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Dec',
+  { slug: 'khopra-danda', operatorPage: 'https://discoverparbat.com/khopra-ridge-trek', region: 'annapurna-region', name: 'Khopra Danda', days: '6–8', maxAltitude: '3,660 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Dec',
     summary: 'A quieter ridge with community lodges and a wide panorama of Dhaulagiri and Annapurna South, with an optional side trip to Khayer Lake.' },
   { slug: 'mohare-danda', region: 'annapurna-region', name: 'Mohare Danda', days: '4–6', maxAltitude: '3,300 m', difficulty: 'Easy', season: 'Oct–May',
     summary: 'A community eco-trek on a forested ridge with Dhaulagiri and Annapurna views, far quieter than nearby Poon Hill.' },
-  { slug: 'kokhe-danda', region: 'annapurna-region', name: 'Kokhe Danda', days: '3–5', maxAltitude: '3,309 m', difficulty: 'Easy', season: 'Oct–May',
+  { slug: 'kokhe-danda', operatorPage: 'https://discoverparbat.com/kokhe-danda-trek', region: 'annapurna-region', name: 'Kokhe Danda', days: '3–5', maxAltitude: '3,309 m', difficulty: 'Easy', season: 'Oct–May',
     summary: 'A short, uncrowded trek in Parbat district with close views of Dhaulagiri and the Annapurna range.' },
   { slug: 'nar-phu-valley', region: 'annapurna-region', name: 'Nar Phu Valley', days: '10–14', maxAltitude: '5,320 m (Kang La)', difficulty: 'Challenging', season: 'Mar–May, Sep–Nov', restricted: true,
     summary: 'Hidden Tibetan-style villages, canyons and old monasteries in a restricted valley off the Annapurna Circuit, crossing the high Kang La.' },
@@ -99,7 +100,7 @@ export const treks: Trek[] = [
     summary: 'A camping expedition into the trans-Himalaya to Shey Gompa and remote Dolpo villages, crossing several high passes.' },
   { slug: 'limi-valley', region: 'western-nepal', name: 'Limi Valley', days: '16–20', maxAltitude: '4,949 m (Nyalu La)', difficulty: 'Strenuous', season: 'May–Oct', restricted: true,
     summary: 'A far-west route in Humla along old trade trails to Tibetan villages and views toward Mt Kailash.' },
-  { slug: 'api-himal-base-camp', region: 'western-nepal', name: 'Api Himal Base Camp', days: '12–16', maxAltitude: 'approx. 4,000 m', difficulty: 'Challenging', season: 'Apr–May, Oct–Nov',
+  { slug: 'api-himal-base-camp', operatorPage: 'https://discoverparbat.com/api-himal-base-camp-trek', region: 'western-nepal', name: 'Api Himal Base Camp', days: '12–16', maxAltitude: 'approx. 4,000 m', difficulty: 'Challenging', season: 'Apr–May, Oct–Nov',
     summary: 'Nepal’s far-western corner in Darchula, following the Mahakali river to the base of Api Himal in the Api Nampa Conservation Area.' },
   { slug: 'saipal-base-camp', region: 'western-nepal', name: 'Saipal Base Camp', days: '15–18', maxAltitude: 'approx. 4,700 m', difficulty: 'Strenuous', season: 'Mar–May, Sep–Nov',
     summary: 'A long, mostly camping expedition from Simikot in Humla to the base of 7,031 m Saipal Himal, through some of Nepal’s most remote villages and high pastures.' },
@@ -111,7 +112,7 @@ export const treks: Trek[] = [
   // ── Dhaulagiri ────────────────────────────────────────────
   { slug: 'dhaulagiri-circuit', region: 'dhaulagiri-region', name: 'Dhaulagiri Circuit', days: '15–18', maxAltitude: '5,360 m (French Pass)', difficulty: 'Strenuous', season: 'Apr–May, Oct–Nov',
     summary: 'A tough camping trek around Dhaulagiri over French Pass and Dhampus Pass, through the Hidden Valley and down to the Kali Gandaki.' },
-  { slug: 'dhorpatan', region: 'dhaulagiri-region', name: 'Dhorpatan', days: '10–14', maxAltitude: 'approx. 3,800 m', difficulty: 'Moderate', season: 'Mar–May, Sep–Nov',
+  { slug: 'dhorpatan', operatorPage: 'https://discoverparbat.com/dhorpatan-jaljala-circuit-trek', region: 'dhaulagiri-region', name: 'Dhorpatan', days: '10–14', maxAltitude: 'approx. 3,800 m', difficulty: 'Moderate', season: 'Mar–May, Sep–Nov',
     summary: 'Treks around Dhorpatan Hunting Reserve, Nepal’s only hunting reserve: the Jaljala side, the high pastures of Bukipatan and Tikadhara, with Dhaulagiri and Putha Hiunchuli views, blue sheep and Magar villages. Camping and homestays.' },
   { slug: 'rukum-rolpa', region: 'dhaulagiri-region', name: 'Rukum / Rolpa Treks', days: '5–14', maxAltitude: 'Varies by route', difficulty: 'Moderate', season: 'Mar–May, Sep–Nov',
     summary: 'Routes through the Kham Magar hills of Rukum and Rolpa: Sisne Himal, the Guerrilla Trek along trails tied to Nepal’s civil-war history, Sun Pokhari and the high pastures of Chungri Buki. Mostly homestays and camping.' },
