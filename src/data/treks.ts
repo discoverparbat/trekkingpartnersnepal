@@ -112,7 +112,7 @@ export const treks: Trek[] = [
   // ── Dhaulagiri ────────────────────────────────────────────
   { slug: 'dhaulagiri-circuit', region: 'dhaulagiri-region', name: 'Dhaulagiri Circuit', days: '15–18', maxAltitude: '5,360 m (French Pass)', difficulty: 'Strenuous', season: 'Apr–May, Oct–Nov',
     summary: 'A tough camping trek around Dhaulagiri over French Pass and Dhampus Pass, through the Hidden Valley and down to the Kali Gandaki.' },
-  { slug: 'dhorpatan', operatorPage: 'https://discoverparbat.com/dhorpatan-jaljala-circuit-trek', region: 'dhaulagiri-region', name: 'Dhorpatan', days: '10–14', maxAltitude: 'approx. 3,800 m', difficulty: 'Moderate', season: 'Mar–May, Sep–Nov',
+  { slug: 'dhorpatan', region: 'dhaulagiri-region', name: 'Dhorpatan', days: '10–14', maxAltitude: 'approx. 3,800 m', difficulty: 'Moderate', season: 'Mar–May, Sep–Nov',
     summary: 'Treks around Dhorpatan Hunting Reserve, Nepal’s only hunting reserve: the Jaljala side, the high pastures of Bukipatan and Tikadhara, with Dhaulagiri and Putha Hiunchuli views, blue sheep and Magar villages. Camping and homestays.' },
   { slug: 'rukum-rolpa', region: 'dhaulagiri-region', name: 'Rukum / Rolpa Treks', days: '5–14', maxAltitude: 'Varies by route', difficulty: 'Moderate', season: 'Mar–May, Sep–Nov',
     summary: 'Routes through the Kham Magar hills of Rukum and Rolpa: Sisne Himal, the Guerrilla Trek along trails tied to Nepal’s civil-war history, Sun Pokhari and the high pastures of Chungri Buki. Mostly homestays and camping.' },
