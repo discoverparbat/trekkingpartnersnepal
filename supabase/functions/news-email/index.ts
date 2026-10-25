@@ -36,6 +36,7 @@ You get this email because you have an account on Trekking Partners Nepal. We on
 type Campaign = { subject: string; html: (name: string) => string };
 
 const ARTICLE = 'https://discoverparbat.com/article/vijaya-dashami-meaning-story';
+const WEATHER_ARTICLE = 'https://discoverparbat.com/article/cyclone-arnab-nepal-trekking-weather';
 
 const CAMPAIGNS: Record<string, Campaign> = {
   'dashain-2083': {
@@ -53,6 +54,28 @@ const CAMPAIGNS: Record<string, Campaign> = {
 </div></a>` +
       `<div style="margin:0 0 22px">${button(ARTICLE, 'Read the article')}</div>` +
       p(`<span style="font-size:14px;color:#55657d">Trekking during the holidays? Buses fill up and many offices close for a few days, so plan travel early. Looking for company on the trail? ${link(`${SITE}/find-partners/`, 'Find a trekking partner')}.</span>`),
+  },
+  'cyclone-arnab-2083': {
+    subject: 'Weather alert: Cyclone Arnab brings rain and heavy snow to Nepal, 28–31 Oct',
+    html: (name) =>
+      p(`Hi ${esc(name)},`) +
+      p(`A quick heads-up if you’re trekking in Nepal this week. A storm in the Bay of Bengal, expected to become <strong>Cyclone Arnab</strong>, is forecast to bring heavy rain to the hills and deep snow to the high Himalaya.`) +
+      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px"><tr><td style="padding:14px 16px;font-size:15px;line-height:1.6;color:#431407">
+<strong>Mon–Tue (26–27 Oct):</strong> sunny<br>
+<strong>Wed (28 Oct):</strong> clouds build from the afternoon<br>
+<strong>Thu–Fri (29–30 Oct):</strong> heavy rain and snow, worst from Thursday night<br>
+<strong>Sat (31 Oct):</strong> easing · <strong>Sun (1 Nov):</strong> clearing<br>
+<span style="display:block;margin-top:8px">Expect 100–200 mm of rain in the hills and 0.25–1.5 m of snow in the high mountains, heaviest around Dhaulagiri, Annapurna and Manaslu.</span>
+</td></tr></table>` +
+      p(`<strong>Pause high treks and pass crossings from Wednesday to Saturday</strong> (Thorong La, Larkya La and similar). Already on the trail? Be at a safe, lower village by Wednesday evening and wait for the weather to clear.`) +
+      `<a href="${WEATHER_ARTICLE}" style="display:block;text-decoration:none;color:#0f1d33;border:1px solid #d6e3f3;border-radius:12px;margin:0 0 18px">
+<div style="padding:14px 16px">
+<div style="font-size:12px;color:#55657d;margin:0 0 4px">DISCOVER PARBAT</div>
+<div style="font-size:17px;font-weight:bold;line-height:1.35;margin:0 0 6px">Cyclone Arnab and Nepal: Trekking Weather Alert for 28 October to 1 November</div>
+<div style="font-size:14px;color:#55657d;line-height:1.45">Day-by-day forecast, which treks to pause, roads and flights, and when the weather clears.</div>
+</div></a>` +
+      `<div style="margin:0 0 22px">${button(WEATHER_ARTICLE, 'Read the full update')}</div>` +
+      p(`<span style="font-size:14px;color:#55657d">Planning a trek with partners this week? Talk to them about moving your start date, and update the dates on your post in ${link(`${SITE}/account/`, 'My account')}. Questions about conditions? Ask in the ${link(`${SITE}/community/`, 'Community')}.</span>`),
   },
 };
 

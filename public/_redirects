@@ -4,3 +4,7 @@
 /western-nepal/dhaulagiri-circuit/   /dhaulagiri-region/dhaulagiri-circuit/  301
 /western-nepal/dhaulagiri-circuit    /dhaulagiri-region/dhaulagiri-circuit/  301
 /dhaulagiri-region/guerrilla-trek/   /dhaulagiri-region/rukum-rolpa/         301
+
+# Weather alerts: on-site link used by the bell notification (302 = temporary, repoint for the next alert)
+/weather-alert/   https://discoverparbat.com/article/cyclone-arnab-nepal-trekking-weather   302
+/weather-alert    https://discoverparbat.com/article/cyclone-arnab-nepal-trekking-weather   302
