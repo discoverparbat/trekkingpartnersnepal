@@ -375,7 +375,7 @@ export const trekGuides: Record<string, TrekGuide> = {
     sections: [
       {
         heading: 'Who Khopra Danda suits',
-        html: `<p>Khopra Danda (Khopra Ridge) is what Poon Hill was before the crowds. The trail climbs through rhododendron forest and Magar villages to a grassy ridge at about 3,660 m, where community lodges look straight across the Kali Gandaki gorge to Dhaulagiri, with Annapurna South and Nilgiri close by. Fit trekkers can add a hard side trip to the sacred Khayer Lake at 4,653 m. The itinerary and cost are on Discover Parbat's <a href="https://discoverparbat.com/khopra-ridge-trek">Khopra Ridge Trek</a> page.</p>
+        html: `<p>Khopra Danda (Khopra Ridge) is what Poon Hill was before the crowds. The trail climbs through rhododendron forest and Magar villages to a grassy ridge at 3,667 m, where community lodges look straight across the Kali Gandaki gorge to Dhaulagiri, with Annapurna South and Nilgiri close by. Fit trekkers can add a hard side trip to the sacred Khayer Lake at 4,653 m. The itinerary and cost are on Discover Parbat's <a href="https://discoverparbat.com/khopra-ridge-trek">Khopra Ridge Trek</a> page.</p>
 <p>It's moderate. Most trekkers take 7–9 days from Pokhara. The climbs are steeper than on Poon Hill, but you sleep no higher than the ridge itself unless you go for Khayer Lake. It suits people who've done or skipped Poon Hill and want the same mountains with far fewer people, and anyone who likes simple community lodges over busy teahouse villages.</p>`,
       },
       {
@@ -400,7 +400,7 @@ export const trekGuides: Record<string, TrekGuide> = {
     ],
     faq: [
       { q: 'Do I need a guide for Khopra Danda?', a: 'Not legally. You need the ACAP permit, which you can get in Pokhara. Because the trail is quiet and the Khayer Lake side trip is high and faint, a guide or partner is recommended.' },
-      { q: 'How high is Khopra Ridge?', a: 'The ridge is at about 3,660 m. The optional Khayer Lake side trip reaches 4,653 m.' },
+      { q: 'How high is Khopra Ridge?', a: 'The ridge is at 3,667 m. The optional Khayer Lake side trip reaches 4,653 m.' },
       { q: 'Is Khopra Danda better than Poon Hill?', a: 'It is quieter and closer to Dhaulagiri, with simple community lodges, but longer and steeper. Poon Hill is easier and better for a very short first trek.' },
     ],
   },

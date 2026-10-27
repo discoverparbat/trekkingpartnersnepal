@@ -28,7 +28,7 @@ export const treks: Trek[] = [
     summary: 'A short trek through rhododendron forest to the famous Poon Hill sunrise over Dhaulagiri and Annapurna. Great for first-timers.' },
   { slug: 'mardi-himal', operatorPage: 'https://discoverparbat.com/mardi-himal-trek', region: 'annapurna-region', name: 'Mardi Himal', days: '5–7', maxAltitude: '4,500 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Nov',
     summary: 'A ridge trail climbing above the forest to close-up views of Machapuchare (Fishtail) and Mardi Himal.' },
-  { slug: 'khopra-danda', operatorPage: 'https://discoverparbat.com/khopra-ridge-trek', region: 'annapurna-region', name: 'Khopra Danda', days: '6–8', maxAltitude: '3,660 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Dec',
+  { slug: 'khopra-danda', operatorPage: 'https://discoverparbat.com/khopra-ridge-trek', region: 'annapurna-region', name: 'Khopra Danda', days: '6–8', maxAltitude: '3,667 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Dec',
     summary: 'A quieter ridge with community lodges and a wide panorama of Dhaulagiri and Annapurna South, with an optional side trip to Khayer Lake.' },
   { slug: 'mohare-danda', region: 'annapurna-region', name: 'Mohare Danda', days: '4–6', maxAltitude: '3,300 m', difficulty: 'Easy', season: 'Oct–May',
     summary: 'A community eco-trek on a forested ridge with Dhaulagiri and Annapurna views, far quieter than nearby Poon Hill.' },
