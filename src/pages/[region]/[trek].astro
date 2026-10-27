@@ -9,6 +9,7 @@ import TrekQuestions from '../../components/TrekQuestions.astro';
 import { treks, treksInRegion, trekTitle, type Trek } from '../../data/treks';
 import { getRegion, type Region } from '../../data/regions';
 import { operator } from '../../data/operator';
+import { getTrekGuide } from '../../data/trekGuides';
 
 export function getStaticPaths() {
   return treks.map((trek) => ({
@@ -21,6 +22,7 @@ const { trek, region } = Astro.props as { trek: Trek; region: Region };
 const url = `https://trekkingpartnersnepal.com/${region.slug}/${trek.slug}/`;
 const related = treksInRegion(region.slug).filter((t) => t.slug !== trek.slug).slice(0, 3);
 const image = trek.image ?? region.hero;
+const guide = getTrekGuide(trek.slug);
 
 const schema = [
   {
@@ -41,6 +43,17 @@ const schema = [
     image: new URL(image, 'https://trekkingpartnersnepal.com').href,
     touristType: 'Trekkers',
   },
+  ...(guide
+    ? [{
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: guide.faq.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      }]
+    : []),
 ];
 ---
 <Base
@@ -71,7 +84,7 @@ const schema = [
 
         {trek.restricted && (
           <div class="notice">
-            <strong>Restricted area.</strong> This trek needs a special permit, a licensed guide and at least two trekkers. Finding a partner is the easiest way to make it happen.
+            <strong>Restricted area.</strong> This trek needs a special permit through a registered agency and a licensed guide. Since 2026 single trekkers can get the permit too, but going with a partner splits the guide's cost. <a href="/news/restricted-area-treks-nepal-permits-solo/">How restricted permits work</a>.
           </div>
         )}
 
@@ -83,6 +96,27 @@ const schema = [
 
         <h2>Trekkers looking for partners</h2>
         <TrekPosts trek={trek.slug} label={trek.name} />
+
+        {guide && (
+          <div class="guide">
+            {guide.sections.map((sec) => (
+              <section>
+                <h2>{sec.heading}</h2>
+                <Fragment set:html={sec.html} />
+              </section>
+            ))}
+            <section class="faq">
+              <h2>{trek.name}: frequently asked questions</h2>
+              {guide.faq.map((f) => (
+                <details>
+                  <summary>{f.q}</summary>
+                  <p>{f.a}</p>
+                </details>
+              ))}
+            </section>
+            <p class="guide-cta">Heading to {trek.name}? <a href="/find-partners/new/">Post your dates</a> and find someone to trek with. It's free.</p>
+          </div>
+        )}
 
         <TrekQuestions trek={trek.slug} label={trek.name} />
 
@@ -121,6 +155,17 @@ const schema = [
   .operator-note { background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--sky-500); border-radius: 10px; padding: 14px 18px; margin: 0 0 32px; line-height: 1.6; }
   .operator-note a { font-weight: 600; }
   .notice { background: #fff6ee; border: 1px solid #f7d6bd; border-left: 4px solid var(--sun); border-radius: 10px; padding: 14px 18px; margin-bottom: 32px; }
+  .guide { margin: 40px 0; }
+  .guide section { margin-bottom: 32px; }
+  .guide h2 { margin: 0 0 12px; }
+  .guide p, .guide li { line-height: 1.7; }
+  .guide ul { padding-left: 20px; }
+  .guide li { margin-bottom: 8px; }
+  .faq details { background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; }
+  .faq summary { font-weight: 600; cursor: pointer; }
+  .faq details p { margin: 10px 0 0; }
+  .guide-cta { background: var(--sky-100); border-radius: 10px; padding: 16px 20px; font-weight: 500; }
+  .guide-cta a { font-weight: 700; }
   .side { position: sticky; top: 90px; background: linear-gradient(180deg, var(--sky-100), var(--white)); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
   @media (max-width: 960px) {
     .layout { grid-template-columns: 1fr; }
