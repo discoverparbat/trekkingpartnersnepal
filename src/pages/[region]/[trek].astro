@@ -6,6 +6,7 @@ import TrekPosts from '../../components/TrekPosts.astro';
 import RelatedNews from '../../components/RelatedNews.astro';
 import TrekAlerts from '../../components/TrekAlerts.astro';
 import TrekQuestions from '../../components/TrekQuestions.astro';
+import LocalGuide from '../../components/LocalGuide.astro';
 import { treks, treksInRegion, trekTitle, type Trek } from '../../data/treks';
 import { getRegion, type Region } from '../../data/regions';
 import { operator } from '../../data/operator';
@@ -105,6 +106,7 @@ const schema = [
                 <Fragment set:html={sec.html} />
               </section>
             ))}
+            <LocalGuide trek={trek} />
             <section class="faq">
               <h2>{trek.name}: frequently asked questions</h2>
               {guide.faq.map((f) => (
@@ -117,6 +119,7 @@ const schema = [
             <p class="guide-cta">Heading to {trek.name}? <a href="/find-partners/new/">Post your dates</a> and find someone to trek with. It's free.</p>
           </div>
         )}
+        {!guide && <LocalGuide trek={trek} />}
 
         <TrekQuestions trek={trek.slug} label={trek.name} />
 

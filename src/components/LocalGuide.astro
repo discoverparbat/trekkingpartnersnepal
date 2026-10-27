@@ -1,0 +1,35 @@
+---
+// "Trek with a local guide" block, shown on every trek page.
+// Recommends a local guide even where it isn't required, and points to Discover Parbat.
+import { operator } from '../data/operator';
+import { trekTitle, type Trek } from '../data/treks';
+
+interface Props { trek: Trek }
+const { trek } = Astro.props;
+const link = trek.operatorPage ?? operator.contact;
+const linkText = trek.operatorPage ? `${trekTitle(trek)} with ${operator.name}` : `Ask ${operator.name} about a guide`;
+---
+<section class="local-guide">
+  <h2>Trek {trek.name} with a local guide</h2>
+  {trek.restricted ? (
+    <p>{trek.name} is a restricted area, so a licensed guide is required. Choosing the right one matters as much as the permit.</p>
+  ) : (
+    <p>A licensed guide isn't mandatory on {trek.name}, and the rule isn't enforced on most of Nepal's trails, but we still recommend trekking with a local guide.</p>
+  )}
+  <p>An experienced guide isn't only there to show you the way. They know the families who run the teahouses and homestays, explain the villages, monasteries, festivals and food you'd otherwise walk straight past, help you talk with local people, watch for altitude sickness and changing weather, and handle rooms, permits and transport so you can simply enjoy the walk. Many trekkers say their guide was the best part of the trip.</p>
+  <p>{operator.name} is a licensed local trekking company from Parbat, near Pokhara, with experienced guides who know these trails and the people along them. Trekking with a partner? Share one guide and split the cost.</p>
+  <p class="lg-links">
+    <a class="btn-guide" href={link} target="_blank" rel="noopener">{linkText} →</a>
+    {trek.operatorPage && <a href={operator.contact} target="_blank" rel="noopener">Contact {operator.name}</a>}
+  </p>
+</section>
+
+<style>
+  .local-guide { background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--sun); border-radius: var(--radius); padding: 22px 24px; margin: 8px 0 36px; }
+  .local-guide h2 { margin: 0 0 12px; }
+  .local-guide p { line-height: 1.7; margin: 0 0 12px; }
+  .lg-links { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin: 16px 0 0 !important; }
+  .btn-guide { display: inline-block; background: var(--sun); color: var(--white); font-weight: 600; text-decoration: none; padding: 10px 18px; border-radius: 999px; }
+  .btn-guide:hover { background: var(--sun-dark); }
+  .lg-links a:not(.btn-guide) { font-weight: 600; }
+</style>

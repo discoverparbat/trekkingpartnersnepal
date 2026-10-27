@@ -26,7 +26,7 @@ export const trekGuides: Record<string, TrekGuide> = {
       {
         heading: 'Do you need a guide or permit?',
         html: `<p>No guide is required for ABC, and you don't need a TIMS card. You do need the <strong>ACAP permit</strong> (Annapurna Conservation Area), which you can get yourself at the Nepal Tourism Board office in Pokhara or Kathmandu. Full details in <a href="${GUIDE_RULES}">Do You Need a Guide to Trek in Nepal?</a></p>
-<p>The trail is well marked and busy in season, so many trekkers go independently or with a partner. A guide is still worth it if it's your first trek, or if you're going in winter, when snow can build up above Deurali.</p>`,
+<p>The trail is well marked and busy in season, so it isn't hard to follow. We still recommend a local guide, especially on your first trek or in winter, when snow can build up above Deurali.</p>`,
       },
       {
         heading: 'Best months, and when it\'s easiest to find a partner',
@@ -133,7 +133,7 @@ export const trekGuides: Record<string, TrekGuide> = {
       {
         heading: 'Do you need a guide or permit?',
         html: `<p>No guide is needed and no TIMS card. You need the <strong>ACAP permit</strong>, which you can get yourself at the Nepal Tourism Board in Pokhara. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
-<p>The trail is busy and well signposted, so this is one of the easiest treks in Nepal to do independently. A guide adds stories and local knowledge more than safety here.</p>`,
+<p>The trail is busy and well signposted, so it's one of the easiest treks to follow on your own. Even so, a local guide adds a lot here: the stories behind the Magar and Gurung villages, the food and the people you'd otherwise walk past.</p>`,
       },
       {
         heading: 'Best months, and when it\'s easiest to find a partner',
@@ -204,7 +204,7 @@ export const trekGuides: Record<string, TrekGuide> = {
       {
         heading: 'Do you need a guide or permit?',
         html: `<p>No guide is required and no TIMS card. You need the <strong>Langtang National Park permit</strong>, which you can get yourself at the Nepal Tourism Board in Kathmandu or at the park office in Dhunche on the way. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
-<p>The valley trail is easy to follow. Consider a guide or partner for Tserko Ri, or if you plan to continue over to Gosaikunda.</p>`,
+<p>The valley trail is easy to follow, but a local guide brings the Tamang villages and monasteries to life, and is especially worth it for Tserko Ri or if you continue over to Gosaikunda.</p>`,
       },
       {
         heading: 'Best months, and when it\'s easiest to find a partner',
@@ -410,12 +410,12 @@ export const trekGuides: Record<string, TrekGuide> = {
     sections: [
       {
         heading: 'Who Mohare Danda suits',
-        html: `<p>Mohare Danda is a community eco-trek in Myagdi, on a forested ridge at about 3,300 m with views of Dhaulagiri, Annapurna South and Machapuchare. Instead of a string of busy teahouse villages, you stay in small community-run lodges and homestays in villages like Nangi, where the income goes back into local projects.</p>
-<p>It's easy and typically 4–6 days. It suits first-timers, families and anyone who wants Poon Hill-style sunrises without the crowds, plus some real village time along the way.</p>`,
+        html: `<p>Mohare Danda is a community eco-trek in Myagdi, on a forested ridge at about 3,300 m with views of Dhaulagiri, Annapurna South and Machapuchare. Instead of a string of busy teahouse villages, you stay in small community-run lodges and homestays along the way, where the income goes back into the villages.</p>
+<p>It's easy. The classic route takes 5 days, starting at Galeshwor and finishing at Baiseri via Tikot. It suits first-timers, families and anyone who wants Poon Hill-style sunrises without the crowds, plus some real village time along the way.</p>`,
       },
       {
         heading: 'Do you need a guide or permit?',
-        html: `<p>No TIMS card is needed, and a guide isn't legally required. Routes that link Mohare with Ghorepani, Poon Hill or Tadapani enter the Annapurna Conservation Area and need the <strong>ACAP permit</strong>, which you can get yourself in Pokhara. If you're unsure whether your route enters ACAP, carry the permit. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+        html: `<p>No TIMS card is needed, and a guide isn't legally required. The classic 5-day route from Galeshwor to Baiseri via Tikot <strong>needs no permit</strong>. You only need the <strong>ACAP permit</strong> if you exit towards Ghorepani or Nayapul, and you can get it yourself in Pokhara. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
 <p>It's a quiet trail with few signs and junctions in the forest, and accommodation is arranged locally, so a local guide makes it much smoother.</p>`,
       },
       {
@@ -426,17 +426,17 @@ export const trekGuides: Record<string, TrekGuide> = {
       {
         heading: 'Doing Mohare Danda with a partner',
         html: `<ul>
-<li><strong>Where to meet:</strong> Pokhara, then travel to the trailhead together.</li>
+<li><strong>Where to meet:</strong> Pokhara, then travel to the trailhead at Galeshwor together.</li>
 <li><strong>What to share:</strong> transport, a local guide and homestay rooms.</li>
-<li><strong>Where you can split up:</strong> Mohare links to the Poon Hill and Khopra trails, so one partner can head to Ghorepani or <a href="/annapurna-region/khopra-danda/">Khopra Danda</a> while the other returns to Pokhara.</li>
+<li><strong>Where you can split up:</strong> Mohare links to the Poon Hill and Khopra trails, so one partner can head to Ghorepani or <a href="/annapurna-region/khopra-danda/">Khopra Danda</a> while the other finishes the classic route at Baiseri. Whoever exits towards Ghorepani or Nayapul needs the ACAP permit.</li>
 <li><strong>Be flexible:</strong> lodges are small, so confirm beds a day ahead through your guide or host.</li>
 </ul>`,
       },
     ],
     faq: [
       { q: 'Is Mohare Danda better than Poon Hill?', a: 'It has similar mountain views with far fewer people and more village time, but fewer facilities. Poon Hill is busier and better signposted.' },
-      { q: 'Do I need a permit for Mohare Danda?', a: 'Routes that link with Ghorepani, Poon Hill or Tadapani enter the Annapurna Conservation Area and need ACAP. TIMS is not required.' },
-      { q: 'How many days is the Mohare Danda trek?', a: 'Usually 4 to 6 days from Pokhara, depending on your route.' },
+      { q: 'Do I need a permit for Mohare Danda?', a: 'The classic 5-day route from Galeshwor to Baiseri via Tikot needs no permit. You only need ACAP if you exit towards Ghorepani or Nayapul. TIMS is not required.' },
+      { q: 'How many days is the Mohare Danda trek?', a: 'The classic route takes 5 days, from Galeshwor to Baiseri via Tikot. Linking to Ghorepani or Khopra makes it longer.' },
     ],
   },
 
@@ -451,8 +451,8 @@ export const trekGuides: Record<string, TrekGuide> = {
       },
       {
         heading: 'Do you need a guide or permit?',
-        html: `<p>You need the <strong>Api Nampa Conservation Area permit</strong>. No TIMS card. Some areas of Darchula near the Tibetan border have their own restricted-area rules, so check your exact route with your agency. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
-<p>Even where a guide isn't legally required, we'd strongly recommend one here. Trails are unmarked, there are no teahouses on the upper sections, food and camping need arranging, and few people speak English.</p>`,
+        html: `<p>The only permit you need is the <strong>Api Nampa Conservation Area permit</strong>. No restricted-area permit and no TIMS card. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>A guide isn't legally required, but we'd strongly recommend one here. Trails are unmarked, there are no teahouses on the upper sections, food and camping need arranging, and few people speak English.</p>`,
       },
       {
         heading: 'Best months, and when it\'s easiest to find a partner',
@@ -471,7 +471,8 @@ export const trekGuides: Record<string, TrekGuide> = {
     ],
     faq: [
       { q: 'Where is Api Himal Base Camp?', a: 'In Darchula district in far-western Nepal, inside the Api Nampa Conservation Area, near the borders with India and Tibet.' },
-      { q: 'Do I need a guide for Api Himal Base Camp?', a: 'A guide is strongly recommended. The trails are unmarked, accommodation is basic or camping, and very few people trek there. Some border areas of Darchula have restricted-area rules, so check your route with an agency.' },
+      { q: 'Do I need a guide for Api Himal Base Camp?', a: 'A guide is strongly recommended. The trails are unmarked, accommodation is basic or camping, and very few people trek there. The only permit needed is the Api Nampa Conservation Area permit.' },
+      { q: 'Which permits do I need for Api Himal Base Camp?', a: 'Only the Api Nampa Conservation Area permit. No restricted-area permit or TIMS card is needed.' },
       { q: 'How many days does the Api Himal trek take?', a: 'Usually 12 to 16 days including the long journey to Darchula and back.' },
     ],
   },
