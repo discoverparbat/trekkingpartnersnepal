@@ -546,6 +546,215 @@ export const trekGuides: Record<string, TrekGuide> = {
       { q: 'How high is Tsum Valley?', a: 'The highest usual point is Mu Gompa at about 3,700 m. There is no high pass on the Tsum-only route.' },
     ],
   },
+  // ── Panchase ──────────────────────────────────────────────
+  'panchase': {
+    sections: [
+      {
+        heading: 'Who the Panchase trek suits',
+        html: `<p>Panchase is the easiest real trek near Pokhara. In three or four days you walk through forest and Gurung and Brahmin villages on the border of Kaski, Parbat and Syangja to Panchase Bhanjyang and the sacred ponds on the hilltop (about 2,500 m). At sunrise, Dhaulagiri, the Annapurnas and Machapuchare line up above the Pokhara valley. The forest is one of the best spots near Pokhara for birds and orchids.</p>
+<p>It's easy and low, so altitude isn't a concern. It suits first-timers, families, anyone with only a few days, and people who want village life and forest more than glaciers. It also makes a good warm-up before a longer trek.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p>Panchase sits outside the Annapurna Conservation Area, so the usual route <strong>doesn't need an ACAP permit</strong>, and no TIMS card is needed. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>A guide isn't required. The forest paths have several junctions and few signs, though, and homestays work best when someone local arranges them. A local guide also knows the birds, plants and the story of the Panchase temple.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p>Panchase works from <strong>October to May</strong>. October–December brings the clearest mountain views, and March–April brings rhododendrons and orchids in the forest. It's low enough to be a good winter trek. In the monsoon the forest is beautiful but wet, with leeches.</p>
+<p>It's a short trek from Pokhara, so it's easy to arrange at short notice. Many trekkers find someone in Lakeside a day or two before. Check the posts on this page too.</p>`,
+      },
+      {
+        heading: 'Doing Panchase with a partner',
+        html: `<ul>
+<li><strong>Where to meet:</strong> Pokhara Lakeside. The trek starts and ends close to the city.</li>
+<li><strong>What to share:</strong> the taxi or jeep to the trailhead and back, homestay rooms and a local guide.</li>
+<li><strong>Combine it:</strong> Panchase links with the Parbat hills, so with extra days you can carry on to <a href="/annapurna-region/kokhe-danda/">Kokhe Danda</a> for a longer, quieter village trek.</li>
+<li><strong>Go up for sunrise together:</strong> the walk to the top is short but dark. Bring head torches.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'Do I need a permit for Panchase?', a: 'The usual Panchase route lies outside the Annapurna Conservation Area, so no ACAP permit is needed, and TIMS is not required.' },
+      { q: 'How many days is the Panchase trek?', a: 'Usually 3 or 4 days from Pokhara.' },
+      { q: 'Is Panchase good for beginners and families?', a: 'Yes. It is short, low at about 2,500 m and easy, with village homestays and big mountain views.' },
+    ],
+  },
+
+  // ── Khumai Danda & Korchon ────────────────────────────────
+  'khumai-korchon': {
+    sections: [
+      {
+        heading: 'Who Khumai Danda and Korchon suit',
+        html: `<p>Khumai Danda is a short ridge trek north of Pokhara. From Ghachok you climb through forest to Khumai Danda and on to the Korchon viewpoint (about 3,700 m), where Machapuchare (Fishtail) fills the sky in front of you, with Annapurna South and Mardi Himal close by. Most routes return via Mirsa and the Kharpani hot spring.</p>
+<p>It's moderate: short days, but a steep climb and a real gain in height. It suits trekkers with three to five days who want a <a href="/annapurna-region/mardi-himal/">Mardi Himal</a>-style view with fewer people, and those who like simple lodges and a quiet trail.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p>Khumai and Korchon lie in the Annapurna Conservation Area, so you need the <strong>ACAP permit</strong>, which you can get yourself in Pokhara. No TIMS card. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>A guide isn't required, but we recommend one. It's a newer, quieter route with few signs, and cloud often fills the forest in the afternoon. Facilities higher up are basic, and a local guide will know which lodges are open.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p><strong>October–December</strong> gives the clearest views of Machapuchare. Spring brings rhododendron forest. Winter can bring snow near Korchon but often very clear skies. Avoid the monsoon if you want views.</p>
+<p>Very few trekkers walk this ridge, so you're unlikely to meet partners on it. <a href="${POST}">Post your dates</a> before you leave Pokhara.</p>`,
+      },
+      {
+        heading: 'Doing Khumai and Korchon with a partner',
+        html: `<ul>
+<li><strong>Where to meet:</strong> Pokhara, then share a taxi to Ghachok.</li>
+<li><strong>What to share:</strong> transport, lodge rooms and a local guide.</li>
+<li><strong>Where you can split up:</strong> at Khumai Danda one of you can stay and enjoy the view while the other climbs on to Korchon. Meet back the same day.</li>
+<li><strong>End with the hot spring:</strong> the return via Mirsa to Kharpani makes a good last day together.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'Do I need a permit for Khumai Danda?', a: 'Yes. Khumai Danda and Korchon are in the Annapurna Conservation Area, so you need ACAP, which you can get in Pokhara. TIMS is not required.' },
+      { q: 'How high is Korchon?', a: 'The Korchon viewpoint is at about 3,700 m, facing Machapuchare.' },
+      { q: 'Is Khumai Danda a good alternative to Mardi Himal?', a: 'Yes. It has similar close views of Machapuchare with far fewer trekkers, but more basic facilities.' },
+    ],
+  },
+
+  // ── Kori, Kapuche & Karpu ─────────────────────────────────
+  'kori-kapuche-karpu': {
+    sections: [
+      {
+        heading: 'Who the Kori, Kapuche and Karpu treks suit',
+        html: `<p>These treks start from Sikles, one of the largest Gurung villages in the Annapurna region, northeast of Pokhara. From there you can walk to Kapuche Lake, a glacial lake beneath Annapurna II and Lamjung Himal, or climb to the high grassy ridges of Kori (about 3,800 m) and Karpu Danda for wide views of the Annapurna and Lamjung ranges.</p>
+<p>They're moderate, with steep climbs and simple facilities. You stay in homestays in Sikles and camp or use very basic shelters higher up. They suit trekkers who want Gurung village culture and truly quiet mountain ridges, and don't mind roughing it for a night or two.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p>Sikles and the routes above it are in the Annapurna Conservation Area, so you need the <strong>ACAP permit</strong>, which you can get yourself in Pokhara. No TIMS card. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>A guide isn't legally required, but we strongly recommend one. Trails above Sikles are faint, there are no teahouses on the ridges, and you'll need help arranging camping gear, food and homestays.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p><strong>October–November</strong> and <strong>March–May</strong> are best. Kapuche Lake and the high ridges can be snowbound in winter, and the monsoon brings cloud and slippery trails.</p>
+<p>These routes see very few foreign trekkers, so plan with a partner before you go. <a href="${POST}">Post your dates</a> a few weeks ahead.</p>`,
+      },
+      {
+        heading: 'Doing Kori or Kapuche with a partner',
+        html: `<ul>
+<li><strong>Where to meet:</strong> Pokhara, then share a jeep to Sikles.</li>
+<li><strong>What to share:</strong> the jeep, a local guide, camping gear and food for the upper nights.</li>
+<li><strong>Choose together:</strong> Kapuche Lake, Kori, Karpu or a combination. Agree before you go, since it changes the camping days.</li>
+<li><strong>Stay together</strong> on the upper ridges. There's nobody else up there.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'Do I need a permit for Sikles, Kori or Kapuche Lake?', a: 'Yes. These routes are in the Annapurna Conservation Area, so you need ACAP. TIMS is not required.' },
+      { q: 'Are there teahouses on the Kori trek?', a: 'You stay in homestays in Sikles, but higher up there are no teahouses, so you need camping gear or very basic shelters.' },
+      { q: 'Do I need a guide for Kapuche Lake?', a: 'It is not legally required, but strongly recommended, because the trails are faint and accommodation and food have to be arranged.' },
+    ],
+  },
+
+  // ── Annapurna I Base Camp (North) ─────────────────────────
+  'annapurna-north-base-camp': {
+    sections: [
+      {
+        heading: 'Who the Annapurna North Base Camp trek suits',
+        html: `<p>This is the side of Annapurna I that Maurice Herzog's French expedition climbed in 1950, the first 8,000 m peak ever summited. The route starts from Narchyang in Myagdi, near Beni, and climbs through forest and over high meadows to the north base camp at about 4,190 m, below the huge north face of Annapurna I.</p>
+<p>It's challenging. Lodges end at Narchyang, so the upper nights are camping, the trail is steep and rough in places, and you'll see very few people. It suits experienced trekkers who want a real expedition feel, mountaineering history and complete quiet.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p>The route is in the Annapurna Conservation Area, so you need the <strong>ACAP permit</strong>, which you can get yourself in Pokhara. No TIMS card, and no restricted-area permit. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>A guide isn't legally required, but on this route we'd treat one as essential. The trail above Narchyang is hard to find in places, you need tents, food and cooking gear, and help is far away.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p><strong>Late September–November</strong> and <strong>April–May</strong> are the windows. The upper meadows can be snowbound in winter, and the monsoon brings landslides and leeches in the lower forest.</p>
+<p>Only a handful of trekkers go here each season, so team up before you start. <a href="${POST}">Post your dates</a> well ahead.</p>`,
+      },
+      {
+        heading: 'Doing it with a partner',
+        html: `<ul>
+<li><strong>Why it matters here:</strong> a camping trek costs much the same for one or three people. Guides, porters, tents and food are far cheaper shared.</li>
+<li><strong>Where to meet:</strong> Pokhara, then travel to Beni and Narchyang together.</li>
+<li><strong>Plan contingency days:</strong> weather can pin you down at camp. Agree in advance how many spare days you have.</li>
+<li><strong>Don't split up</strong> above Narchyang.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'Where does the Annapurna North Base Camp trek start?', a: 'From Narchyang in Myagdi district, near Beni, about a day by road from Pokhara.' },
+      { q: 'Are there lodges on the Annapurna North Base Camp trek?', a: 'Lodges end at Narchyang. The upper nights are camping, so you need tents, food and cooking gear.' },
+      { q: 'Which permit do I need?', a: 'Only the ACAP permit. No restricted-area permit or TIMS card is needed.' },
+    ],
+  },
+
+  // ── Everest Three Passes ──────────────────────────────────
+  'three-passes': {
+    sections: [
+      {
+        heading: 'Who the Three Passes trek suits',
+        html: `<p>The Three Passes is the full Khumbu loop and one of the toughest teahouse treks in Nepal. It crosses the Kongma La (5,535 m), Cho La (about 5,420 m) and Renjo La (about 5,360 m), linking <a href="/everest-region/everest-base-camp/">Everest Base Camp</a> and Kala Patthar with the <a href="/everest-region/gokyo-lakes/">Gokyo Lakes</a> and the quieter Thame valley.</p>
+<p>It's strenuous: long days above 5,000 m, loose moraine, steep climbs and, on the Cho La, a glacier crossing that can be icy. It suits fit, experienced trekkers who have been to altitude before and have three weeks to spare.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p>No guide is legally required and no TIMS card. You need the <strong>Sagarmatha National Park permit</strong> (at Monjo) and the <strong>local municipality fee</strong> (at Lukla). See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>We strongly recommend a guide. The passes are where trekkers get lost or hurt: trails over moraine are hard to follow, the Cho La glacier can need microspikes, and conditions change fast.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p><strong>October–November</strong> is the best window. <strong>April–May</strong> also works, but there can be more snow on the passes early in spring. In winter the passes are often icy or blocked.</p>
+<p>Many people do EBC or Gokyo, but far fewer do all three passes. Find a partner before you fly to Lukla. <a href="${POST}">Post your dates</a> and mention "Three Passes" so the right people reply.</p>`,
+      },
+      {
+        heading: 'Doing the Three Passes with a partner',
+        html: `<ul>
+<li><strong>Where to meet:</strong> Kathmandu, to share the Lukla flight and agree on a plan for weather delays.</li>
+<li><strong>What to share:</strong> a guide, a porter, rooms and emergency gear like a satellite messenger.</li>
+<li><strong>Where you can split up:</strong> some partners do only part of the loop, for example skipping the Kongma La and rejoining at Lobuche. Never let anyone cross a pass alone.</li>
+<li><strong>Turnaround rules:</strong> agree the night before each pass on a start time, a turnaround time and what happens if either of you feels unwell.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'How hard is the Everest Three Passes trek?', a: 'Strenuous. You cross three passes over 5,300 m, including a glacier on the Cho La. It is for fit trekkers with previous altitude experience.' },
+      { q: 'Do I need a guide for the Three Passes?', a: 'It is not legally required, but strongly recommended. The passes are hard to navigate and conditions change fast.' },
+      { q: 'How many days do the Three Passes take?', a: 'Usually 18 to 21 days from Lukla, including acclimatisation days.' },
+    ],
+  },
+
+  // ── Gosaikunda Lakes ──────────────────────────────────────
+  'gosaikunda': {
+    sections: [
+      {
+        heading: 'Who the Gosaikunda trek suits',
+        html: `<p>Gosaikunda is a sacred lake at 4,380 m in Langtang National Park, holy to both Hindus and Buddhists. The trail climbs steeply from Dhunche through forest past Sing Gompa and Laurebina, with views back to Langtang Lirung, Ganesh Himal and on clear days the Annapurnas. Many trekkers continue over the Laurebina La (about 4,610 m) into Helambu, or combine it with the <a href="/langtang-region/langtang-valley/">Langtang Valley</a>.</p>
+<p>It's moderate, but the climb is steep and you gain height quickly, so altitude matters more than the short distance suggests. It suits trekkers with about a week who want a high alpine lake and a living pilgrimage trail close to Kathmandu.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p>No guide is legally required and no TIMS card. You need the <strong>Langtang National Park permit</strong>, which you can get yourself in Kathmandu or at Dhunche. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>The trail to the lake is clear, but the crossing of the Laurebina La towards Helambu can be confusing in cloud or snow. A local guide also adds a lot on a pilgrimage trail like this one.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p><strong>October–November</strong> and <strong>March–May</strong> are best. The lake freezes in winter and the pass can be snowbound. At the full moon of Janai Purnima, usually in August, thousands of pilgrims walk to the lake, which is an amazing sight but very crowded and wet.</p>
+<p>Gosaikunda is popular with Nepali trekkers but quieter among foreigners. Look for partners on the <a href="/langtang-region/">Langtang region page</a> too, since many people combine both.</p>`,
+      },
+      {
+        heading: 'Doing Gosaikunda with a partner',
+        html: `<ul>
+<li><strong>Where to meet:</strong> Kathmandu, then share a jeep to Dhunche.</li>
+<li><strong>What to share:</strong> the jeep, rooms and a guide for the pass.</li>
+<li><strong>Where you can split up:</strong> at the lake, one of you can head back to Dhunche while the other crosses the Laurebina La into Helambu. Only split if the person crossing has a guide or another partner.</li>
+<li><strong>Take the climb slowly:</strong> the jump from Dhunche to the lake is big. Build in a night at Laurebina or Sing Gompa.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'Do I need a permit for Gosaikunda?', a: 'Yes, the Langtang National Park permit, which you can get in Kathmandu or Dhunche. TIMS is not required.' },
+      { q: 'Can I combine Gosaikunda with the Langtang Valley?', a: 'Yes. Many trekkers walk the Langtang Valley first, then cross to Thulo Syabru and climb to Gosaikunda.' },
+      { q: 'How high is Gosaikunda?', a: 'The lake is at 4,380 m, and the Laurebina La pass towards Helambu is about 4,610 m.' },
+    ],
+  },
 };
 
 export const getTrekGuide = (slug: string) => trekGuides[slug];
