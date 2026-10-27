@@ -356,10 +356,10 @@ export const trekGuides: Record<string, TrekGuide> = {
       {
         heading: 'Doing Kokhe Danda with a partner or group',
         html: `<ul>
-<li><strong>Where to meet:</strong> Pokhara Lakeside, the closest city.</li>
+<li><strong>Where to meet:</strong> Pokhara. The trek starts from there, so meet in Lakeside the day before.</li>
 <li><strong>What to share:</strong> the transport to the trailhead and a local guide.</li>
 <li><strong>Easiest option:</strong> join a <a href="/fixed-departures/">fixed departure</a> with Discover Parbat. It runs on set dates with a local guide and homestays arranged, and solo travellers are welcome. See the dates in the box on this page.</li>
-<li><strong>Combine it:</strong> some trekkers pair Kokhe Danda with <a href="/annapurna-region/khopra-danda/">Khopra Danda</a> for a longer, quieter alternative to the classic Annapurna treks.</li>
+<li><strong>Combine it:</strong> with 7–8 days you can pair Kokhe Danda with <a href="/annapurna-region/khopra-danda/">Khopra Danda</a>, a longer and quieter alternative to the classic Annapurna treks. Discover Parbat has the <a href="https://discoverparbat.com/khopra-ridge-trek">Khopra Ridge Trek</a> details.</li>
 </ul>`,
       },
     ],
