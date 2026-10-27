@@ -34,7 +34,7 @@ export const regions: Region[] = [
     name: 'Manaslu',
     short: 'A quieter circuit around the world’s eighth-highest mountain.',
     intro:
-      'The Manaslu Circuit circles the world’s eighth-highest mountain and crosses the Larkya La, with fewer crowds than Annapurna. Tsum Valley is a hidden Buddhist valley branching off the same trail. Both are restricted areas, so you need a licensed guide and at least two trekkers to get the permit – a good reason to find a partner.',
+      'The Manaslu Circuit circles the world’s eighth-highest mountain and crosses the Larkya La, with fewer crowds than Annapurna. Tsum Valley is a hidden Buddhist valley branching off the same trail. Both are restricted areas, so you need a licensed guide and an agency permit. Single trekkers can now apply too, but sharing the guide with a partner makes it far cheaper.',
     card: '/images/manaslu.jpg',
     hero: '/images/manaslu1.webp',
   },

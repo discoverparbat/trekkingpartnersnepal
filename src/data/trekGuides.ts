@@ -369,6 +369,182 @@ export const trekGuides: Record<string, TrekGuide> = {
       { q: 'Can I join a group for Kokhe Danda?', a: 'Yes. Discover Parbat runs fixed departures on set dates with a local guide and homestays included. Solo travellers are welcome.' },
     ],
   },
+  // ── Khopra Danda ──────────────────────────────────────────
+  // Main itinerary/cost lives on discoverparbat.com/khopra-ridge-trek – link, don't repeat.
+  'khopra-danda': {
+    sections: [
+      {
+        heading: 'Who Khopra Danda suits',
+        html: `<p>Khopra Danda (Khopra Ridge) is what Poon Hill was before the crowds. The trail climbs through rhododendron forest and Magar villages to a grassy ridge at about 3,660 m, where community lodges look straight across the Kali Gandaki gorge to Dhaulagiri, with Annapurna South and Nilgiri close by. Fit trekkers can add a hard side trip to the sacred Khayer Lake at 4,653 m. The itinerary and cost are on Discover Parbat's <a href="https://discoverparbat.com/khopra-ridge-trek">Khopra Ridge Trek</a> page.</p>
+<p>It's moderate. Most trekkers take 7–9 days from Pokhara. The climbs are steeper than on Poon Hill, but you sleep no higher than the ridge itself unless you go for Khayer Lake. It suits people who've done or skipped Poon Hill and want the same mountains with far fewer people, and anyone who likes simple community lodges over busy teahouse villages.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p>Khopra lies inside the Annapurna Conservation Area, so you need the <strong>ACAP permit</strong>, which you can get yourself in Pokhara. No TIMS card. A guide isn't legally required. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>We do recommend a guide, or at least a partner. The trail is quiet and less signposted than the main Annapurna routes, cloud often fills the forest in the afternoon, and the <strong>Khayer Lake</strong> side trip is a long, high day on a faint trail. Don't do that part alone.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p><strong>October–December</strong> gives the clearest Dhaulagiri views. Khopra stays good later into December than the high treks. <strong>March–April</strong> brings rhododendron forest in full bloom. Winter is cold on the ridge but often clear. Khayer Lake can be snowbound from December to March.</p>
+<p>Khopra is a quiet trek, so you won't meet many people heading the same way. <a href="${POST}">Post your dates</a> before you leave Pokhara, or join a group departure.</p>`,
+      },
+      {
+        heading: 'Doing Khopra with a partner',
+        html: `<ul>
+<li><strong>Where to meet:</strong> Pokhara. Pick up ACAP permits together and share transport to the trailhead.</li>
+<li><strong>What to share:</strong> transport, rooms at the community lodges (they're small, so coordinate dates), and a local guide.</li>
+<li><strong>Where you can split up:</strong> at Khopra, one of you can do Khayer Lake with a guide while the other rests on the ridge. Many routes link with Ghorepani, so a partner short on time can walk out via Poon Hill.</li>
+<li><strong>Make it longer:</strong> with 7–8 days you can pair Khopra with <a href="/annapurna-region/kokhe-danda/">Kokhe Danda</a> in Parbat for a quiet, village-focused alternative to the classic Annapurna treks.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'Do I need a guide for Khopra Danda?', a: 'Not legally. You need the ACAP permit, which you can get in Pokhara. Because the trail is quiet and the Khayer Lake side trip is high and faint, a guide or partner is recommended.' },
+      { q: 'How high is Khopra Ridge?', a: 'The ridge is at about 3,660 m. The optional Khayer Lake side trip reaches 4,653 m.' },
+      { q: 'Is Khopra Danda better than Poon Hill?', a: 'It is quieter and closer to Dhaulagiri, with simple community lodges, but longer and steeper. Poon Hill is easier and better for a very short first trek.' },
+    ],
+  },
+
+  // ── Mohare Danda ──────────────────────────────────────────
+  'mohare-danda': {
+    sections: [
+      {
+        heading: 'Who Mohare Danda suits',
+        html: `<p>Mohare Danda is a community eco-trek in Myagdi, on a forested ridge at about 3,300 m with views of Dhaulagiri, Annapurna South and Machapuchare. Instead of a string of busy teahouse villages, you stay in small community-run lodges and homestays in villages like Nangi, where the income goes back into local projects.</p>
+<p>It's easy and typically 4–6 days. It suits first-timers, families and anyone who wants Poon Hill-style sunrises without the crowds, plus some real village time along the way.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p>No TIMS card is needed, and a guide isn't legally required. Routes that link Mohare with Ghorepani, Poon Hill or Tadapani enter the Annapurna Conservation Area and need the <strong>ACAP permit</strong>, which you can get yourself in Pokhara. If you're unsure whether your route enters ACAP, carry the permit. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>It's a quiet trail with few signs and junctions in the forest, and accommodation is arranged locally, so a local guide makes it much smoother.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p>Mohare is good from <strong>October to May</strong>. October–December gives the clearest views. March–April is rhododendron season. At around 3,300 m it's also a good winter choice when high treks are snowbound.</p>
+<p>Very few trekkers walk this ridge compared with Poon Hill, so team up before you go. <a href="${POST}">Post your dates</a>, or ask in the <a href="/community/">Community</a> about current lodge openings.</p>`,
+      },
+      {
+        heading: 'Doing Mohare Danda with a partner',
+        html: `<ul>
+<li><strong>Where to meet:</strong> Pokhara, then travel to the trailhead together.</li>
+<li><strong>What to share:</strong> transport, a local guide and homestay rooms.</li>
+<li><strong>Where you can split up:</strong> Mohare links to the Poon Hill and Khopra trails, so one partner can head to Ghorepani or <a href="/annapurna-region/khopra-danda/">Khopra Danda</a> while the other returns to Pokhara.</li>
+<li><strong>Be flexible:</strong> lodges are small, so confirm beds a day ahead through your guide or host.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'Is Mohare Danda better than Poon Hill?', a: 'It has similar mountain views with far fewer people and more village time, but fewer facilities. Poon Hill is busier and better signposted.' },
+      { q: 'Do I need a permit for Mohare Danda?', a: 'Routes that link with Ghorepani, Poon Hill or Tadapani enter the Annapurna Conservation Area and need ACAP. TIMS is not required.' },
+      { q: 'How many days is the Mohare Danda trek?', a: 'Usually 4 to 6 days from Pokhara, depending on your route.' },
+    ],
+  },
+
+  // ── Api Himal Base Camp ───────────────────────────────────
+  // Main itinerary/cost lives on discoverparbat.com/api-himal-base-camp-trek – link, don't repeat.
+  'api-himal-base-camp': {
+    sections: [
+      {
+        heading: 'Who the Api Himal Base Camp trek suits',
+        html: `<p>Api Himal Base Camp is one of Nepal's most remote treks, in Darchula in the far-western corner of the country. The route follows the Mahakali river, which forms the border with India, then climbs through forest and pasture to around 4,000 m at the base of Api Himal (7,132 m) in the Api Nampa Conservation Area. You'll pass through villages that see very few foreigners. Full details are on Discover Parbat's <a href="https://discoverparbat.com/api-himal-base-camp-trek">Api Himal Base Camp Trek</a> page.</p>
+<p>It's challenging, mostly because of the remoteness: long travel days to get there, basic homestays and camping instead of teahouses, and few people around if something goes wrong. It suits experienced trekkers who want true wilderness and culture far from the crowds.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p>You need the <strong>Api Nampa Conservation Area permit</strong>. No TIMS card. Some areas of Darchula near the Tibetan border have their own restricted-area rules, so check your exact route with your agency. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>Even where a guide isn't legally required, we'd strongly recommend one here. Trails are unmarked, there are no teahouses on the upper sections, food and camping need arranging, and few people speak English.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p>The best windows are <strong>April–May</strong> and <strong>October–November</strong>. In the monsoon the roads into Darchula are often blocked by landslides, and in winter the upper route is snowbound.</p>
+<p>Very few trekkers go to Api Himal in any season, so you won't meet partners on the trail. Plan it as a team from the start: <a href="${POST}">post your dates</a> a month or more ahead.</p>`,
+      },
+      {
+        heading: 'Doing Api Himal with a partner',
+        html: `<ul>
+<li><strong>Why it matters here:</strong> remote treks cost more for one person. A partner splits the guide, porters, camping gear and the long private transport into Darchula.</li>
+<li><strong>Where to meet:</strong> Kathmandu, or Dhangadhi if you're both flying west. From there it's a long road journey north.</li>
+<li><strong>Agree on contingency days:</strong> roads and weather in the far west are unpredictable. Build in spare days and agree how you'll handle delays.</li>
+<li><strong>Don't split up</strong> on this trek. There's nobody else on the trail to fall back on.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'Where is Api Himal Base Camp?', a: 'In Darchula district in far-western Nepal, inside the Api Nampa Conservation Area, near the borders with India and Tibet.' },
+      { q: 'Do I need a guide for Api Himal Base Camp?', a: 'A guide is strongly recommended. The trails are unmarked, accommodation is basic or camping, and very few people trek there. Some border areas of Darchula have restricted-area rules, so check your route with an agency.' },
+      { q: 'How many days does the Api Himal trek take?', a: 'Usually 12 to 16 days including the long journey to Darchula and back.' },
+    ],
+  },
+
+  // ── Nar Phu Valley (restricted) ───────────────────────────
+  'nar-phu-valley': {
+    sections: [
+      {
+        heading: 'Who the Nar Phu Valley trek suits',
+        html: `<p>Nar Phu is a hidden side valley off the Annapurna Circuit. From Koto, near Chame, a narrow canyon trail leads up to the stone villages of Phu and Nar, with Tibetan-style houses, prayer flags and old monasteries like Tashi Lhakhang. Most routes then cross the Kang La (5,320 m) and come down at Ngawal on the upper Circuit.</p>
+<p>It's challenging, with real altitude, simple lodges and a big pass. It suits trekkers who want something wilder than the main Circuit and are happy to combine it with Manang or Thorong La.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p><strong>Yes, Nar Phu is a restricted area.</strong> You need a <strong>restricted-area permit</strong> through a registered agency, a <strong>licensed guide</strong>, and the <strong>ACAP permit</strong>. TIMS is not required.</p>
+<p>Since 2026, a <strong>single trekker can apply</strong> through an agency. Read <a href="${RESTRICTED}">Restricted Area Treks in Nepal</a>.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p><strong>Late September–November</strong> and <strong>March–May</strong> are best. The Kang La can be snowbound in winter and early spring. In the monsoon the lower canyon can be affected by rockfall.</p>
+<p>Because of the agency and guide rules, partners need to team up before the permit is issued. <a href="${POST}">Post your dates</a> two to four weeks ahead.</p>`,
+      },
+      {
+        heading: 'Doing Nar Phu with a partner',
+        html: `<ul>
+<li><strong>Why it matters here:</strong> sharing one guide and one permit application is the biggest saving on any restricted trek.</li>
+<li><strong>Where to meet:</strong> Kathmandu or Pokhara, where your agency issues the permit, then travel together towards Besisahar and Koto.</li>
+<li><strong>Where you can split up:</strong> once you come down from the Kang La at Ngawal, you're back on the open Annapurna Circuit. One partner can continue over Thorong La while the other heads down. Agree on this with your agency in advance, since it affects the guide's days.</li>
+<li><strong>Cross Kang La together</strong> with your guide, and agree a turnaround time.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'Can I trek Nar Phu solo?', a: 'You can now get the restricted-area permit as a single trekker through a registered agency, but a licensed guide must go with you.' },
+      { q: 'Can I combine Nar Phu with the Annapurna Circuit?', a: 'Yes. Most trekkers cross the Kang La to Ngawal and then continue over Thorong La on the Annapurna Circuit.' },
+      { q: 'Which permits do I need for Nar Phu?', a: 'The Nar Phu restricted-area permit through an agency, plus the ACAP permit. TIMS is not required.' },
+    ],
+  },
+
+  // ── Tsum Valley (restricted) ──────────────────────────────
+  'tsum-valley': {
+    sections: [
+      {
+        heading: 'Who the Tsum Valley trek suits',
+        html: `<p>Tsum is a sacred Buddhist valley near the Tibetan border, branching off the Manaslu trail. Villages like Chhokangparo and Nile sit among long mani walls and chortens, and the trek reaches Mu Gompa at about 3,700 m. Rachen Gompa, a nunnery, is one of the highlights. There's no high pass, which makes it gentler than the Manaslu Circuit.</p>
+<p>It's moderate. Most of the challenge is the long approach up the Budhi Gandaki gorge. It suits trekkers who want culture and peace more than summits, and those combining it with the <a href="/manaslu-region/manaslu-circuit/">Manaslu Circuit</a>.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p><strong>Yes, Tsum is a restricted area.</strong> You need a <strong>restricted-area permit</strong> through a registered agency, a <strong>licensed guide</strong>, and the <strong>Manaslu Conservation Area permit</strong>. TIMS is not required.</p>
+<p>Since 2026, a <strong>single trekker can apply</strong> through an agency. See <a href="${RESTRICTED}">Restricted Area Treks in Nepal</a>.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p><strong>Late September–November</strong> and <strong>March–May</strong> are best. Tsum is lower than Manaslu, so it's a little more forgiving at the edges of the season, but the approach gorge has landslide risk in the monsoon.</p>
+<p>Many Tsum trekkers also do Manaslu, so you can look for partners for either. <a href="${POST}">Post your dates</a> early so you can share a permit.</p>`,
+      },
+      {
+        heading: 'Doing Tsum with a partner',
+        html: `<ul>
+<li><strong>Why it matters here:</strong> you're paying for a guide either way, so a partner halves that cost and the jeep to the trailhead.</li>
+<li><strong>Where to meet:</strong> Kathmandu, where the agency hands over permits, then drive together towards Soti Khola or Machha Khola.</li>
+<li><strong>Plan the whole route together:</strong> Tsum on its own, or Tsum plus the Manaslu Circuit. The permit and guide days depend on this, so agree before you apply.</li>
+<li><strong>Respect local customs:</strong> walk clockwise around mani walls and chortens, and ask before photographing people or monasteries.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'Can I trek Tsum Valley solo?', a: 'You can now get the restricted-area permit as a single trekker through a registered agency, but a licensed guide must go with you.' },
+      { q: 'Can I combine Tsum Valley and the Manaslu Circuit?', a: 'Yes. Tsum branches off the Manaslu trail, so many trekkers do Tsum first and then continue around Manaslu over the Larkya La.' },
+      { q: 'How high is Tsum Valley?', a: 'The highest usual point is Mu Gompa at about 3,700 m. There is no high pass on the Tsum-only route.' },
+    ],
+  },
 };
 
 export const getTrekGuide = (slug: string) => trekGuides[slug];

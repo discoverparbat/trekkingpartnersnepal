@@ -12,7 +12,7 @@ export interface Trek {
   maxAltitude: string;     // highest point
   difficulty: Difficulty;
   season: string;
-  restricted?: boolean;    // restricted-area permit: guide + min. 2 trekkers
+  restricted?: boolean;    // restricted-area permit: agency + licensed guide (single trekkers allowed since 2026)
   summary: string;
   image?: string;          // optional; falls back to the region image
   operatorPage?: string;   // optional; this trek's page on discoverparbat.com (itinerary, cost, booking)
