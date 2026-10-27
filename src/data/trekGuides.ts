@@ -308,7 +308,7 @@ export const trekGuides: Record<string, TrekGuide> = {
       },
       {
         heading: 'Do you need a guide or permit?',
-        html: `<p><strong>Yes, Upper Mustang is a restricted area.</strong> You need a <strong>restricted-area permit</strong> through a registered agency, a <strong>licensed guide</strong>, and the <strong>ACAP permit</strong>. The restricted permit for Upper Mustang is one of the most expensive in Nepal and is charged in 10-day blocks. TIMS is not required.</p>
+        html: `<p><strong>Yes, Upper Mustang is a restricted area.</strong> You need a <strong>restricted-area permit</strong> through a registered agency, a <strong>licensed guide</strong>, and the <strong>ACAP permit</strong>. The restricted permit for Upper Mustang is one of the most expensive in Nepal, but it's now charged <strong>per day (USD 50 per person per day)</strong> instead of a fixed 10-day block, so shorter trips cost less. TIMS is not required.</p>
 <p>Since 2026 a <strong>single trekker can apply</strong> through an agency. See <a href="${RESTRICTED}">Restricted Area Treks in Nepal</a>.</p>`,
       },
       {
@@ -319,17 +319,17 @@ export const trekGuides: Record<string, TrekGuide> = {
       {
         heading: 'Doing Upper Mustang with a partner',
         html: `<ul>
-<li><strong>Why it matters here:</strong> the permit is per person, but the guide, jeeps and agency costs can all be shared. On a trek this expensive, a partner makes a big difference.</li>
+<li><strong>Why it matters here:</strong> the permit is per person per day, but the guide, jeeps and agency costs can all be shared. On a trek this expensive, a partner makes a big difference.</li>
 <li><strong>Where to meet:</strong> Pokhara, before flying or driving to Jomsom together. The restricted area starts just beyond Kagbeni.</li>
 <li><strong>What to share:</strong> the guide, jeeps on the road sections, and rooms.</li>
-<li><strong>Agree on the trip style:</strong> walk the whole way, or use jeeps on dusty road sections? Decide this before applying, since it changes the number of days on the permit.</li>
+<li><strong>Agree on the trip style:</strong> walk the whole way, or use jeeps on dusty road sections? Decide this before applying: the permit is charged per day, so jeeping the road sections means fewer days and a cheaper permit.</li>
 </ul>`,
       },
     ],
     faq: [
       { q: 'Can I trek Upper Mustang alone?', a: 'You can now get the permit as a single trekker through a registered agency, but a licensed guide must go with you.' },
       { q: 'Can you trek Upper Mustang in the monsoon?', a: 'Yes. Upper Mustang lies in the rain shadow of the Annapurnas and stays mostly dry from June to August, which makes it one of the best monsoon treks in Nepal.' },
-      { q: 'Why is the Upper Mustang permit so expensive?', a: 'The government limits visitor numbers to protect the region. The restricted-area permit is charged per person in 10-day blocks. Sharing the guide and transport with a partner reduces the total cost.' },
+      { q: 'How much is the Upper Mustang permit?', a: 'The Upper Mustang restricted-area permit is now USD 50 per person per day, instead of a fixed 10-day block, so shorter trips cost less. You also need the ACAP permit. Sharing the guide and transport with a partner reduces the total cost.' },
     ],
   },
 
