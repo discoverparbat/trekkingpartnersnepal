@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+import { operator } from '../data/operator';
+
+const EMAIL = 'hello@trekkingpartnersnepal.com';
+const mail = (subject: string) => `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}`;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: 'Contact Trekking Partners Nepal',
+  url: 'https://trekkingpartnersnepal.com/contact/',
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'Trekking Partners Nepal',
+    url: 'https://trekkingpartnersnepal.com/',
+    email: EMAIL,
+    contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', email: EMAIL, availableLanguage: ['English', 'Nepali'] },
+    parentOrganization: { '@type': 'TravelAgency', name: operator.name, url: operator.site },
+  },
+};
+
+const topics = [
+  { title: 'Questions about the site', text: 'Trouble signing in, editing a post, or using the partner board.', subject: 'Question about the site' },
+  { title: 'Report a problem', text: 'Spam, a scam or someone making you uncomfortable. You can also use the Report button on any post or reply.', subject: 'Report a problem' },
+  { title: 'Trail and permit updates', text: 'Seen a closure, landslide or rule change on the trail? Tell us and we\'ll share it in News.', subject: 'Trail update' },
+  { title: 'Your data', text: 'Ask for a copy of your data, or for your account to be deleted.', subject: 'My account and data' },
+];
+---
+<Base title="Contact Us | Trekking Partners Nepal" description="Get in touch with Trekking Partners Nepal: questions about the site, reports, trail updates and fixed departures. Email hello@trekkingpartnersnepal.com." schema={schema}>
+  <section class="page-hero" style="background-image:url('/images/hero.jpg')">
+    <div class="container">
+      <nav class="crumbs"><a href="/">Home</a> › Contact</nav>
+      <h1>Contact us</h1>
+      <p>We're a small team in Nepal and read every message, usually replying within a day.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container contact">
+      <div class="contact-main">
+        <div class="panel email-panel">
+          <p class="label">Email us</p>
+          <p class="email"><a href={`mailto:${EMAIL}`}>{EMAIL}</a></p>
+        </div>
+
+        <h2>What can we help with?</h2>
+        <div class="topics">
+          {topics.map((t) => (
+            <a class="topic" href={mail(t.subject)}>
+              <strong>{t.title}</strong>
+              <span>{t.text}</span>
+            </a>
+          ))}
+        </div>
+
+        <h2>Booking a fixed departure</h2>
+        <p>Our fixed departures are run by {operator.name}, the local trekking company behind this site. For dates, prices and bookings, contact them directly on the <a href={operator.contact} target="_blank" rel="noopener">{operator.name} contact page</a>, or email us and we'll pass it on.</p>
+
+        <h2>Looking for a trekking partner?</h2>
+        <p>We can't match people by email, but the partner board is free: <a href="/find-partners/new/">post your dates</a> or <a href="/find-partners/">browse other trekkers</a>.</p>
+      </div>
+
+      <aside class="contact-side">
+        <div class="panel">
+          <h3>Elsewhere</h3>
+          <p><a href="https://www.facebook.com/groups/887606059135821" target="_blank" rel="noopener">Facebook group →</a></p>
+          <h3>{operator.name}</h3>
+          <p><a href={operator.site} target="_blank" rel="noopener">Website →</a><br />
+            <a href={operator.facebook} target="_blank" rel="noopener">Facebook page →</a><br />
+            <a href={operator.maps} target="_blank" rel="noopener">Google reviews →</a></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; align-items: start; }
+  @media (max-width: 860px) { .contact { grid-template-columns: 1fr; } }
+  .contact-main { max-width: 720px; }
+  .contact-main h2 { font-size: 1.45rem; margin-top: 36px; }
+  .contact-main p { color: #33445c; font-size: 1.02rem; }
+  .email-panel .label { margin: 0 0 4px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.06em; color: #5b6b80; }
+  .email-panel .email { margin: 0; font-size: clamp(0.95rem, 4.2vw, 1.5rem); font-weight: 700; overflow-wrap: anywhere; }
+  .topics { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .topic { display: block; padding: 16px 18px; border: 1px solid #dfe5ec; border-radius: 12px; background: #fff; color: inherit; text-decoration: none; transition: border-color 0.15s, transform 0.15s; }
+  .topic:hover { border-color: currentColor; transform: translateY(-1px); }
+  .topic strong { display: block; margin-bottom: 4px; }
+  .topic span { color: #5b6b80; font-size: 0.95rem; }
+  .contact-side { position: sticky; top: 90px; }
+  .contact-side h3 { margin-top: 18px; }
+  .contact-side h3:first-child { margin-top: 0; }
+</style>
