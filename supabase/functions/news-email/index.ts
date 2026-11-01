@@ -132,7 +132,10 @@ Deno.serve(async (req) => {
       body: JSON.stringify(batch),
     });
     if (!res.ok) {
-      console.error('Resend error', res.status, await res.text());
+      const err = await res.text();
+      console.error('Resend error', res.status, err);
+      // Daily/monthly plan limit reached (not the short per-second rate limit) → ⚠️ bell alert to admins
+      if (res.status === 429 && /quota/i.test(err)) { await db.rpc('flag_email_limit'); failed = todo.length - count; break; }
       failed += chunk.length;
       continue;
     }

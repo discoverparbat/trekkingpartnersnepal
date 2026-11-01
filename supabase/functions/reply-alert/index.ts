@@ -106,7 +106,10 @@ Deno.serve(async (req) => {
       sent++;
       await db.from('reply_emails').insert({ user_id: p.id, trip_id: trip.id, comment_id: c.id });
     } else {
-      console.error('Resend error', res.status, await res.text());
+      const err = await res.text();
+      console.error('Resend error', res.status, err);
+      // Daily/monthly plan limit reached (not the short per-second rate limit) → ⚠️ bell alert to admins
+      if (res.status === 429 && /quota/i.test(err)) { await db.rpc('flag_email_limit'); break; }
     }
   }
   return new Response(JSON.stringify({ sent }), { headers: { 'Content-Type': 'application/json' } });

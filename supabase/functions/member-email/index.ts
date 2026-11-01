@@ -112,7 +112,10 @@ Deno.serve(async (req) => {
     body: JSON.stringify({ from: FROM, to: [to], reply_to: REPLY_TO, subject, html }),
   });
   if (!res.ok) {
-    console.error('Resend error', res.status, await res.text());
+    const err = await res.text();
+    console.error('Resend error', res.status, err);
+    // Daily/monthly plan limit reached (not the short per-second rate limit) → ⚠️ bell alert to admins
+    if (res.status === 429 && /quota/i.test(err)) { await db.rpc('flag_email_limit'); }
     return new Response('send failed', { status: 502 });
   }
   return new Response(JSON.stringify({ sent: 1 }), { headers: { 'Content-Type': 'application/json' } });
