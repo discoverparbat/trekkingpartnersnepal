@@ -1,0 +1,49 @@
+---
+// Tags every link to discoverparbat.com with UTM parameters, so Discover Parbat's
+// Google Analytics shows exactly which TPN section and page sent each visitor:
+//   utm_source=trekkingpartnersnepal  utm_medium=referral
+//   utm_campaign=<section: home, treks, fixed_departures, news, community, partners, site>
+//   utm_content=<the TPN page path>
+// It runs at click time, so it also covers links inside news articles loaded from Supabase.
+// It also records a "discover_parbat_click" event in TPN's own GA4.
+---
+<script is:inline>
+  (function () {
+    var DP = /(^|\.)discoverparbat\.com$/i;
+    function section(path) {
+      if (path === '/') return 'home';
+      var first = path.split('/')[1] || '';
+      var map = { news: 'news', 'fixed-departures': 'fixed_departures', departure: 'fixed_departures', community: 'community', 'find-partners': 'partners', post: 'partners' };
+      if (map[first]) return map[first];
+      var sitePages = ['about', 'contact', 'safety', 'privacy', 'terms', 'account', 'trekker', 'login', 'unsubscribe'];
+      return sitePages.indexOf(first) > -1 ? 'site' : 'treks'; // region/trek pages
+    }
+    function tag(e) {
+      var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+      if (!a) return;
+      var url;
+      try { url = new URL(a.href, location.href); } catch (err) { return; }
+      if (!DP.test(url.hostname)) return;
+      var path = location.pathname;
+      if (!url.searchParams.has('utm_source')) {
+        url.searchParams.set('utm_source', 'trekkingpartnersnepal');
+        url.searchParams.set('utm_medium', 'referral');
+        url.searchParams.set('utm_campaign', section(path));
+        url.searchParams.set('utm_content', path);
+        a.href = url.toString();
+      }
+      if ((e.type === 'click' || e.type === 'auxclick') && typeof window.gtag === 'function') {
+        window.gtag('event', 'discover_parbat_click', {
+          link_url: url.origin + url.pathname,
+          link_text: (a.textContent || '').trim().slice(0, 100),
+          tpn_section: section(path),
+        });
+      }
+    }
+    // mousedown/auxclick catch middle-click and "open in new tab" too.
+    document.addEventListener('click', tag, true);
+    document.addEventListener('auxclick', tag, true);
+    document.addEventListener('mousedown', tag, true);
+    document.addEventListener('touchstart', tag, { capture: true, passive: true });
+  })();
+</script>

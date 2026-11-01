@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Analytics from '../components/Analytics.astro';
+import DpLinkTracking from '../components/DpLinkTracking.astro';
 import { regions } from '../data/regions';
 
 interface Props {
@@ -56,6 +57,7 @@ const year = new Date().getFullYear();
 
     {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
     <Analytics />
+    <DpLinkTracking />
   </head>
   <body>
     <header class="site-header">
