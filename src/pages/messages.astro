@@ -1,0 +1,516 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Messages | Trekking Partners Nepal" description="Private, end-to-end encrypted messages with other trekkers." noindex>
+  <section class="section msgs-page">
+    <div class="container">
+
+      <div id="loading" class="panel narrow-panel" style="text-align:center"><p class="muted" style="margin:0">Loading your messages…</p></div>
+
+      <!-- Signed out / incomplete profile -->
+      <div id="gate" class="panel narrow-panel locked" hidden>
+        <p class="lock-icon" aria-hidden="true">✉️</p>
+        <h1 id="gate-title" class="gate-title"></h1>
+        <p id="gate-text" class="muted"></p>
+        <button id="gate-btn" type="button" class="btn btn-sun"></button>
+      </div>
+
+      <!-- First-time setup -->
+      <form id="setup" class="form-card narrow-panel form-grid" hidden novalidate>
+        <span class="eyebrow">Private messages</span>
+        <h1 class="gate-title">Set your messages password</h1>
+        <p class="muted" style="margin:0">Messages on Trekking Partners Nepal are <strong>end-to-end encrypted</strong>: only you and the person you’re talking to can read them – not us, not anyone else. This password locks your messages key so you can read them on any device.</p>
+        <label class="field">Messages password <span class="hint">at least 8 characters, different from your Google password</span>
+          <input type="password" name="pw" minlength="8" maxlength="200" autocomplete="new-password" required />
+        </label>
+        <label class="field">Repeat password
+          <input type="password" name="pw2" minlength="8" maxlength="200" autocomplete="new-password" required />
+        </label>
+        <label class="check-field"><input type="checkbox" name="ok" required /> I understand nobody can recover this password. If I forget it, I can reset it, but my old messages can’t be read anymore.</label>
+        <p id="setup-error" class="form-error" hidden></p>
+        <button type="submit" class="btn btn-sun" id="setup-btn">Turn on messages</button>
+      </form>
+
+      <!-- New device -->
+      <form id="unlock" class="form-card narrow-panel form-grid" hidden novalidate>
+        <span class="eyebrow">Private messages</span>
+        <h1 class="gate-title">Unlock your messages</h1>
+        <p class="muted" style="margin:0">Enter your messages password to read your messages on this device. You only need to do this once per device.</p>
+        <label class="field">Messages password
+          <input type="password" name="pw" maxlength="200" autocomplete="current-password" required />
+        </label>
+        <p id="unlock-error" class="form-error" hidden></p>
+        <button type="submit" class="btn btn-sun" id="unlock-btn">Unlock</button>
+        <button type="button" class="link-btn" id="forgot">Forgot your messages password?</button>
+      </form>
+
+      <!-- Inbox + chat -->
+      <div id="app" class="msgs" hidden>
+        <aside class="msgs-list" id="list-pane">
+          <div class="list-head">
+            <h1>Messages</h1>
+            <span class="e2e-tag" title="Only you and the other trekker can read these messages">🔒 End-to-end encrypted</span>
+          </div>
+          <div id="list" class="convos"></div>
+          <div id="list-empty" class="list-empty" hidden>
+            <p><strong>No messages yet.</strong></p>
+            <p class="muted">Find someone going your way on <a href="/find-partners/">Find partners</a>, then tap <strong>Message</strong> on their post or reply.</p>
+          </div>
+          <button type="button" class="link-btn lock-btn" id="lock">Lock messages on this device</button>
+        </aside>
+
+        <div class="msgs-chat" id="chat-pane">
+          <div id="chat-none" class="chat-none">
+            <p class="muted">Choose a conversation.</p>
+          </div>
+          <div id="chat" class="chat" hidden>
+            <header class="chat-head">
+              <button type="button" class="back" id="back" aria-label="Back to conversations">←</button>
+              <a id="c-avatar-link" href="#" tabindex="-1" aria-hidden="true"><span id="c-avatar"></span></a>
+              <div class="chat-who">
+                <a id="c-name" class="chat-name" href="#"></a>
+                <span id="c-sub" class="post-sub"></span>
+              </div>
+              <div class="chat-menu">
+                <button type="button" class="menu-btn" id="menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Chat options">⋯</button>
+                <div class="menu" id="menu" hidden>
+                  <button type="button" id="m-code">Check encryption code</button>
+                  <button type="button" id="m-block">Block</button>
+                  <button type="button" id="m-report" class="danger">Report</button>
+                </div>
+              </div>
+            </header>
+            <div class="chat-body" id="body" aria-live="polite"></div>
+            <div class="chat-state" id="state" hidden></div>
+            <form class="composer" id="composer">
+              <textarea id="text" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Message"></textarea>
+              <button type="submit" class="btn btn-sun btn-sm" id="send">Send</button>
+            </form>
+            <p class="composer-tip">Tip: swap WhatsApp or Instagram here rather than in public replies. Meet in a public place first – <a href="/safety/">safety tips</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <dialog id="report-dlg" class="report-dlg">
+    <form id="report-form" class="report-form" method="dialog">
+      <h2>Report this conversation</h2>
+      <p class="muted">Your report goes to the site admin with <strong>your copy of the last 20 messages</strong>, decrypted on your device, so we can see what happened. The other trekker won’t know who reported them.</p>
+      <fieldset class="report-reasons">
+        <legend>Reason</legend>
+        <label class="check-field"><input type="radio" name="reason" value="spam" required /> Spam or advertising</label>
+        <label class="check-field"><input type="radio" name="reason" value="scam" /> Scam, fake profile or asking for money</label>
+        <label class="check-field"><input type="radio" name="reason" value="harassment" /> Harassment, hate or offensive</label>
+        <label class="check-field"><input type="radio" name="reason" value="unsafe" /> Unsafe or makes me uncomfortable</label>
+        <label class="check-field"><input type="radio" name="reason" value="other" /> Something else</label>
+      </fieldset>
+      <label class="field">Details <span class="hint">optional</span>
+        <textarea name="details" maxlength="500" rows="3"></textarea>
+      </label>
+      <label class="check-field"><input type="checkbox" name="block" checked /> Also block this trekker</label>
+      <p class="form-error" id="report-error" hidden></p>
+      <p class="form-note" id="report-done" hidden></p>
+      <div class="report-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="report-cancel">Cancel</button>
+        <button type="submit" class="btn btn-sun btn-sm" id="report-send">Send report</button>
+      </div>
+    </form>
+  </dialog>
+</Base>
+
+<style>
+  .msgs-page { padding: 32px 0 48px; }
+  .narrow-panel { max-width: 560px; margin: 0 auto; }
+  .gate-title { font-size: 1.6rem; margin: 6px 0 8px; }
+  .locked { text-align: center; }
+  .lock-icon { font-size: 2rem; margin: 0; }
+  .form-grid { display: grid; gap: 16px; }
+  .check-field { display: flex; gap: 10px; align-items: flex-start; font-size: .9rem; line-height: 1.45; }
+  .check-field input { margin-top: 3px; }
+  .link-btn { background: none; border: 0; padding: 0; color: var(--sky-600); font: 500 .88rem var(--font-body); cursor: pointer; justify-self: start; }
+  .link-btn:hover { text-decoration: underline; }
+
+  .msgs { display: grid; grid-template-columns: 320px 1fr; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; height: min(78vh, 760px); min-height: 480px; }
+  .msgs-list { border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  .list-head { padding: 16px 16px 12px; border-bottom: 1px solid var(--line); }
+  .list-head h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .e2e-tag { font-size: .78rem; color: var(--muted); }
+  .convos { overflow-y: auto; flex: 1; }
+  .list-empty { padding: 20px 16px; font-size: .92rem; }
+  .list-empty p { margin: 0 0 8px; }
+  .lock-btn { margin: 10px 16px 14px; font-size: .8rem; color: var(--muted); }
+  .convos :global(.convo) { display: flex; gap: 10px; align-items: center; width: 100%; padding: 12px 16px; background: none; border: 0; border-bottom: 1px solid var(--sky-50); text-align: left; cursor: pointer; font: inherit; color: inherit; }
+  .convos :global(.convo:hover) { background: var(--sky-50); }
+  .convos :global(.convo.on) { background: var(--sky-100); }
+  .convos :global(.convo .avatar) { width: 40px; height: 40px; flex: none; }
+  .convos :global(.convo-main) { flex: 1; min-width: 0; }
+  .convos :global(.convo-name) { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .convos :global(.convo-sub) { display: block; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .convos :global(.convo.unread .convo-name) { color: var(--ink); }
+  .convos :global(.dot) { width: 10px; height: 10px; border-radius: 50%; background: var(--sun); flex: none; }
+
+  .msgs-chat { display: flex; min-height: 0; }
+  .chat-none { margin: auto; }
+  .chat { display: flex; flex-direction: column; width: 100%; min-height: 0; }
+  .chat-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .chat-head :global(.avatar) { width: 40px; height: 40px; }
+  .chat-who { flex: 1; min-width: 0; }
+  .chat-name { display: block; font-weight: 600; color: var(--ink); text-decoration: none; }
+  .chat-name:hover { text-decoration: underline; }
+  .back { display: none; background: none; border: 0; font-size: 1.3rem; cursor: pointer; padding: 4px 8px 4px 0; color: var(--ink); }
+  .chat-menu { position: relative; }
+  .menu-btn { background: none; border: 1px solid var(--line); border-radius: 50%; width: 36px; height: 36px; font-size: 1.1rem; cursor: pointer; color: var(--ink); }
+  .menu { position: absolute; right: 0; top: calc(100% + 6px); background: var(--white); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); z-index: 20; min-width: 210px; overflow: hidden; }
+  .menu button { display: block; width: 100%; text-align: left; padding: 10px 14px; background: none; border: 0; font: 500 .9rem var(--font-body); cursor: pointer; color: var(--ink); }
+  .menu button:hover { background: var(--sky-50); }
+  .menu button.danger { color: #b3261e; }
+
+  .chat-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 6px; background: var(--sky-50); }
+  .chat-body :global(.day) { align-self: center; font-size: .75rem; color: var(--muted); margin: 10px 0 4px; }
+  .chat-body :global(.bubble) { max-width: min(78%, 520px); padding: 8px 12px; border-radius: 14px; background: var(--white); border: 1px solid var(--line); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.45; font-size: .95rem; }
+  .chat-body :global(.bubble.mine) { align-self: flex-end; background: var(--night-800); color: var(--white); border-color: var(--night-800); }
+  .chat-body :global(.bubble.locked) { font-style: italic; color: var(--muted); }
+  .chat-body :global(.bubble time) { display: block; font-size: .7rem; opacity: .7; margin-top: 2px; text-align: right; }
+  .chat-body :global(.hello) { margin: auto; text-align: center; max-width: 380px; color: var(--muted); font-size: .9rem; }
+  .chat-state { padding: 12px 16px; border-top: 1px solid var(--line); background: #fff8f2; font-size: .9rem; }
+  .chat-state :global(button) { margin-left: 8px; }
+  .composer { display: flex; gap: 8px; align-items: flex-end; padding: 10px 12px; border-top: 1px solid var(--line); }
+  .composer textarea { flex: 1; resize: none; max-height: 160px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font: inherit; font-size: .95rem; line-height: 1.4; }
+  .composer textarea:focus { outline: 2px solid var(--sky-400); outline-offset: 1px; }
+  .composer-tip { margin: 0; padding: 0 14px 10px; font-size: .76rem; color: var(--muted); }
+
+  @media (max-width: 760px) {
+    .msgs-page { padding: 12px 0 24px; }
+    .msgs { grid-template-columns: 1fr; height: calc(100vh - 110px); }
+    .msgs.chat-open .msgs-list { display: none; }
+    .msgs:not(.chat-open) .msgs-chat { display: none; }
+    .msgs-list { border-right: 0; }
+    .back { display: block; }
+  }
+</style>
+
+<script>
+  import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../lib/auth';
+  import { avatar, authorName, authorFacts, el } from '../lib/posts';
+  import * as M from '../lib/messages';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const show = (id: string) => { ['loading', 'gate', 'setup', 'unlock', 'app'].forEach((x) => ($(x).hidden = x !== id)); };
+
+  let me = '';
+  let key: M.DeviceKey | null = null;
+  let convos: M.Conversation[] = [];
+  let chat: M.Chat | null = null;
+  let messages: M.ChatMessage[] = [];
+  let stopChat: (() => void) | null = null;
+  let theirKeyReady = false;
+
+  init();
+
+  async function init() {
+    const user = await getUser();
+    if (!user) return gate('Sign in to see your messages', 'Messages are for members only. Signing in with Google takes a few seconds.', 'Sign in with Google', () => goToLogin());
+    me = user.id;
+    const profile = await getMyProfile(me);
+    if (!isComplete(profile)) return gate('Complete your profile to use messages', 'Add your name, age and nationality so other trekkers know who they’re talking to.', 'Complete my profile', () => goToAccount());
+
+    const row = await M.getMyKeyRow(me);
+    if (!row) return setupForm(false);
+    key = await M.deviceKey(me, row);
+    if (!key) return unlockForm(row);
+    openApp();
+  }
+
+  function gate(title: string, text: string, label: string, onClick: () => void) {
+    $('gate-title').textContent = title;
+    $('gate-text').textContent = text;
+    const b = $('gate-btn') as HTMLButtonElement;
+    b.textContent = label;
+    b.onclick = onClick;
+    show('gate');
+  }
+
+  function setupForm(reset: boolean) {
+    const f = $('setup') as HTMLFormElement;
+    if (reset) {
+      f.querySelector('h1')!.textContent = 'Choose a new messages password';
+      $('setup-btn').textContent = 'Reset and continue';
+    }
+    show('setup');
+    f.onsubmit = async (e) => {
+      e.preventDefault();
+      const pw = (f.elements.namedItem('pw') as HTMLInputElement).value;
+      const pw2 = (f.elements.namedItem('pw2') as HTMLInputElement).value;
+      const ok = (f.elements.namedItem('ok') as HTMLInputElement).checked;
+      const err = $('setup-error');
+      err.hidden = true;
+      const fail = (m: string) => { err.textContent = m; err.hidden = false; };
+      if (pw.length < 8) return fail('Use at least 8 characters.');
+      if (pw !== pw2) return fail('The two passwords don’t match.');
+      if (!ok) return fail('Please tick the box to confirm you understand.');
+      const btn = $('setup-btn') as HTMLButtonElement;
+      btn.disabled = true; btn.textContent = 'Setting up…';
+      try {
+        key = await M.createKeys(me, pw);
+        openApp();
+      } catch (x: any) {
+        fail('Could not set up messages: ' + x.message);
+        btn.disabled = false; btn.textContent = reset ? 'Reset and continue' : 'Turn on messages';
+      }
+    };
+  }
+
+  function unlockForm(row: M.KeyRow) {
+    const f = $('unlock') as HTMLFormElement;
+    show('unlock');
+    f.onsubmit = async (e) => {
+      e.preventDefault();
+      const pw = (f.elements.namedItem('pw') as HTMLInputElement).value;
+      const err = $('unlock-error');
+      err.hidden = true;
+      const btn = $('unlock-btn') as HTMLButtonElement;
+      btn.disabled = true; btn.textContent = 'Unlocking…';
+      try {
+        key = await M.unlockKeys(me, row, pw);
+        openApp();
+      } catch (x: any) {
+        err.textContent = x.message === 'wrong-password' ? 'That password isn’t right. Try again.' : 'Could not unlock: ' + x.message;
+        err.hidden = false;
+        btn.disabled = false; btn.textContent = 'Unlock';
+      }
+    };
+    $('forgot').onclick = () => {
+      if (!confirm('Reset your messages password?\n\nYou’ll keep your conversations, but messages sent before the reset can’t be read anymore – on any device. This can’t be undone.')) return;
+      setupForm(true);
+    };
+  }
+
+  // ── Inbox ──────────────────────────────────────────────────
+  async function openApp() {
+    show('app');
+    $('lock').onclick = async () => {
+      if (!confirm('Lock messages on this device? You’ll need your messages password to read them here again.')) return;
+      await M.lockDevice(me);
+      location.reload();
+    };
+    await refreshList();
+    M.watchConversations(me, () => refreshList());
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshList(); });
+
+    const wanted = new URLSearchParams(location.search).get('c');
+    const first = wanted && convos.find((c) => c.id === wanted);
+    if (first) openChat(first);
+  }
+
+  async function refreshList() {
+    convos = await M.listConversations();
+    $('list-empty').hidden = convos.length > 0;
+    $('list').replaceChildren(...convos.map((c) => {
+      const b = el('button', ['convo', c.unread && !c.blocked ? 'unread' : '', chat?.convo.id === c.id ? 'on' : ''].filter(Boolean).join(' '));
+      b.type = 'button';
+      const main = el('span', 'convo-main');
+      main.append(el('span', 'convo-name', authorName(c.other)));
+      const sub = c.blocked ? (c.blocked_by_me ? 'Blocked' : 'Unavailable')
+        : [c.trek, c.last_message_at ? ago(c.last_message_at) : 'No messages yet'].filter(Boolean).join(' · ');
+      main.append(el('span', 'convo-sub', sub));
+      b.append(avatar(c.other, 40), main);
+      if (c.unread && !c.blocked && chat?.convo.id !== c.id) b.append(el('span', 'dot'));
+      b.addEventListener('click', () => openChat(c));
+      return b;
+    }));
+  }
+
+  // ── One chat ───────────────────────────────────────────────
+  async function openChat(c: M.Conversation) {
+    stopChat?.();
+    chat = new M.Chat(c, me, key!);
+    history.replaceState(null, '', `/messages/?c=${c.id}`);
+    $('app').classList.add('chat-open');
+    $('chat-none').hidden = true;
+    $('chat').hidden = false;
+    const profileUrl = `/trekker/?id=${encodeURIComponent(c.other_id)}`;
+    $('c-avatar').replaceChildren(avatar(c.other, 40));
+    ($('c-avatar-link') as HTMLAnchorElement).href = profileUrl;
+    $('c-name').textContent = authorName(c.other);
+    ($('c-name') as HTMLAnchorElement).href = profileUrl;
+    $('c-sub').textContent = [authorFacts(c.other), c.trek ? `about ${c.trek}` : ''].filter(Boolean).join(' · ');
+    $('m-block').textContent = c.blocked_by_me ? 'Unblock' : 'Block';
+    $('body').replaceChildren(el('p', 'hello', 'Loading…'));
+    document.querySelectorAll('.convo').forEach((n, i) => n.classList.toggle('on', convos[i]?.id === c.id));
+
+    const [loaded, theirs] = await Promise.all([chat.load(), chat.theirKey()]);
+    if (chat?.convo.id !== c.id) return;          // switched chat meanwhile
+    messages = loaded;
+    theirKeyReady = !!theirs;
+    render();
+    setState(c);
+    M.markRead(c.id).then(() => refreshList());
+    stopChat = chat.watch((m) => {
+      if (messages.some((x) => x.id === m.id)) return;
+      messages.push(m);
+      render();
+      if (!m.mine) M.markRead(c.id);
+    });
+  }
+
+  function setState(c: M.Conversation) {
+    const state = $('state');
+    const composer = $('composer') as HTMLFormElement;
+    const who = authorName(c.other).split(' ')[0];
+    state.replaceChildren();
+    let blocked = false;
+    if (c.blocked_by_me) {
+      state.append(`You blocked ${who}. They can’t message you.`);
+      const u = el('button', 'btn btn-outline btn-sm', 'Unblock'); u.type = 'button';
+      u.onclick = () => toggleBlock();
+      state.append(u);
+      blocked = true;
+    } else if (c.blocked) {
+      state.append('You can’t message this trekker.');
+      blocked = true;
+    } else if (!theirKeyReady) {
+      state.append(`Waiting for ${who} to turn on messages. We’ve let them know – you can write once they have.`);
+    }
+    state.hidden = !state.childNodes.length;
+    composer.hidden = blocked || !theirKeyReady;
+    $('m-code').hidden = !theirKeyReady;
+  }
+
+  const ago = (iso: string) => {
+    const d = new Date(iso), now = new Date();
+    return d.toDateString() === now.toDateString()
+      ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  };
+
+  function render() {
+    const body = $('body');
+    if (!messages.length) {
+      const who = authorName(chat!.convo.other).split(' ')[0];
+      body.replaceChildren(el('p', 'hello', `Say hi to ${who}! Share your dates, pace and plans. Messages are end-to-end encrypted – only you two can read them.`));
+      return;
+    }
+    const nodes: HTMLElement[] = [];
+    let lastDay = '';
+    for (const m of messages) {
+      const day = new Date(m.created_at).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      if (day !== lastDay) { nodes.push(el('div', 'day', day)); lastDay = day; }
+      const b = el('div', ['bubble', m.mine ? 'mine' : '', m.text === null ? 'locked' : ''].filter(Boolean).join(' '),
+        m.text ?? '🔒 This message was sent before a messages password reset and can’t be read on this account anymore.');
+      const t = el('time', '', new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      t.dateTime = m.created_at;
+      b.append(t);
+      nodes.push(b);
+    }
+    body.replaceChildren(...nodes);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  // Composer: Enter sends, Shift+Enter adds a line
+  const text = $('text') as HTMLTextAreaElement;
+  text.addEventListener('input', () => { text.style.height = 'auto'; text.style.height = Math.min(text.scrollHeight, 160) + 'px'; });
+  text.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && matchMedia('(pointer: fine)').matches) {
+      e.preventDefault();
+      ($('composer') as HTMLFormElement).requestSubmit();
+    }
+  });
+  $('composer').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const value = text.value.trim();
+    if (!value || !chat) return;
+    const send = $('send') as HTMLButtonElement;
+    send.disabled = true;
+    try {
+      const m = await chat.send(value.slice(0, M.MAX_MESSAGE));
+      if (!messages.some((x) => x.id === m.id)) messages.push(m);
+      text.value = ''; text.style.height = 'auto';
+      render();
+    } catch (x: any) {
+      if (x.message === 'no-key') { theirKeyReady = false; setState(chat.convo); }
+      else alert(/row-level security/i.test(x.message) ? 'You can’t message this trekker.' : 'Could not send: ' + x.message);
+    } finally {
+      send.disabled = false;
+      text.focus();
+    }
+  });
+
+  $('back').addEventListener('click', () => {
+    stopChat?.(); stopChat = null; chat = null;
+    $('app').classList.remove('chat-open');
+    $('chat').hidden = true; $('chat-none').hidden = false;
+    history.replaceState(null, '', '/messages/');
+    refreshList();
+  });
+
+  // ── Menu: encryption code, block, report ───────────────────
+  const menu = $('menu'), menuBtn = $('menu-btn');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menu.hidden = !menu.hidden;
+    menuBtn.setAttribute('aria-expanded', String(!menu.hidden));
+  });
+  document.addEventListener('click', () => { menu.hidden = true; menuBtn.setAttribute('aria-expanded', 'false'); });
+
+  $('m-code').addEventListener('click', async () => {
+    const code = await chat?.safetyCode();
+    if (!code) return;
+    alert(`Encryption code for this chat:\n\n${code}\n\nIf you meet or call this trekker, you can both check you see the same code. If it matches, nobody can be secretly reading your messages.`);
+  });
+
+  async function toggleBlock() {
+    if (!chat) return;
+    const c = chat.convo;
+    const who = authorName(c.other);
+    try {
+      if (c.blocked_by_me) {
+        await M.unblock(c.other_id, me);
+      } else {
+        if (!confirm(`Block ${who}? Neither of you will be able to send messages in this chat. They won’t be told.`)) return;
+        await M.block(c.other_id);
+      }
+    } catch (x: any) { return alert('Could not update: ' + x.message); }
+    await refreshList();
+    const fresh = convos.find((x) => x.id === c.id);
+    if (fresh) openChat(fresh);
+  }
+  $('m-block').addEventListener('click', () => toggleBlock());
+
+  const dlg = $('report-dlg') as HTMLDialogElement;
+  const rform = $('report-form') as HTMLFormElement;
+  $('m-report').addEventListener('click', () => {
+    rform.reset();
+    $('report-error').hidden = true; $('report-done').hidden = true;
+    ($('report-send') as HTMLButtonElement).hidden = false;
+    $('report-cancel').textContent = 'Cancel';
+    rform.querySelectorAll('fieldset, label').forEach((n) => ((n as HTMLElement).hidden = false));
+    dlg.showModal();
+  });
+  $('report-cancel').addEventListener('click', () => dlg.close());
+  rform.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!chat) return;
+    const reason = (rform.querySelector('input[name=reason]:checked') as HTMLInputElement | null)?.value;
+    const err = $('report-error');
+    if (!reason) { err.textContent = 'Please choose a reason.'; err.hidden = false; return; }
+    const details = (rform.elements.namedItem('details') as HTMLTextAreaElement).value.trim() || null;
+    const alsoBlock = (rform.elements.namedItem('block') as HTMLInputElement).checked;
+    const send = $('report-send') as HTMLButtonElement;
+    send.disabled = true;
+    try {
+      const fresh = await M.reportConversation(chat.convo, messages, reason, details);
+      if (alsoBlock && !chat.convo.blocked_by_me) await M.block(chat.convo.other_id);
+      rform.querySelectorAll('fieldset, label').forEach((n) => ((n as HTMLElement).hidden = true));
+      $('report-done').textContent = fresh
+        ? 'Thanks, your report has been sent. We’ll look at it and act if it breaks our rules.'
+        : 'You’ve already reported this conversation. Thanks, we’ll look at it.';
+      $('report-done').hidden = false;
+      send.hidden = true;
+      $('report-cancel').textContent = 'Close';
+      if (alsoBlock) { await refreshList(); const c = convos.find((x) => x.id === chat!.convo.id); if (c) openChat(c); }
+    } catch (x: any) {
+      err.textContent = 'Could not send: ' + x.message; err.hidden = false;
+    } finally { send.disabled = false; }
+  });
+</script>

@@ -7,8 +7,9 @@ import { fetchProfiles } from './posts';
 
 export interface Notice {
   id: string;
-  kind: 'welcome' | 'first_post' | 'reply' | 'thread_reply' | 'answer' | 'thread_answer' | 'best_answer' | 'moved_to_partners' | 'announcement' | 'new_question';
+  kind: 'welcome' | 'first_post' | 'reply' | 'thread_reply' | 'answer' | 'thread_answer' | 'best_answer' | 'moved_to_partners' | 'announcement' | 'new_question' | 'message_invite' | 'admin_alert';
   trip_id: string | null;
+  conversation_id?: string | null;   // message_invite only (update 22)
   question_id: string | null;
   title?: string | null;   // announcements only
   body?: string | null;
@@ -35,8 +36,10 @@ export async function fetchNotices(userId: string, limit = 20): Promise<NoticeVi
   const load = (cols: string) => supabase
     .from('notifications').select(cols)
     .eq('user_id', userId).order('created_at', { ascending: false }).limit(limit);
-  // Newest columns first; fall back while update-12 (title, body, link) or update-10 (question_id) hasn't run yet
-  let res = await load(COLS + ', title, body, link');
+  // Newest columns first; fall back while update-22 (conversation_id), update-12 (title, body, link)
+  // or update-10 (question_id) hasn't run yet
+  let res = await load(COLS + ', title, body, link, conversation_id');
+  if (res.error) res = await load(COLS + ', title, body, link');
   if (res.error) res = await load(COLS);
   if (res.error) res = await load(COLS.replace('question_id, ', ''));
   if (res.error || !res.data) return [];
@@ -63,16 +66,30 @@ export async function fetchNotices(userId: string, limit = 20): Promise<NoticeVi
     .filter((n) => !(n.kind === 'reply' || n.kind === 'thread_reply') || trekOf.has(n.trip_id))
     // …and the same for questions that were deleted
     .filter((n) => !QUESTION_KINDS.includes(n.kind) || questionOf.has(n.question_id))
-    .map((n) => n.kind === 'announcement'
+    .map((n) => n.kind === 'announcement' || n.kind === 'admin_alert'
       ? announcement(n as Notice)
+      : n.kind === 'message_invite'
+      ? messageInvite(n as Notice, n.actor_id ? actorOf.get(n.actor_id) : undefined, n.trip_id ? trekOf.get(n.trip_id) : undefined)
       : QUESTION_KINDS.includes(n.kind)
       ? describeQuestion(n as Notice, questionOf.get(n.question_id)!, n.actor_id ? actorOf.get(n.actor_id) : undefined)
       : describe(n as Notice, n.trip_id ? trekOf.get(n.trip_id) : undefined, n.actor_id ? actorOf.get(n.actor_id) : undefined));
 }
 
-/** Site news sent with public.announce(): headline, text and an on-site link */
+/** Someone wants to message you, but you haven't set up messages yet (update 22) */
+function messageInvite(n: Notice, actor?: { display_name: string | null; avatar_url: string | null; team?: boolean }, trek?: string): NoticeView {
+  const who = (actor?.team ? actor.display_name : actor?.display_name?.split(' ')[0]) || 'A trekker';
+  return { ...n, icon: '✉️', strong: who,
+    text: ` wants to message you${trek ? ` about ${trek}` : ''}. Turn on messages to read and reply – it takes a minute.`,
+    href: n.conversation_id ? `/messages/?c=${encodeURIComponent(n.conversation_id)}` : '/messages/',
+    actorAvatar: actor?.avatar_url ?? null };
+}
+
+/** Site news sent with public.announce(), and admin alerts: headline, text and an on-site link */
 function announcement(n: Notice): NoticeView {
   const link = n.link && n.link.startsWith('/') && !n.link.startsWith('//') ? n.link : '/';
+  if (n.kind === 'admin_alert') {
+    return { ...n, icon: '⚠️', strong: n.title || 'Admin alert', text: n.body ? ' ' + n.body : '', href: link, actorAvatar: null };
+  }
   return { ...n, icon: '📣', strong: n.title || 'News from Trekking Partners Nepal',
     text: n.body ? ' ' + n.body : '', href: link, actorAvatar: null };
 }

@@ -118,3 +118,23 @@ has a "Turn off news emails" link; reply and answer emails are not affected. Cam
 2. Run `supabase/update-17-news-emails.sql` in the SQL Editor. Its last line sends the Vijaya Dashami 2083 email.
 3. To send a future campaign: add it to `CAMPAIGNS` in the function, redeploy, then run
    `select public.send_news_email('campaign-name');`
+
+## Private messages (update 22)
+One-to-one, **end-to-end encrypted** messages between members, started from a partner post
+(the **✉ Message** button on the post, or on any reply). The envelope in the header shows unread chats.
+
+- Encryption happens in the browser (`src/lib/e2e.ts`, Web Crypto: ECDH P-256 + HKDF + AES-GCM). The database only
+  stores ciphertext. Each member sets a **messages password** once; it locks their key so it works on other devices.
+  Nobody (admin included) can recover it. "Forgot password" resets the key; older messages then can't be read.
+- A member can start chats with **5 new people per 24 hours** (replies unlimited). A 6th attempt is refused and every
+  admin gets a ⚠️ bell alert (once per member per 12 hours).
+- **Block** (both directions, silent) and **Report** in every chat. A report carries the last 20 messages, decrypted on
+  the reporter's device – that excerpt is the only message content admins ever see (Admin → Moderation).
+- Emails (Edge Function `message-alert`): at most one per chat every 3 hours, never with message text, only if the
+  member hasn't read that chat in the last 5 minutes, and only with reply emails on (same unsubscribe link). If someone
+  hasn't set up messages yet, they get a 🔔 and an email inviting them.
+- If Resend refuses an email because a plan quota is reached, admins get a ⚠️ "Email limit reached" bell alert.
+
+Setup (already applied to the live project on 1 Nov 2026):
+1. Run `supabase/update-22-messages.sql` in the SQL Editor (needs updates 4, 5, 8, 10, 13).
+2. Deploy `supabase/functions/message-alert/index.ts` as **message-alert** (JWT verification **off**; uses `RESEND_API_KEY`).

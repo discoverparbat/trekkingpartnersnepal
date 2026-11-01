@@ -35,6 +35,7 @@ import Base from '../layouts/Base.astro';
               <div id="a-facts" class="post-sub"></div>
             </div>
             <span id="t-time" class="post-sub when"></span>
+            <button id="a-msg" type="button" class="btn btn-sun btn-sm msg-btn" hidden>✉ Message</button>
           </div>
 
           <p id="t-text" class="trip-text"></p>
@@ -156,6 +157,11 @@ import Base from '../layouts/Base.astro';
   .reply-form textarea { min-height: 110px; }
   .r-list :global(.reply-edit) { margin-left: auto; }
   .r-list :global(.reply-edit + .reply-del) { margin-left: 0; }
+  .r-list :global(.reply-msg) { color: var(--sky-600); font-weight: 600; }
+  .r-list :global(.reply-msg:hover) { color: var(--sky-700); text-decoration: underline; }
+  .r-list :global(.reply-del + .reply-msg) { margin-left: 0; }
+  .msg-btn { flex: none; }
+  @media (max-width: 520px) { .author { flex-wrap: wrap; } .msg-btn { width: 100%; } }
   .r-list :global(.reply-edited) { display: block; margin-top: 4px; font-size: .78rem; color: var(--muted); font-style: italic; }
   .r-list :global(.reply-editor) { margin-top: 8px; }
   .r-list :global(.reply-editor textarea) { width: 100%; box-sizing: border-box; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; resize: vertical; min-height: 110px; }
@@ -173,6 +179,7 @@ import Base from '../layouts/Base.astro';
   import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../lib/auth';
   import { fetchTrip, fetchTrips, fetchProfiles, postCard, avatar, authorName, authorFacts, dateRange, timeAgo, paceLabel, el, type Author, type Trip } from '../lib/posts';
   import { reportButton } from '../lib/report';
+  import { startConversation, START_ERRORS } from '../lib/messages';
   import { showTrekAlerts } from '../lib/community';
   import { getTrek } from '../data/treks';
   import { getRegion } from '../data/regions';
@@ -227,6 +234,15 @@ import Base from '../layouts/Base.astro';
 
     // Owner / admin controls
     const isOwner = user?.id === trip.user_id;
+    if (!isOwner) {
+      const msg = $('a-msg') as HTMLButtonElement;
+      msg.hidden = false;
+      msg.addEventListener('click', () => {
+        if (!user) return goToLogin();
+        if (!member) return goToAccount();
+        messageTrekker(trip.user_id, msg);
+      });
+    }
     if (isOwner) markOwnerShare();
     if (!isOwner) {
       $('t-report').replaceChildren(reportButton('post', trip.id, 'Report post'));
@@ -330,6 +346,15 @@ import Base from '../layouts/Base.astro';
     return wrap;
   }
 
+  /** Start (or reopen) a private chat about this post, then go to it. */
+  async function messageTrekker(otherId: string, btn: HTMLButtonElement) {
+    btn.disabled = true;
+    const r = await startConversation(otherId, id);
+    btn.disabled = false;
+    if ('error' in r && r.error) return alert(START_ERRORS[r.error] ?? 'Could not start the chat: ' + r.error);
+    location.href = `/messages/?c=${encodeURIComponent((r as { id: string }).id)}`;
+  }
+
   async function loadReplies(myId: string, canModerate: boolean) {
     const { data: rows } = await supabase
       .from('comments').select('id, user_id, body, created_at, edited_at')
@@ -385,8 +410,12 @@ import Base from '../layouts/Base.astro';
         head.append(del);
       }
       if (c.user_id !== myId && !isAdminReply) {
+        const msg = el('button', 'reply-del reply-msg', '✉ Message');
+        msg.type = 'button';
+        msg.title = `Send ${authorName(a)} a private message`;
+        msg.addEventListener('click', () => messageTrekker(c.user_id, msg));
+        head.append(msg);
         const rep = reportButton('reply', c.id);
-        if (!(c.user_id === myId || canModerate)) rep.style.marginLeft = 'auto';
         head.append(rep);
       }
       const text = el('p', 'reply-text', c.body);

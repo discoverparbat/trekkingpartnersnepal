@@ -16,7 +16,7 @@ const REASON: Record<string, string> = {
   spam: 'Spam / advertising', scam: 'Scam / fake / money', harassment: 'Harassment / offensive',
   unsafe: 'Unsafe', other: 'Other',
 };
-const KIND: Record<string, string> = { post: 'Post', reply: 'Reply', profile: 'Trekker', question: 'Question', answer: 'Answer' };
+const KIND: Record<string, string> = { post: 'Post', reply: 'Reply', profile: 'Trekker', question: 'Question', answer: 'Answer', conversation: 'Private messages' };
 
 let toast: Toast = () => {};
 let members = new Map<string, Member>();
@@ -169,6 +169,27 @@ async function loadReports() {
           if (confirm('Delete this answer?') && await deleteContent('answer', a.id)) { toast('Answer deleted'); refresh(); }
         }, 'danger'));
       } else target.append(el('p', 'muted', 'This answer has already been deleted.'));
+    } else if (r.kind === 'conversation') {
+      // Messages are end-to-end encrypted. The only content we see is the excerpt the reporter's
+      // own device decrypted and attached to the report.
+      authorId = r.reported_user;
+      target.append(el('div', 'mod-title', `${nameOf(r.reported_user)} → reported by ${nameOf(r.reporter_id)}`));
+      const lines = Array.isArray(r.evidence) ? r.evidence : [];
+      if (lines.length) {
+        const box = el('div', 'mod-evidence');
+        for (const line of lines.slice(-20)) {
+          const who = line.from === 'reported' ? nameOf(r.reported_user) : nameOf(r.reporter_id);
+          const row = el('p', line.from === 'reported' ? 'ev ev-them' : 'ev');
+          row.append(el('strong', '', `${who}: `), String(line.text ?? ''));
+          if (line.at) row.title = new Date(line.at).toLocaleString();
+          box.append(row);
+        }
+        target.append(box);
+      } else {
+        target.append(el('p', 'muted', 'No messages were attached (the chat may have been empty).'));
+      }
+      target.append(el('p', 'mod-note', 'Excerpt sent from the reporter’s device. Messages are end-to-end encrypted, so we can’t see anything else.'));
+      if (r.reported_user) actions.append(link('View profile', trekkerUrl(r.reported_user), 'mod-link'));
     } else {
       authorId = r.target_id;
       const m = members.get(r.target_id);
