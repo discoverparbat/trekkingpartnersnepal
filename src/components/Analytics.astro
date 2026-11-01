@@ -1,0 +1,21 @@
+---
+// Google Analytics 4 for Trekking Partners Nepal.
+// Paste the GA4 measurement ID (looks like G-XXXXXXXXXX) between the quotes.
+// While it's empty, no tracking code is added to any page.
+const GA_ID = '';
+
+// Skip local dev builds and the private /admin pages so your own visits don't count.
+const path = Astro.url.pathname;
+const enabled = GA_ID !== '' && import.meta.env.PROD && !path.startsWith('/admin');
+---
+{enabled && (
+  <>
+    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+    <script is:inline define:vars={{ GA_ID }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', GA_ID);
+    </script>
+  </>
+)}
