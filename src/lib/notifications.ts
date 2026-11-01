@@ -81,7 +81,7 @@ function messageInvite(n: Notice, actor?: { display_name: string | null; avatar_
   return { ...n, icon: '✉️', strong: who,
     text: n.kind === 'message_ready'
       ? ` turned on messages – you can write to them now${trek ? ` about ${trek}` : ''}.`
-      : ` wants to message you${trek ? ` about ${trek}` : ''}. Turn on messages to read and reply – it takes a minute.`,
+      : ` wants to message you${trek ? ` about ${trek}` : ''}. Open Messages to read and reply.`,
     href: n.conversation_id ? `/messages/?c=${encodeURIComponent(n.conversation_id)}` : '/messages/',
     actorAvatar: actor?.avatar_url ?? null };
 }

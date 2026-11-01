@@ -119,25 +119,28 @@ has a "Turn off news emails" link; reply and answer emails are not affected. Cam
 3. To send a future campaign: add it to `CAMPAIGNS` in the function, redeploy, then run
    `select public.send_news_email('campaign-name');`
 
-## Private messages (update 22)
-One-to-one, **end-to-end encrypted** messages between members, started from a partner post
+## Private messages (updates 22 and 24)
+One-to-one private messages between members, started from a partner post
 (the **✉ Message** button on the post, or on any reply). The envelope in the header shows unread chats.
 
-- Encryption happens in the browser (`src/lib/e2e.ts`, Web Crypto: ECDH P-256 + HKDF + AES-GCM). The database only
-  stores ciphertext. Each member sets a **messages password** once; it locks their key so it works on other devices.
-  Nobody (admin included) can recover it. "Forgot password" resets the key; older messages then can't be read.
+- Since update 24 messages are stored as text in `messages.body`, tied to the members' Google sign-in. Row-level
+  security means only the two people in a chat can read it. No messages password, nothing to set up, and chats are
+  on every device. Messages are on for every member with a complete profile.
+- Messages sent before update 24 were end-to-end encrypted (`src/lib/e2e.ts`). They're restored once: automatically
+  if a member opens Messages on a device that still has their old key, otherwise the inbox asks once for the old
+  messages password. Either person in a chat can restore it for both (`restore_messages`); the encrypted copy is then
+  cleared. Until then those messages show as "older message".
 - A member can start chats with **5 new people per 24 hours** (replies unlimited). A 6th attempt is refused and every
   admin gets a ⚠️ bell alert (once per member per 12 hours).
-- **Block** (both directions, silent) and **Report** in every chat. A report carries the last 20 messages, decrypted on
-  the reporter's device – that excerpt is the only message content admins ever see (Admin → Moderation).
+- **Block** (both directions, silent) and **Report** in every chat. A report carries the last 20 messages (Admin → Moderation).
 - Emails (Edge Function `message-alert`): at most one per chat every 3 hours, never with message text, only if the
-  member hasn't read that chat in the last 5 minutes, and only with reply emails on (same unsubscribe link). If someone
-  hasn't set up messages yet, they get a 🔔 and an email inviting them.
+  member hasn't read that chat in the last 5 minutes, and only with reply emails on (same unsubscribe link).
 - If Resend refuses an email because a plan quota is reached, admins get a ⚠️ "Email limit reached" bell alert.
 
 Setup (already applied to the live project on 1 Nov 2026):
 1. Run `supabase/update-22-messages.sql` in the SQL Editor (needs updates 4, 5, 8, 10, 13).
 2. Deploy `supabase/functions/message-alert/index.ts` as **message-alert** (JWT verification **off**; uses `RESEND_API_KEY`).
+3. Run `supabase/update-24-messages-no-password.sql` (removes the messages password; applied 1 Nov 2026).
 
 ### Getting members ready for messages (update 23)
 - "Turn on messages" nudges: a banner on Find partners and on the member's own posts (not dismissable on a brand-new

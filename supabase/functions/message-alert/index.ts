@@ -1,8 +1,8 @@
 // Supabase Edge Function: message-alert
 // Emails a member when someone messages them on Trekking Partners Nepal.
 //   type "message": a new message (the database already throttles this to one email per chat every 3 hours)
-//   type "invite":  someone wants to message them, but they haven't set up messaging yet
-// Messages are end-to-end encrypted, so the email never contains the message text – only who wrote.
+//   type "invite":  only used before update 24 (when members had to set up messages first)
+// The email never contains the message text – only who wrote – so chats stay on the site.
 // Called by the database triggers in supabase/update-22-messages.sql. Uses the RESEND_API_KEY secret.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
@@ -72,11 +72,11 @@ Deno.serve(async (req) => {
   const body = type === 'invite'
     ? p(`Hi ${esc(name)},`) +
       p(`<strong>${esc(who)}</strong> would like to message you${about}.`) +
-      p(`Messages on Trekking Partners Nepal are private and end-to-end encrypted. To read and reply, open Messages and set a messages password – it takes a minute.`) +
-      `<div style="margin:0 0 22px">${button(chatUrl, 'Set up messages')}</div>`
+      p(`Messages on Trekking Partners Nepal are private – only the two of you can read them. Open Messages to read and reply.`) +
+      `<div style="margin:0 0 22px">${button(chatUrl, 'Open messages')}</div>`
     : p(`Hi ${esc(name)},`) +
       p(`<strong>${esc(who)}</strong> sent you a message${about}.`) +
-      p(`<span style="color:#55657d;font-size:14px">Messages are end-to-end encrypted, so we can’t show them here. Open the chat to read and reply.</span>`) +
+      p(`<span style="color:#55657d;font-size:14px">For your privacy we don’t put messages in emails. Open the chat to read and reply.</span>`) +
       `<div style="margin:0 0 22px">${button(chatUrl, 'Read message')}</div>`;
   const html = shell(
     body + p(`<span style="font-size:14px;color:#55657d">Meeting a new trekking partner? Meet in a public place first and read our <a href="${SITE}/safety/" style="color:#1a72bd">safety tips</a>.</span>`),

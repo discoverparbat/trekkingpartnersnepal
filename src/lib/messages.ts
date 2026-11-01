@@ -1,6 +1,6 @@
 // Private one-to-one messages: loading, sending, blocking and reporting (browser only).
-// All message text is encrypted / decrypted here in the browser – see e2e.ts.
-// The database (update-22-messages.sql) only ever sees ciphertext.
+// Messages are stored as text; row-level security means only the two people in a chat can read them
+// (update-24-messages-no-password.sql). e2e.ts is only used to restore messages sent before update 24.
 import { supabase } from './supabase';
 import { fetchProfiles, type Author } from './posts';
 import { getTrek } from '../data/treks';
@@ -29,46 +29,70 @@ export interface ChatMessage {
   id: string;
   sender_id: string;
   created_at: string;
-  text: string | null;            // null = can't be decrypted on this device (key was reset)
+  text: string | null;            // null = old encrypted message not restored yet
   mine: boolean;
 }
 
-// ── Keys ─────────────────────────────────────────────────────
-export async function getMyKeyRow(userId: string): Promise<KeyRow | null> {
+// ── Old encrypted messages (before update 24) ────────────────
+// Messages sent before update 24 were end-to-end encrypted. They're restored once: when the member opens
+// Messages on a device that still holds their old key, or enters their old messages password.
+async function getMyKeyRow(userId: string): Promise<KeyRow | null> {
   const { data } = await supabase.from('message_keys')
     .select('key_id, wrapped_key, salt, iv, iterations').eq('user_id', userId).maybeSingle();
   return (data as KeyRow) ?? null;
 }
 
-/** This device's unlocked key, if it matches the account's current key. */
-export async function deviceKey(userId: string, row: KeyRow): Promise<DeviceKey | null> {
+/** How many messages in my chats still need restoring, and whether I have an old key to restore them with. */
+export async function lockedStatus(userId: string): Promise<{ count: number; row: KeyRow | null; device: DeviceKey | null }> {
+  const { data } = await supabase.rpc('locked_message_count');
+  const count = (data as number) ?? 0;
+  if (!count) return { count, row: null, device: null };
+  const row = await getMyKeyRow(userId);
+  if (!row) return { count, row, device: null };
   const saved = await e2e.loadDeviceKey(userId);
-  return saved && saved.keyId === row.key_id ? saved : null;
+  return { count, row, device: saved && saved.keyId === row.key_id ? saved : null };
 }
 
-/** First setup, or a reset after a forgotten password. */
-export async function createKeys(userId: string, password: string): Promise<DeviceKey> {
-  const { privateKey, wrapped } = await e2e.createKeyPair(password);
-  const { data, error } = await supabase.rpc('set_message_key', {
-    public_jwk: wrapped.public_jwk, wrapped_key: wrapped.wrapped_key, salt: wrapped.salt,
-    iv: wrapped.iv, iterations: wrapped.iterations,
-  });
-  if (error) throw new Error(error.message);
-  const keyId = data as string;
-  await e2e.saveDeviceKey(userId, keyId, privateKey);
-  return { keyId, privateKey };
-}
-
-/** Unlock on a new device with the messages password. Throws "wrong-password". */
-export async function unlockKeys(userId: string, row: KeyRow, password: string): Promise<DeviceKey> {
+/** Unlock the old key with the old messages password. Throws "wrong-password". */
+export async function unlockOldKey(userId: string, row: KeyRow, password: string): Promise<DeviceKey> {
   let privateKey: CryptoKey;
   try { privateKey = await e2e.unwrapPrivateKey(row, password); }
   catch { throw new Error('wrong-password'); }
-  await e2e.saveDeviceKey(userId, row.key_id, privateKey);
   return { keyId: row.key_id, privateKey };
 }
 
-export const lockDevice = (userId: string) => e2e.forgetDeviceKey(userId);
+/** Decrypt every old message I can and save the text for both people. Returns how many were restored. */
+export async function restoreOldMessages(userId: string, key: DeviceKey): Promise<number> {
+  const { data: rows } = await supabase.from('messages')
+    .select('id, conversation_id, sender_id, sender_key_id, recipient_key_id, ciphertext, iv')
+    .is('body', null).limit(1000);
+  if (!rows?.length) return 0;
+
+  const theirIds = [...new Set(rows.map((r: any) => (r.sender_id === userId ? r.recipient_key_id : r.sender_key_id)))];
+  const { data: pubs } = await supabase.from('message_public_keys').select('key_id, public_jwk').in('key_id', theirIds);
+  const jwk = new Map((pubs ?? []).map((p: any) => [p.key_id, p.public_jwk]));
+
+  const items: { id: string; body: string }[] = [];
+  for (const r of rows as any[]) {
+    const mine = r.sender_id === userId;
+    if ((mine ? r.sender_key_id : r.recipient_key_id) !== key.keyId) continue;
+    const theirs = jwk.get(mine ? r.recipient_key_id : r.sender_key_id);
+    if (!theirs || !r.ciphertext) continue;
+    try {
+      const k = await e2e.conversationKey(key.privateKey, theirs, r.conversation_id);
+      items.push({ id: r.id, body: await e2e.decryptMessage(k, r.ciphertext, r.iv, r.conversation_id, r.sender_id) });
+    } catch { /* can't be read with this key */ }
+  }
+  if (!items.length) return 0;
+  const { data, error } = await supabase.rpc('restore_messages', { items });
+  if (error) throw new Error(error.message);
+  return (data as number) ?? 0;
+}
+
+/** Stop asking about old messages (they stay saved, encrypted, in case the other person restores them). */
+const SKIP_KEY = 'tpn-skip-old-messages';
+export const skipOld = () => { try { localStorage.setItem(SKIP_KEY, '1'); } catch {} };
+export const skippedOld = () => { try { return localStorage.getItem(SKIP_KEY) === '1'; } catch { return false; } };
 
 // ── Conversations ────────────────────────────────────────────
 export async function listConversations(): Promise<Conversation[]> {
@@ -111,85 +135,31 @@ export async function unreadCount(): Promise<number> {
 }
 
 // ── One chat ─────────────────────────────────────────────────
+const COLS = 'id, sender_id, body, created_at';
+const toMessage = (r: any, me: string): ChatMessage =>
+  ({ id: r.id, sender_id: r.sender_id, created_at: r.created_at, text: r.body ?? null, mine: r.sender_id === me });
+
 export class Chat {
-  private shared = new Map<string, Promise<CryptoKey>>();   // "myKeyId|theirKeyId" → AES key
-  private jwks = new Map<string, JsonWebKey>();               // public key id → JWK
-
-  constructor(readonly convo: Conversation, readonly me: string, readonly key: DeviceKey) {}
-
-  private async publicKeys(ids: string[]) {
-    const missing = [...new Set(ids)].filter((id) => !this.jwks.has(id));
-    if (!missing.length) return;
-    const { data } = await supabase.from('message_public_keys').select('key_id, public_jwk').in('key_id', missing);
-    for (const r of data ?? []) this.jwks.set((r as any).key_id, (r as any).public_jwk);
-  }
-
-  private sharedKey(theirKeyId: string): Promise<CryptoKey> | null {
-    const jwk = this.jwks.get(theirKeyId);
-    if (!jwk) return null;
-    const k = `${this.key.keyId}|${theirKeyId}`;
-    if (!this.shared.has(k)) this.shared.set(k, e2e.conversationKey(this.key.privateKey, jwk, this.convo.id));
-    return this.shared.get(k)!;
-  }
-
-  async decryptRows(rows: any[]): Promise<ChatMessage[]> {
-    await this.publicKeys(rows.map((r) => (r.sender_id === this.me ? r.recipient_key_id : r.sender_key_id)));
-    return Promise.all(rows.map(async (r): Promise<ChatMessage> => {
-      const mine = r.sender_id === this.me;
-      const myKeyId = mine ? r.sender_key_id : r.recipient_key_id;
-      const theirKeyId = mine ? r.recipient_key_id : r.sender_key_id;
-      let text: string | null = null;
-      if (myKeyId === this.key.keyId) {
-        const k = this.sharedKey(theirKeyId);
-        if (k) {
-          try { text = await e2e.decryptMessage(await k, r.ciphertext, r.iv, this.convo.id, r.sender_id); } catch {}
-        }
-      }
-      return { id: r.id, sender_id: r.sender_id, created_at: r.created_at, text, mine };
-    }));
-  }
+  constructor(readonly convo: Conversation, readonly me: string) {}
 
   async load(limit = 200): Promise<ChatMessage[]> {
-    const { data } = await supabase.from('messages')
-      .select('id, sender_id, sender_key_id, recipient_key_id, ciphertext, iv, created_at')
+    const { data } = await supabase.from('messages').select(COLS)
       .eq('conversation_id', this.convo.id).order('created_at', { ascending: false }).limit(limit);
-    return this.decryptRows((data ?? []).reverse());
-  }
-
-  /** The other person's current public key, or null if they haven't set up messages yet. */
-  async theirKey(): Promise<{ key_id: string; public_jwk: JsonWebKey } | null> {
-    const { data } = await supabase.rpc('current_message_key', { other: this.convo.other_id });
-    const row = (data as any[])?.[0];
-    if (!row) return null;
-    this.jwks.set(row.key_id, row.public_jwk);
-    return row;
+    return (data ?? []).reverse().map((r) => toMessage(r, this.me));
   }
 
   async send(text: string) {
-    const theirs = await this.theirKey();
-    if (!theirs) throw new Error('no-key');
-    const k = await this.sharedKey(theirs.key_id)!;
-    const { ciphertext, iv } = await e2e.encryptMessage(k, text, this.convo.id, this.me);
-    const { data, error } = await supabase.from('messages').insert({
-      conversation_id: this.convo.id, sender_key_id: this.key.keyId, recipient_key_id: theirs.key_id, ciphertext, iv,
-    }).select('id, sender_id, sender_key_id, recipient_key_id, ciphertext, iv, created_at').single();
+    const { data, error } = await supabase.from('messages')
+      .insert({ conversation_id: this.convo.id, body: text }).select(COLS).single();
     if (error) throw new Error(error.message);
-    return (await this.decryptRows([data]))[0];
+    return toMessage(data, this.me);
   }
 
-  /** Short code both people can compare, to check nobody swapped keys. */
-  async safetyCode(): Promise<string | null> {
-    const theirs = await this.theirKey();
-    const { data: mine } = await supabase.from('message_public_keys').select('public_jwk').eq('key_id', this.key.keyId).maybeSingle();
-    if (!theirs || !mine) return null;
-    return e2e.safetyCode((mine as any).public_jwk, theirs.public_jwk);
-  }
-
-  /** Live updates for this chat. Returns an unsubscribe function. */
+  /** Live updates for this chat (new messages, and old ones being restored). Returns an unsubscribe function. */
   watch(onMessage: (m: ChatMessage) => void) {
     const ch = supabase.channel(`chat-${this.convo.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${this.convo.id}` },
-        async (payload) => { const [m] = await this.decryptRows([payload.new]); onMessage(m); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${this.convo.id}` },
+        (payload) => { if (payload.new && (payload.new as any).id) onMessage(toMessage(payload.new, this.me)); })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }
@@ -214,10 +184,7 @@ export async function unblock(otherId: string, me: string) {
   if (error) throw new Error(error.message);
 }
 
-/**
- * Report a conversation. The last messages are decrypted on this device and sent with the report,
- * so the admin can see what happened – that excerpt is the only message content the admin ever sees.
- */
+/** Report a conversation. The last 20 messages go with the report so the admin can see what happened. */
 export async function reportConversation(convo: Conversation, recent: ChatMessage[], reason: string, details: string | null) {
   const evidence = recent.filter((m) => m.text !== null).slice(-20).map((m) => ({
     from: m.mine ? 'reporter' : 'reported', at: m.created_at, text: (m.text as string).slice(0, 600),

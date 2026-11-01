@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="Messages | Trekking Partners Nepal" description="Private, end-to-end encrypted messages with other trekkers." noindex>
+<Base title="Messages | Trekking Partners Nepal" description="Private messages with other trekkers." noindex>
   <section class="section msgs-page">
     <div class="container">
 
@@ -15,48 +15,28 @@ import Base from '../layouts/Base.astro';
         <button id="gate-btn" type="button" class="btn btn-sun"></button>
       </div>
 
-      <!-- First-time setup -->
-      <form id="setup" class="form-card narrow-panel form-grid" hidden novalidate>
-        <span class="eyebrow">Private messages</span>
-        <h1 class="gate-title">Set your messages password</h1>
-        <p class="muted" style="margin:0">Messages on Trekking Partners Nepal are <strong>end-to-end encrypted</strong>: only you and the person you’re talking to can read them – not us, not anyone else. This password locks your messages key so you can read them on any device.</p>
-        <label class="field">Messages password <span class="hint">at least 8 characters, different from your Google password</span>
-          <input type="password" name="pw" minlength="8" maxlength="200" autocomplete="new-password" required />
-        </label>
-        <label class="field">Repeat password
-          <input type="password" name="pw2" minlength="8" maxlength="200" autocomplete="new-password" required />
-        </label>
-        <label class="check-field"><input type="checkbox" name="ok" required /> I understand nobody can recover this password. If I forget it, I can reset it, but my old messages can’t be read anymore.</label>
-        <p id="setup-error" class="form-error" hidden></p>
-        <button type="submit" class="btn btn-sun" id="setup-btn">Turn on messages</button>
-      </form>
-
-      <!-- New device -->
-      <form id="unlock" class="form-card narrow-panel form-grid" hidden novalidate>
-        <span class="eyebrow">Private messages</span>
-        <h1 class="gate-title">Unlock your messages</h1>
-        <p class="muted" style="margin:0">Enter your messages password to read your messages on this device. You only need to do this once per device.</p>
-        <label class="field">Messages password
-          <input type="password" name="pw" maxlength="200" autocomplete="current-password" required />
-        </label>
-        <p id="unlock-error" class="form-error" hidden></p>
-        <button type="submit" class="btn btn-sun" id="unlock-btn">Unlock</button>
-        <button type="button" class="link-btn" id="forgot">Forgot your messages password?</button>
-      </form>
-
       <!-- Inbox + chat -->
       <div id="app" class="msgs" hidden>
         <aside class="msgs-list" id="list-pane">
           <div class="list-head">
             <h1>Messages</h1>
-            <span class="e2e-tag" title="Only you and the other trekker can read these messages">🔒 End-to-end encrypted</span>
+            <span class="e2e-tag">🔒 Private – only you and the other trekker can read them</span>
           </div>
+          <form id="restore" class="restore" hidden novalidate>
+            <p><strong id="restore-title"></strong></p>
+            <p class="muted">They were sent with the old messages password. Enter it once to bring them back – for you and the other trekker. You won’t need a password again.</p>
+            <input type="password" name="pw" maxlength="200" autocomplete="current-password" placeholder="Old messages password" aria-label="Old messages password" />
+            <p id="restore-error" class="form-error" hidden></p>
+            <div class="restore-actions">
+              <button type="submit" class="btn btn-sun btn-sm" id="restore-btn">Bring them back</button>
+              <button type="button" class="link-btn" id="restore-skip">Not now</button>
+            </div>
+          </form>
           <div id="list" class="convos"></div>
           <div id="list-empty" class="list-empty" hidden>
             <p><strong>No messages yet.</strong></p>
             <p class="muted">Find someone going your way on <a href="/find-partners/">Find partners</a>, then tap <strong>Message</strong> on their post or reply.</p>
           </div>
-          <button type="button" class="link-btn lock-btn" id="lock">Lock messages on this device</button>
         </aside>
 
         <div class="msgs-chat" id="chat-pane">
@@ -74,7 +54,6 @@ import Base from '../layouts/Base.astro';
               <div class="chat-menu">
                 <button type="button" class="menu-btn" id="menu-btn" aria-haspopup="true" aria-expanded="false" aria-label="Chat options">⋯</button>
                 <div class="menu" id="menu" hidden>
-                  <button type="button" id="m-code">Check encryption code</button>
                   <button type="button" id="m-block">Block</button>
                   <button type="button" id="m-report" class="danger">Report</button>
                 </div>
@@ -96,7 +75,7 @@ import Base from '../layouts/Base.astro';
   <dialog id="report-dlg" class="report-dlg">
     <form id="report-form" class="report-form" method="dialog">
       <h2>Report this conversation</h2>
-      <p class="muted">Your report goes to the site admin with <strong>your copy of the last 20 messages</strong>, decrypted on your device, so we can see what happened. The other trekker won’t know who reported them.</p>
+      <p class="muted">Your report goes to the site admin with <strong>the last 20 messages</strong> of this chat, so we can see what happened. The other trekker won’t know who reported them.</p>
       <fieldset class="report-reasons">
         <legend>Reason</legend>
         <label class="check-field"><input type="radio" name="reason" value="spam" required /> Spam or advertising</label>
@@ -139,7 +118,10 @@ import Base from '../layouts/Base.astro';
   .convos { overflow-y: auto; flex: 1; }
   .list-empty { padding: 20px 16px; font-size: .92rem; }
   .list-empty p { margin: 0 0 8px; }
-  .lock-btn { margin: 10px 16px 14px; font-size: .8rem; color: var(--muted); }
+  .restore { margin: 12px 12px 4px; padding: 12px; background: #fff4ec; border: 1px solid #f7c9a8; border-radius: 10px; font-size: .86rem; display: grid; gap: 8px; }
+  .restore p { margin: 0; }
+  .restore input { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; }
+  .restore-actions { display: flex; gap: 14px; align-items: center; }
   .convos :global(.convo) { display: flex; gap: 10px; align-items: center; width: 100%; padding: 12px 16px; background: none; border: 0; border-bottom: 1px solid var(--sky-50); text-align: left; cursor: pointer; font: inherit; color: inherit; }
   .convos :global(.convo:hover) { background: var(--sky-50); }
   .convos :global(.convo.on) { background: var(--sky-100); }
@@ -196,15 +178,13 @@ import Base from '../layouts/Base.astro';
   import * as M from '../lib/messages';
 
   const $ = (id: string) => document.getElementById(id)!;
-  const show = (id: string) => { ['loading', 'gate', 'setup', 'unlock', 'app'].forEach((x) => ($(x).hidden = x !== id)); };
+  const show = (id: string) => { ['loading', 'gate', 'app'].forEach((x) => ($(x).hidden = x !== id)); };
 
   let me = '';
-  let key: M.DeviceKey | null = null;
   let convos: M.Conversation[] = [];
   let chat: M.Chat | null = null;
   let messages: M.ChatMessage[] = [];
   let stopChat: (() => void) | null = null;
-  let theirKeyReady = false;
 
   init();
 
@@ -214,12 +194,9 @@ import Base from '../layouts/Base.astro';
     me = user.id;
     const profile = await getMyProfile(me);
     if (!isComplete(profile)) return gate('Complete your profile to use messages', 'Add your name, age and nationality so other trekkers know who they’re talking to.', 'Complete my profile', () => goToAccount());
-
-    const row = await M.getMyKeyRow(me);
-    if (!row) return setupForm(false);
-    key = await M.deviceKey(me, row);
-    if (!key) return unlockForm(row);
+    if (goBackIfAsked()) return;
     openApp();
+    restoreOld();
   }
 
   function gate(title: string, text: string, label: string, onClick: () => void) {
@@ -231,79 +208,60 @@ import Base from '../layouts/Base.astro';
     show('gate');
   }
 
-  function setupForm(reset: boolean) {
-    const f = $('setup') as HTMLFormElement;
-    if (reset) {
-      f.querySelector('h1')!.textContent = 'Choose a new messages password';
-      $('setup-btn').textContent = 'Reset and continue';
-    }
-    show('setup');
-    f.onsubmit = async (e) => {
-      e.preventDefault();
-      const pw = (f.elements.namedItem('pw') as HTMLInputElement).value;
-      const pw2 = (f.elements.namedItem('pw2') as HTMLInputElement).value;
-      const ok = (f.elements.namedItem('ok') as HTMLInputElement).checked;
-      const err = $('setup-error');
-      err.hidden = true;
-      const fail = (m: string) => { err.textContent = m; err.hidden = false; };
-      if (pw.length < 8) return fail('Use at least 8 characters.');
-      if (pw !== pw2) return fail('The two passwords don’t match.');
-      if (!ok) return fail('Please tick the box to confirm you understand.');
-      const btn = $('setup-btn') as HTMLButtonElement;
-      btn.disabled = true; btn.textContent = 'Setting up…';
-      try {
-        key = await M.createKeys(me, pw);
-        if (!goBackIfAsked()) openApp();
-      } catch (x: any) {
-        fail('Could not set up messages: ' + x.message);
-        btn.disabled = false; btn.textContent = reset ? 'Reset and continue' : 'Turn on messages';
-      }
-    };
-  }
-
-  function unlockForm(row: M.KeyRow) {
-    const f = $('unlock') as HTMLFormElement;
-    show('unlock');
-    f.onsubmit = async (e) => {
-      e.preventDefault();
-      const pw = (f.elements.namedItem('pw') as HTMLInputElement).value;
-      const err = $('unlock-error');
-      err.hidden = true;
-      const btn = $('unlock-btn') as HTMLButtonElement;
-      btn.disabled = true; btn.textContent = 'Unlocking…';
-      try {
-        key = await M.unlockKeys(me, row, pw);
-        if (!goBackIfAsked()) openApp();
-      } catch (x: any) {
-        err.textContent = x.message === 'wrong-password' ? 'That password isn’t right. Try again.' : 'Could not unlock: ' + x.message;
-        err.hidden = false;
-        btn.disabled = false; btn.textContent = 'Unlock';
-      }
-    };
-    $('forgot').onclick = () => {
-      if (!confirm('Reset your messages password?\n\nYou’ll keep your conversations, but messages sent before the reset can’t be read anymore – on any device. This can’t be undone.')) return;
-      setupForm(true);
-    };
-  }
-
-  // Came from a "Turn on messages" button? Go back there once set up.
+  // Old links from "Turn on messages" buttons: messages are always on now, so just go back.
   function goBackIfAsked() {
     const next = new URLSearchParams(location.search).get('next');
     if (next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/messages')) {
-      location.href = next;
+      location.replace(next);
       return true;
     }
     return false;
   }
 
+  // ── Messages sent before passwords were removed ────────────
+  // Restored automatically if this device still has the old key; otherwise we ask once for the old password.
+  async function restoreOld() {
+    let st;
+    try { st = await M.lockedStatus(me); } catch { return; }
+    if (!st.count || !st.row) return;
+    if (st.device) {
+      try { if (await M.restoreOldMessages(me, st.device)) afterRestore(); } catch {}
+      return;
+    }
+    if (M.skippedOld()) return;
+    const f = $('restore') as HTMLFormElement;
+    $('restore-title').textContent = st.count === 1 ? 'You have 1 older message to bring back' : `You have ${st.count} older messages to bring back`;
+    f.hidden = false;
+    $('restore-skip').onclick = () => { M.skipOld(); f.hidden = true; };
+    f.onsubmit = async (e) => {
+      e.preventDefault();
+      const pw = (f.elements.namedItem('pw') as HTMLInputElement).value;
+      const err = $('restore-error');
+      err.hidden = true;
+      if (!pw) return;
+      const btn = $('restore-btn') as HTMLButtonElement;
+      btn.disabled = true; btn.textContent = 'Bringing back…';
+      try {
+        const key = await M.unlockOldKey(me, st.row!, pw);
+        await M.restoreOldMessages(me, key);
+        f.hidden = true;
+        afterRestore();
+      } catch (x: any) {
+        err.textContent = x.message === 'wrong-password' ? 'That password isn’t right. Try again.' : 'Could not bring them back: ' + x.message;
+        err.hidden = false;
+      } finally { btn.disabled = false; btn.textContent = 'Bring them back'; }
+    };
+  }
+
+  async function afterRestore() {
+    if (!chat) return;
+    messages = await chat.load();
+    render();
+  }
+
   // ── Inbox ──────────────────────────────────────────────────
   async function openApp() {
     show('app');
-    $('lock').onclick = async () => {
-      if (!confirm('Lock messages on this device? You’ll need your messages password to read them here again.')) return;
-      await M.lockDevice(me);
-      location.reload();
-    };
     await refreshList();
     M.watchConversations(me, () => refreshList());
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshList(); });
@@ -334,7 +292,7 @@ import Base from '../layouts/Base.astro';
   // ── One chat ───────────────────────────────────────────────
   async function openChat(c: M.Conversation) {
     stopChat?.();
-    chat = new M.Chat(c, me, key!);
+    chat = new M.Chat(c, me);
     history.replaceState(null, '', `/messages/?c=${c.id}`);
     $('app').classList.add('chat-open');
     $('chat-none').hidden = true;
@@ -349,15 +307,15 @@ import Base from '../layouts/Base.astro';
     $('body').replaceChildren(el('p', 'hello', 'Loading…'));
     document.querySelectorAll('.convo').forEach((n, i) => n.classList.toggle('on', convos[i]?.id === c.id));
 
-    const [loaded, theirs] = await Promise.all([chat.load(), chat.theirKey()]);
+    const loaded = await chat.load();
     if (chat?.convo.id !== c.id) return;          // switched chat meanwhile
     messages = loaded;
-    theirKeyReady = !!theirs;
     render();
     setState(c);
     M.markRead(c.id).then(() => refreshList());
     stopChat = chat.watch((m) => {
-      if (messages.some((x) => x.id === m.id)) return;
+      const i = messages.findIndex((x) => x.id === m.id);
+      if (i >= 0) { if (m.text !== null) { messages[i] = m; render(); } return; }
       messages.push(m);
       render();
       if (!m.mine) M.markRead(c.id);
@@ -379,12 +337,9 @@ import Base from '../layouts/Base.astro';
     } else if (c.blocked) {
       state.append('You can’t message this trekker.');
       blocked = true;
-    } else if (!theirKeyReady) {
-      state.append(`Waiting for ${who} to turn on messages. We’ve let them know – you can write once they have.`);
     }
     state.hidden = !state.childNodes.length;
-    composer.hidden = blocked || !theirKeyReady;
-    $('m-code').hidden = !theirKeyReady;
+    composer.hidden = blocked;
   }
 
   const ago = (iso: string) => {
@@ -400,9 +355,7 @@ import Base from '../layouts/Base.astro';
       const c = chat!.convo;
       const who = authorName(c.other).split(' ')[0];
       const text = c.blocked ? 'No messages.'
-        : !theirKeyReady && c.started_by_me ? `${who} will see this chat as soon as they turn on messages. We’ve sent them a notification and an email – you’ll be able to write here once they have.`
-        : !theirKeyReady ? `${who} wants to chat, but needs to finish turning on messages first.`
-        : `Say hi to ${who}! Share your dates, pace and plans. Messages are end-to-end encrypted – only you two can read them.`;
+        : `Say hi to ${who}! Share your dates, pace and plans. Messages are private – only you two can read them.`;
       body.replaceChildren(el('p', 'hello', text));
       return;
     }
@@ -412,7 +365,7 @@ import Base from '../layouts/Base.astro';
       const day = new Date(m.created_at).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
       if (day !== lastDay) { nodes.push(el('div', 'day', day)); lastDay = day; }
       const b = el('div', ['bubble', m.mine ? 'mine' : '', m.text === null ? 'locked' : ''].filter(Boolean).join(' '),
-        m.text ?? '🔒 This message was sent before a messages password reset and can’t be read on this account anymore.');
+        m.text ?? '🔒 Older message, saved with the old messages password. It will appear once you or the other trekker brings older messages back.');
       const t = el('time', '', new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       t.dateTime = m.created_at;
       b.append(t);
@@ -443,8 +396,7 @@ import Base from '../layouts/Base.astro';
       text.value = ''; text.style.height = 'auto';
       render();
     } catch (x: any) {
-      if (x.message === 'no-key') { theirKeyReady = false; setState(chat.convo); }
-      else alert(/row-level security/i.test(x.message) ? 'You can’t message this trekker.' : 'Could not send: ' + x.message);
+      alert(/row-level security/i.test(x.message) ? 'You can’t message this trekker.' : 'Could not send: ' + x.message);
     } finally {
       send.disabled = false;
       text.focus();
@@ -459,7 +411,7 @@ import Base from '../layouts/Base.astro';
     refreshList();
   });
 
-  // ── Menu: encryption code, block, report ───────────────────
+  // ── Menu: block, report ───────────────────
   const menu = $('menu'), menuBtn = $('menu-btn');
   menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -467,12 +419,6 @@ import Base from '../layouts/Base.astro';
     menuBtn.setAttribute('aria-expanded', String(!menu.hidden));
   });
   document.addEventListener('click', () => { menu.hidden = true; menuBtn.setAttribute('aria-expanded', 'false'); });
-
-  $('m-code').addEventListener('click', async () => {
-    const code = await chat?.safetyCode();
-    if (!code) return;
-    alert(`Encryption code for this chat:\n\n${code}\n\nIf you meet or call this trekker, you can both check you see the same code. If it matches, nobody can be secretly reading your messages.`);
-  });
 
   async function toggleBlock() {
     if (!chat) return;

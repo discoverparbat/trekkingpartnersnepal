@@ -88,11 +88,6 @@ p { margin: 0 0 1em; }
 .msg-link:hover { color: var(--white); background: rgba(255,255,255,.1); }
 
 /* "Turn on messages" nudge */
-.msg-nudge { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: #fff4ec; border: 1px solid #f7c9a8; border-radius: var(--radius); padding: 12px 14px; margin: 0 0 20px; font-size: .92rem; color: var(--ink); }
-.msg-nudge-icon { font-size: 1.2rem; }
-.msg-nudge-text { flex: 1; min-width: 200px; }
-.msg-nudge-x { background: none; border: 0; color: var(--muted); font-size: 1rem; cursor: pointer; padding: 4px; }
-.msg-nudge-x:hover { color: var(--ink); }
 
 /* Notification bell */
 .bell-wrap { position: relative; }

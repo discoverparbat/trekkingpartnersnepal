@@ -170,8 +170,7 @@ async function loadReports() {
         }, 'danger'));
       } else target.append(el('p', 'muted', 'This answer has already been deleted.'));
     } else if (r.kind === 'conversation') {
-      // Messages are end-to-end encrypted. The only content we see is the excerpt the reporter's
-      // own device decrypted and attached to the report.
+      // The last 20 messages of the chat, attached by the reporter's browser.
       authorId = r.reported_user;
       target.append(el('div', 'mod-title', `${nameOf(r.reported_user)} → reported by ${nameOf(r.reporter_id)}`));
       const lines = Array.isArray(r.evidence) ? r.evidence : [];
@@ -188,7 +187,7 @@ async function loadReports() {
       } else {
         target.append(el('p', 'muted', 'No messages were attached (the chat may have been empty).'));
       }
-      target.append(el('p', 'mod-note', 'Excerpt sent from the reporter’s device. Messages are end-to-end encrypted, so we can’t see anything else.'));
+      target.append(el('p', 'mod-note', 'The last 20 messages, attached when the report was sent.'));
       if (r.reported_user) actions.append(link('View profile', trekkerUrl(r.reported_user), 'mod-link'));
     } else {
       authorId = r.target_id;
