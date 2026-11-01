@@ -65,6 +65,18 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
           </div>
         </form>
 
+        <div class="form-card email-card" id="messages-card" hidden>
+          <h2 class="form-title">Private messages</h2>
+          <div id="msg-off" hidden>
+            <p class="muted small" style="margin:0 0 12px">Turn on messages so trekkers who match your dates can contact you. They’re end-to-end encrypted – only you and the other trekker can read them. You’ll choose a messages password; it takes a minute.</p>
+            <a href="/messages/?next=/account/" class="btn btn-sun btn-sm">Turn on messages</a>
+          </div>
+          <div id="msg-on" hidden>
+            <p class="muted small" style="margin:0 0 12px">✓ Messages are on. Your messages are end-to-end encrypted.</p>
+            <a href="/messages/" class="btn btn-outline btn-sm">Open messages</a>
+          </div>
+        </div>
+
         <div class="form-card email-card" id="email-alerts">
           <h2 class="form-title">Email alerts</h2>
           <label class="check-field"><input type="checkbox" id="email-replies" /> Email me when someone replies to my posts (or a post I replied on), answers my Community questions, or sends me a private message</label>
@@ -186,6 +198,12 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
       saved.hidden = false;
       setTimeout(() => (saved.hidden = true), 2500);
       document.getElementById('acc-title')!.textContent = 'Your trekker profile';
+      // Profile just completed: offer messages straight away
+      const card = document.getElementById('messages-card')!;
+      if (card.hidden && document.getElementById('msg-on')!.hidden) {
+        document.getElementById('msg-off')!.hidden = false;
+        card.hidden = false;
+      }
 
       // Came here to finish setting up? Go back to where they were.
       const next = peekNext() ? takeNext() : null;
@@ -203,6 +221,15 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
       const s = document.getElementById('email-saved')!;
       s.hidden = false; setTimeout(() => (s.hidden = true), 2000);
     });
+
+    // Private messages card (update 22)
+    if (isComplete(profile)) {
+      const { data: key, error: keyErr } = await supabase.from('message_keys').select('user_id').eq('user_id', user.id).maybeSingle();
+      if (!keyErr) {
+        document.getElementById(key ? 'msg-on' : 'msg-off')!.hidden = false;
+        document.getElementById('messages-card')!.hidden = false;
+      }
+    }
 
     loadMyPosts(user.id);
   }

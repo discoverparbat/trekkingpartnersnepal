@@ -138,3 +138,10 @@ One-to-one, **end-to-end encrypted** messages between members, started from a pa
 Setup (already applied to the live project on 1 Nov 2026):
 1. Run `supabase/update-22-messages.sql` in the SQL Editor (needs updates 4, 5, 8, 10, 13).
 2. Deploy `supabase/functions/message-alert/index.ts` as **message-alert** (JWT verification **off**; uses `RESEND_API_KEY`).
+
+### Getting members ready for messages (update 23)
+- "Turn on messages" nudges: a banner on Find partners and on the member's own posts (not dismissable on a brand-new
+  post), and a Private messages card in My account. Dismissed banners stay hidden for 3 weeks (`src/lib/msgNudge.ts`).
+- After setting up from a nudge, members are taken back to the page they came from (`/messages/?next=…`).
+- Run `supabase/update-23-messages-ready.sql`: when someone turns on messages, everyone who was waiting to write to them
+  gets a 🔔 "turned on messages – you can write now". (Applied to the live project on 1 Nov 2026.)

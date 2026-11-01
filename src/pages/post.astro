@@ -14,6 +14,7 @@ import Base from '../layouts/Base.astro';
       </div>
 
       <div id="app" hidden>
+        <div id="msg-nudge" hidden></div>
         <p id="new-note" class="form-note" hidden>✓ Your post is live. Other trekkers can now find it and reply. You can close it from <a href="/account/">My account</a> once you’ve found partners.</p>
 
         <div id="trek-alerts" class="trek-alerts" hidden></div>
@@ -180,6 +181,7 @@ import Base from '../layouts/Base.astro';
   import { fetchTrip, fetchTrips, fetchProfiles, postCard, avatar, authorName, authorFacts, dateRange, timeAgo, paceLabel, el, type Author, type Trip } from '../lib/posts';
   import { reportButton } from '../lib/report';
   import { startConversation, START_ERRORS } from '../lib/messages';
+  import { mountNudge } from '../lib/msgNudge';
   import { showTrekAlerts } from '../lib/community';
   import { getTrek } from '../data/treks';
   import { getRegion } from '../data/regions';
@@ -243,7 +245,12 @@ import Base from '../layouts/Base.astro';
         messageTrekker(trip.user_id, msg);
       });
     }
-    if (isOwner) markOwnerShare();
+    if (isOwner) {
+      markOwnerShare();
+      // Post authors are who others will message – make sure they can receive messages.
+      // Not dismissable on a brand-new post; dismissable later.
+      mountNudge($('msg-nudge'), 'Turn on messages so trekkers can contact you privately about this trek.', !params.has('new'));
+    }
     if (!isOwner) {
       $('t-report').replaceChildren(reportButton('post', trip.id, 'Report post'));
       $('t-report').hidden = false;

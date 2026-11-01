@@ -253,7 +253,7 @@ import Base from '../layouts/Base.astro';
       btn.disabled = true; btn.textContent = 'Setting up…';
       try {
         key = await M.createKeys(me, pw);
-        openApp();
+        if (!goBackIfAsked()) openApp();
       } catch (x: any) {
         fail('Could not set up messages: ' + x.message);
         btn.disabled = false; btn.textContent = reset ? 'Reset and continue' : 'Turn on messages';
@@ -273,7 +273,7 @@ import Base from '../layouts/Base.astro';
       btn.disabled = true; btn.textContent = 'Unlocking…';
       try {
         key = await M.unlockKeys(me, row, pw);
-        openApp();
+        if (!goBackIfAsked()) openApp();
       } catch (x: any) {
         err.textContent = x.message === 'wrong-password' ? 'That password isn’t right. Try again.' : 'Could not unlock: ' + x.message;
         err.hidden = false;
@@ -284,6 +284,16 @@ import Base from '../layouts/Base.astro';
       if (!confirm('Reset your messages password?\n\nYou’ll keep your conversations, but messages sent before the reset can’t be read anymore – on any device. This can’t be undone.')) return;
       setupForm(true);
     };
+  }
+
+  // Came from a "Turn on messages" button? Go back there once set up.
+  function goBackIfAsked() {
+    const next = new URLSearchParams(location.search).get('next');
+    if (next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/messages')) {
+      location.href = next;
+      return true;
+    }
+    return false;
   }
 
   // ── Inbox ──────────────────────────────────────────────────
@@ -387,8 +397,13 @@ import Base from '../layouts/Base.astro';
   function render() {
     const body = $('body');
     if (!messages.length) {
-      const who = authorName(chat!.convo.other).split(' ')[0];
-      body.replaceChildren(el('p', 'hello', `Say hi to ${who}! Share your dates, pace and plans. Messages are end-to-end encrypted – only you two can read them.`));
+      const c = chat!.convo;
+      const who = authorName(c.other).split(' ')[0];
+      const text = c.blocked ? 'No messages.'
+        : !theirKeyReady && c.started_by_me ? `${who} will see this chat as soon as they turn on messages. We’ve sent them a notification and an email – you’ll be able to write here once they have.`
+        : !theirKeyReady ? `${who} wants to chat, but needs to finish turning on messages first.`
+        : `Say hi to ${who}! Share your dates, pace and plans. Messages are end-to-end encrypted – only you two can read them.`;
+      body.replaceChildren(el('p', 'hello', text));
       return;
     }
     const nodes: HTMLElement[] = [];

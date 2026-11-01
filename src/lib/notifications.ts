@@ -7,7 +7,7 @@ import { fetchProfiles } from './posts';
 
 export interface Notice {
   id: string;
-  kind: 'welcome' | 'first_post' | 'reply' | 'thread_reply' | 'answer' | 'thread_answer' | 'best_answer' | 'moved_to_partners' | 'announcement' | 'new_question' | 'message_invite' | 'admin_alert';
+  kind: 'welcome' | 'first_post' | 'reply' | 'thread_reply' | 'answer' | 'thread_answer' | 'best_answer' | 'moved_to_partners' | 'announcement' | 'new_question' | 'message_invite' | 'message_ready' | 'admin_alert';
   trip_id: string | null;
   conversation_id?: string | null;   // message_invite only (update 22)
   question_id: string | null;
@@ -68,18 +68,20 @@ export async function fetchNotices(userId: string, limit = 20): Promise<NoticeVi
     .filter((n) => !QUESTION_KINDS.includes(n.kind) || questionOf.has(n.question_id))
     .map((n) => n.kind === 'announcement' || n.kind === 'admin_alert'
       ? announcement(n as Notice)
-      : n.kind === 'message_invite'
+      : n.kind === 'message_invite' || n.kind === 'message_ready'
       ? messageInvite(n as Notice, n.actor_id ? actorOf.get(n.actor_id) : undefined, n.trip_id ? trekOf.get(n.trip_id) : undefined)
       : QUESTION_KINDS.includes(n.kind)
       ? describeQuestion(n as Notice, questionOf.get(n.question_id)!, n.actor_id ? actorOf.get(n.actor_id) : undefined)
       : describe(n as Notice, n.trip_id ? trekOf.get(n.trip_id) : undefined, n.actor_id ? actorOf.get(n.actor_id) : undefined));
 }
 
-/** Someone wants to message you, but you haven't set up messages yet (update 22) */
+/** Someone wants to message you but you haven't set up messages yet (update 22), or someone you were waiting for is now ready (update 23) */
 function messageInvite(n: Notice, actor?: { display_name: string | null; avatar_url: string | null; team?: boolean }, trek?: string): NoticeView {
   const who = (actor?.team ? actor.display_name : actor?.display_name?.split(' ')[0]) || 'A trekker';
   return { ...n, icon: '✉️', strong: who,
-    text: ` wants to message you${trek ? ` about ${trek}` : ''}. Turn on messages to read and reply – it takes a minute.`,
+    text: n.kind === 'message_ready'
+      ? ` turned on messages – you can write to them now${trek ? ` about ${trek}` : ''}.`
+      : ` wants to message you${trek ? ` about ${trek}` : ''}. Turn on messages to read and reply – it takes a minute.`,
     href: n.conversation_id ? `/messages/?c=${encodeURIComponent(n.conversation_id)}` : '/messages/',
     actorAvatar: actor?.avatar_url ?? null };
 }
