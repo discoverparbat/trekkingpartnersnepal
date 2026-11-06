@@ -129,15 +129,20 @@ export async function onRequestGet(context: any) {
   };
   const jsonLd = JSON.stringify(schema).replace(/</g, '\\u003c');
 
+  // Unanswered questions are thin pages: keep the template's noindex until someone answers.
+  // Once a question has an answer it becomes indexable (and appears in /community/sitemap.xml).
+  const indexable = n > 0;
   const extra =
-    `<meta name="robots" content="max-image-preview:large">` +
+    (indexable ? `<meta name="robots" content="max-image-preview:large">` : '') +
     `<meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(description)}">` +
     `<meta property="og:image:alt" content="${esc(trekName)}">` +
     `<script type="application/ld+json">${jsonLd}</script>`;
 
-  const out = new HTMLRewriter()
-    .on('title', new SetText(`${title} | Trekking Partners Nepal`))
-    .on('meta[name="robots"]', { element(el: any) { el.remove(); } })      // the empty template is noindex; real questions are not
+  let rw = new HTMLRewriter()
+    .on('title', new SetText(`${title} | Trekking Partners Nepal`));
+  // the empty template is noindex; answered questions are not
+  if (indexable) rw = rw.on('meta[name="robots"]', { element(el: any) { el.remove(); } });
+  const out = rw
     .on('meta[name="description"]', new SetAttr(description))
     .on('meta[property="og:title"]', new SetAttr(title))
     .on('meta[property="og:description"]', new SetAttr(description))

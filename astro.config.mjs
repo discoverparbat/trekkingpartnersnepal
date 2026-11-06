@@ -7,7 +7,7 @@ export default defineConfig({
   integrations: [
     sitemap({
       // keep private pages out of the sitemap
-      filter: (page) => !/\/(admin|login|account|post|trekker|departure|unsubscribe|find-partners\/new|community\/ask|community\/question)\/$/.test(page),
+      filter: (page) => !/\/(admin|login|account|post|trekker|departure|unsubscribe|privacy|terms|find-partners\/new|community\/ask|community\/question)\/$/.test(page),
     }),
   ],
 });

@@ -1,19 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
 import { operator } from '../data/operator';
+import { organization } from '../data/social';
 
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
   name: 'About Trekking Partners Nepal',
   url: 'https://trekkingpartnersnepal.com/about/',
-  publisher: {
-    '@type': 'Organization',
-    name: 'Trekking Partners Nepal',
-    url: 'https://trekkingpartnersnepal.com/',
-    email: 'hello@trekkingpartnersnepal.com',
-    parentOrganization: { '@type': 'TravelAgency', name: operator.name, url: operator.site },
-  },
+  publisher: organization,
 };
 ---
 <Base title="About Us | Trekking Partners Nepal" description="Trekking Partners Nepal is a free noticeboard for finding trekking partners in Nepal, run by the local team behind Discover Parbat." schema={schema}>

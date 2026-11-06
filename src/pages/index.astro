@@ -8,14 +8,23 @@ import NewsCard from '../components/NewsCard.astro';
 import { getArticles } from '../lib/news';
 import { regions } from '../data/regions';
 import { treks, treksInRegion } from '../data/treks';
+import { organization } from '../data/social';
 
 const latestNews = (await getArticles()).slice(0, 3);
 
 const schema = {
   '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: 'Trekking Partners Nepal',
-  url: 'https://trekkingpartnersnepal.com/',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': 'https://trekkingpartnersnepal.com/#website',
+      name: 'Trekking Partners Nepal',
+      alternateName: 'TPN',
+      url: 'https://trekkingpartnersnepal.com/',
+      publisher: { '@id': organization['@id'] },
+    },
+    organization,
+  ],
 };
 ---
 <Base
