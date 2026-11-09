@@ -1,4 +1,4 @@
--- Update 25: Happy Tihar greeting (Laxmi Puja, 9 Nov 2026)
+-- Update 25: Happy Tihar greeting (Gai Tihar, 9 Nov 2026; Laxmi Puja was 8 Nov)
 --   • a bell announcement for every member (uses public.announce() from update-12)
 --   • the "tihar-2083" news email (uses public.send_news_email() from update-17)
 -- The bell links to /tihar/, which redirects to the Discover Parbat Tihar article (public/_redirects).
@@ -14,7 +14,7 @@ begin
                  where kind = 'announcement' and title = 'Happy Tihar! 🪔 शुभ दीपावली') then
     perform public.announce(
       'Happy Tihar! 🪔 शुभ दीपावली',
-      'Wishing you and your loved ones a bright, joyful Tihar from all of us at Trekking Partners Nepal. Tonight is Laxmi Puja, when homes glow with oil lamps and marigolds, and Bhai Tika is on Wednesday 11 Nov. Read what each of the five days means.',
+      'Wishing you and your loved ones a bright, joyful Tihar from all of us at Trekking Partners Nepal. Homes glowed with oil lamps and marigolds for Laxmi Puja last night, and Bhai Tika is on Wednesday 11 Nov. Read what each of the five days means.',
       '/tihar/'
     );
   end if;

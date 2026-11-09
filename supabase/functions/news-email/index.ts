@@ -83,7 +83,7 @@ const CAMPAIGNS: Record<string, Campaign> = {
     html: (name) =>
       p(`Hi ${esc(name)},`) +
       p(`<strong>शुभ दीपावली! तिहारको हार्दिक शुभकामना!</strong> Happy Tihar from all of us at Trekking Partners Nepal.`) +
-      p(`Tonight is Laxmi Puja, the brightest night of Tihar, Nepal’s five-day festival of lights. Homes glow with oil lamps and marigold garlands, children go door to door singing Bhailo and Deusi, and on Wednesday sisters give their brothers a seven-colour tika and pray for their long lives. Tihar honours crows, dogs, cows, oxen, the land and family – a reminder that every living being has a place in the sacred.`) +
+      p(`Tihar is Nepal’s five-day festival of lights. Homes glowed with oil lamps and marigold garlands for Laxmi Puja last night, children go door to door singing Bhailo and Deusi, and on Wednesday sisters give their brothers a seven-colour tika and pray for their long lives. Tihar honours crows, dogs, cows, oxen, the land and family – a reminder that every living being has a place in the sacred.`) +
       p(`We wish you and your loved ones light, good health, and many happy days on the trail.`) +
       `<a href="${TIHAR_ARTICLE}" style="display:block;text-decoration:none;color:#0f1d33;border:1px solid #d6e3f3;border-radius:12px;overflow:hidden;margin:0 0 18px">
 <img src="https://discoverparbat.com/article/tihar-festival-nepal-hero.jpg" width="472" alt="Tihar night in a Nepali hill village with oil lamps, marigold garlands and Himalayan peaks" style="display:block;width:100%;height:auto;border:0">
