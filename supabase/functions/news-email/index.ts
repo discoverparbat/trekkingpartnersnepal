@@ -37,6 +37,7 @@ type Campaign = { subject: string; html: (name: string) => string };
 
 const ARTICLE = 'https://discoverparbat.com/article/vijaya-dashami-meaning-story';
 const WEATHER_ARTICLE = 'https://discoverparbat.com/article/cyclone-arnab-nepal-trekking-weather';
+const TIHAR_ARTICLE = 'https://discoverparbat.com/article/tihar-festival-nepal-spiritual-significance';
 
 const CAMPAIGNS: Record<string, Campaign> = {
   'dashain-2083': {
@@ -76,6 +77,23 @@ const CAMPAIGNS: Record<string, Campaign> = {
 </div></a>` +
       `<div style="margin:0 0 22px">${button(WEATHER_ARTICLE, 'Read the full update')}</div>` +
       p(`<span style="font-size:14px;color:#55657d">Planning a trek with partners this week? Talk to them about moving your start date, and update the dates on your post in ${link(`${SITE}/account/`, 'My account')}. Questions about conditions? Ask in the ${link(`${SITE}/community/`, 'Community')}.</span>`),
+  },
+  'tihar-2083': {
+    subject: 'Happy Tihar from Nepal 🪔',
+    html: (name) =>
+      p(`Hi ${esc(name)},`) +
+      p(`<strong>शुभ दीपावली! तिहारको हार्दिक शुभकामना!</strong> Happy Tihar from all of us at Trekking Partners Nepal.`) +
+      p(`Tonight is Laxmi Puja, the brightest night of Tihar, Nepal’s five-day festival of lights. Homes glow with oil lamps and marigold garlands, children go door to door singing Bhailo and Deusi, and on Wednesday sisters give their brothers a seven-colour tika and pray for their long lives. Tihar honours crows, dogs, cows, oxen, the land and family – a reminder that every living being has a place in the sacred.`) +
+      p(`We wish you and your loved ones light, good health, and many happy days on the trail.`) +
+      `<a href="${TIHAR_ARTICLE}" style="display:block;text-decoration:none;color:#0f1d33;border:1px solid #d6e3f3;border-radius:12px;overflow:hidden;margin:0 0 18px">
+<img src="https://discoverparbat.com/article/tihar-festival-nepal-hero.jpg" width="472" alt="Tihar night in a Nepali hill village with oil lamps, marigold garlands and Himalayan peaks" style="display:block;width:100%;height:auto;border:0">
+<div style="padding:14px 16px">
+<div style="font-size:12px;color:#55657d;margin:0 0 4px">DISCOVER PARBAT</div>
+<div style="font-size:17px;font-weight:bold;line-height:1.35;margin:0 0 6px">Tihar Festival in Nepal: Spiritual Meaning of All 5 Days</div>
+<div style="font-size:14px;color:#55657d;line-height:1.45">The story of Yama and Yamuna, why Nepalis honour crows, dogs and cows, and what each day of the festival of lights means.</div>
+</div></a>` +
+      `<div style="margin:0 0 22px">${button(TIHAR_ARTICLE, 'Read the article')}</div>` +
+      p(`<span style="font-size:14px;color:#55657d">In Nepal this week? Bhai Tika is on Wednesday 11 November; many offices close and buses fill up around it, so plan travel early. Looking for company on the trail? ${link(`${SITE}/find-partners/`, 'Find a trekking partner')}.</span>`),
   },
 };
 
