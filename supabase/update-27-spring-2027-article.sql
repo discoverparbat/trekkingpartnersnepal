@@ -49,7 +49,7 @@ By late May the monsoon is getting closer. Build a spare day or two into your pl
 
 ## Getting to the trailheads
 
-- **Everest region:** check where your Lukla flight leaves from when you book. In recent peak seasons, many Lukla flights have flown from Manthali (Ramechhap), several hours' drive from Kathmandu, instead of Kathmandu airport. Partners can share the jeep.
+- **Everest region:** in the spring and autumn peak seasons, most Lukla flights leave from Manthali Airport in Ramechhap, not Kathmandu. It's a 4–5 hour drive east of Kathmandu, usually overnight or before dawn to catch the early flights, so check where yours departs when you book. Partners can share the jeep.
 - **Annapurna region:** Pokhara is the base for almost everything. It's the easiest place to meet a partner the day before and pick up permits together.
 - **Langtang:** a long road day north from Kathmandu. Sharing a private jeep with a partner makes it far more comfortable.
 
