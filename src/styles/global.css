@@ -258,6 +258,12 @@ a.post:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-co
 .post-reply-btn:hover, a.post:hover .post-reply-btn { background: var(--sun-dark); }
 .post-reply-btn:hover { transform: translateY(-1px); }
 .post-reply-btn:focus-visible { outline: 3px solid var(--night-800); outline-offset: 2px; }
+/* "From our Facebook group" cards (update 26) */
+.post-group { background: linear-gradient(180deg, #f3f6fd, var(--white) 120px); border-color: #d6e0f5; }
+.group-icon { display: inline-grid; place-items: center; background: #1877f2; color: #fff; }
+.post-group .post-name { color: #1d4fa8; }
+.post-fb-btn { background: #1877f2; box-shadow: 0 8px 20px -8px rgba(24,119,242,.6); }
+.post-fb-btn:hover, a.post-group:hover .post-fb-btn { background: #1462c9; }
 .skeleton {
   background: linear-gradient(100deg, var(--white) 30%, var(--sky-50) 50%, var(--white) 70%) !important;
   background-size: 200% 100% !important; animation: shimmer 1.4s linear infinite;

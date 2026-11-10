@@ -77,6 +77,7 @@ const FB = 'https://www.facebook.com/groups/887606059135821';
 
 <script>
   import { fetchTrips, postCard, type Trip } from '../lib/posts';
+  import { fetchGroupPosts, groupPostCard, isGroupPost, type GroupPost } from '../lib/groupPosts';
   import { getTrek } from '../data/treks';
 
   const grid = document.getElementById('posts')!;
@@ -93,17 +94,19 @@ const FB = 'https://www.facebook.com/groups/887606059135821';
   month.value = params.get('month') ?? '';
   length.value = params.get('length') ?? '';
 
-  let all: Trip[] = [];
+  // Member posts and posts shared from the Facebook group, filtered and sorted together
+  type Item = Trip | GroupPost;
+  let all: Item[] = [];
 
   // A post matches a month if its trek dates overlap that month
-  function inMonth(t: Trip, m: string) {
+  function inMonth(t: Item, m: string) {
     const start = t.start_date.slice(0, 7);
     const end = (t.end_date ?? t.start_date).slice(0, 7);
     return start <= m && end >= m;
   }
 
   // Trip length: the trekker's own dates if given, otherwise the trek's usual length
-  function tripDays(t: Trip) {
+  function tripDays(t: Item) {
     if (t.end_date) {
       return Math.round((new Date(t.end_date).getTime() - new Date(t.start_date).getTime()) / 86400000) + 1;
     }
@@ -111,7 +114,7 @@ const FB = 'https://www.facebook.com/groups/887606059135821';
     return typical.length ? Math.max(...typical) : 0;
   }
 
-  function lengthMatches(t: Trip, l: string) {
+  function lengthMatches(t: Item, l: string) {
     const d = tripDays(t);
     if (!d) return true;
     if (l === 'short') return d <= 7;
@@ -125,7 +128,7 @@ const FB = 'https://www.facebook.com/groups/887606059135821';
       (!region.value || t.region === region.value) &&
       (!month.value || inMonth(t, month.value)) &&
       (!length.value || lengthMatches(t, length.value)));
-    grid.replaceChildren(...list.map(postCard));
+    grid.replaceChildren(...list.map((t) => (isGroupPost(t) ? groupPostCard(t) : postCard(t))));
     grid.hidden = list.length === 0;
     empty.hidden = list.length > 0;
     emptyTitle.textContent = all.length ? 'No posts match these filters' : 'No open posts yet';
@@ -142,7 +145,10 @@ const FB = 'https://www.facebook.com/groups/887606059135821';
   month.addEventListener('change', render);
   length.addEventListener('change', render);
 
-  fetchTrips()
-    .then((trips) => { all = trips; render(); })
+  Promise.all([fetchTrips(), fetchGroupPosts()])
+    .then(([trips, group]) => {
+      all = [...trips, ...group].sort((a, b) => a.start_date.localeCompare(b.start_date));
+      render();
+    })
     .catch((e) => { console.error(e.message); all = []; render(); });
 </script>

@@ -148,3 +148,16 @@ Setup (already applied to the live project on 1 Nov 2026):
 - After setting up from a nudge, members are taken back to the page they came from (`/messages/?next=…`).
 - Run `supabase/update-23-messages-ready.sql`: when someone turns on messages, everyone who was waiting to write to them
   gets a 🔔 "turned on messages – you can write now". (Applied to the live project on 1 Nov 2026.)
+
+## From our Facebook group (update 26)
+Partner requests from the Facebook group, re-written by the admin, shown next to member posts.
+
+1. Run `supabase/update-26-group-posts.sql` in the SQL Editor. Until it's run, the site just shows no group posts.
+2. Admin → **From FB group** → **+ Share a group post**: paste the link to the post in the group, pick the trek and dates,
+   and write a short summary in your own words (no member names, photos or contact details).
+
+How it works:
+- The cards show on Find partners (with the same filters), on trek and region pages, and on the homepage
+  when there are fewer than 4 member posts. They're marked "From our Facebook group · Shared by Trekking Partners Nepal".
+- Clicking a card opens the original Facebook post, so people reply to the member there. There are no on-site replies or messages.
+- Posts drop off the site after their dates pass, or when you **Close** or **Delete** them.

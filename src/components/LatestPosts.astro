@@ -34,15 +34,18 @@ const FB = 'https://www.facebook.com/groups/887606059135821';
 
 <script>
   import { fetchTrips, postCard } from '../lib/posts';
+  import { fetchGroupPosts, groupPostCard } from '../lib/groupPosts';
 
   const grid = document.getElementById('latest-posts')!;
   const empty = document.getElementById('latest-empty')!;
 
-  fetchTrips({ limit: 4 })
-    .then((trips) => {
-      grid.replaceChildren(...trips.map(postCard));
-      grid.hidden = trips.length === 0;
-      empty.hidden = trips.length > 0;
+  // Member posts first; any free spots are filled with the latest posts shared from the Facebook group.
+  Promise.all([fetchTrips({ limit: 4 }), fetchGroupPosts({ limit: 4 })])
+    .then(([trips, group]) => {
+      const cards = [...trips.map(postCard), ...group.slice(0, 4 - trips.length).map(groupPostCard)];
+      grid.replaceChildren(...cards);
+      grid.hidden = cards.length === 0;
+      empty.hidden = cards.length > 0;
     })
     .catch((e) => {
       console.error('Latest posts:', e.message);

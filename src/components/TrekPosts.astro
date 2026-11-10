@@ -28,17 +28,21 @@ const postHref = trek ? `/find-partners/new/?trek=${trek}` : '/find-partners/new
 
 <script>
   import { fetchTrips, postCard } from '../lib/posts';
+  import { fetchGroupPosts, groupPostCard } from '../lib/groupPosts';
 
   document.querySelectorAll<HTMLElement>('.trek-posts').forEach(async (box) => {
     const grid = box.querySelector<HTMLElement>('[data-grid]')!;
     const empty = box.querySelector<HTMLElement>('[data-empty]')!;
     const cta = box.querySelector<HTMLElement>('[data-cta]')!;
     try {
-      const trips = await fetchTrips({ trek: box.dataset.trek || undefined, region: box.dataset.region || undefined });
-      grid.replaceChildren(...trips.map(postCard));
-      grid.hidden = trips.length === 0;
-      empty.hidden = trips.length > 0;
-      cta.hidden = trips.length === 0;
+      const q = { trek: box.dataset.trek || undefined, region: box.dataset.region || undefined };
+      const [trips, group] = await Promise.all([fetchTrips(q), fetchGroupPosts(q)]);
+      // Member posts first, then posts shared from the Facebook group
+      const cards = [...trips.map(postCard), ...group.map(groupPostCard)];
+      grid.replaceChildren(...cards);
+      grid.hidden = cards.length === 0;
+      empty.hidden = cards.length > 0;
+      cta.hidden = cards.length === 0;
     } catch (e: any) {
       console.error('Partner posts:', e.message);
       grid.hidden = true;
