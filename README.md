@@ -13,7 +13,7 @@ public/
 ├── images/        hero.jpg, region photos, and images/treks/ (one photo per trek)
 ├── _headers       security headers
 ├── _redirects     301s for treks that moved region
-├── robots.txt     links both sitemaps (site + /community/sitemap.xml)
+├── robots.txt     links the sitemaps (site + /community/sitemap.xml + /find-partners/sitemap.xml)
 ├── logo.jpg, favicon.ico, favicon-96x96.png, apple-touch-icon.png, web-app-manifest-*.png, site.webmanifest
 ```
 Pages like the homepage, privacy, terms, 404, login and the sitemap are built by Astro –
@@ -161,3 +161,18 @@ How it works:
   when there are fewer than 4 member posts. They're marked "From our Facebook group · Shared by Trekking Partners Nepal".
 - Clicking a card opens the original Facebook post, so people reply to the member there. There are no on-site replies or messages.
 - Posts drop off the site after their dates pass, or when you **Close** or **Delete** them.
+
+## SEO housekeeping (update 27, Nov 2026)
+- **Finished fixed departures don't die.** `functions/departure/` sends a finished departure's link
+  (`/departure/?id=…`) to its trek's permanent page, `/<region>/<trek>/#departures`, with a 301. Unpublished
+  departures go there with a 302, deleted ones to `/fixed-departures/`. Add `&preview` to open one anyway.
+  Upcoming departures get proper Facebook/WhatsApp link previews.
+- **Every trek page targets "<trek> trekking partner" searches.** H1s read "<Trek>: find a trekking partner".
+  Treks without a hand-written guide in `src/data/trekGuides.ts` get a partner guide and FAQ built from
+  `treks.ts` by `src/data/autoGuide.ts`. A hand-written guide always replaces it, so write those for the
+  treks that get the most visits.
+- **Only worthwhile partner posts are indexed.** A post is indexable while it's open, its dates haven't
+  passed and it has at least one reply (`src/lib/postIndex.ts`). Everything else stays noindex.
+  Indexable posts are listed at `/find-partners/sitemap.xml`.
+- **News:** `supabase/update-27-spring-2027-article.sql` adds a draft spring 2027 article. Run it, review it
+  in /admin/ → News, then publish.

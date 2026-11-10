@@ -2,8 +2,14 @@
 // Post pages load their content in the browser, so WhatsApp, Facebook and Google would only
 // see a generic title. This runs on Cloudflare before the page is sent and fills in the real
 // trek, dates, description and photo for link previews. The page itself is unchanged.
+//
+// Google: the /post/ template is noindex. A post only becomes indexable while it's worth
+// finding in search – open, its trek dates haven't passed, and at least one reply (a real,
+// active conversation). Expired, closed and reply-less posts stay noindex so they don't thin
+// out the site. Indexable posts are listed in /find-partners/sitemap.xml.
 import { getTrek } from '../../src/data/treks';
 import { getRegion } from '../../src/data/regions';
+import { isIndexable } from '../../src/lib/postIndex';
 
 // Same public (publishable) key the website already uses in src/lib/supabase.ts
 const SUPABASE_URL = 'https://waorryrsgdfvhujreuvq.supabase.co';
@@ -73,6 +79,13 @@ export async function onRequestGet(context: any) {
   let author: any = null;
   try { author = await profile(env, trip.user_id); } catch {}
 
+  let replies = 0;
+  try {
+    const row = await rest(env, `trip_comment_counts?trip_id=eq.${id}&select=replies`);
+    replies = row?.replies ?? 0;
+  } catch {}
+  const indexable = isIndexable(trip, replies);
+
   const trek = getTrek(trip.trek);
   const region = getRegion(trip.region);
   const trekName = trek?.name ?? trip.trek;
@@ -87,9 +100,12 @@ export async function onRequestGet(context: any) {
   const url = `${SITE}/post/?id=${trip.id}`;
 
   const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
-  const extra = `<meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(description)}"><meta name="twitter:image" content="${esc(image)}"><meta property="og:image:alt" content="${esc(trekName)}">`;
+  const extra = (indexable ? `<meta name="robots" content="max-image-preview:large">` : '') + `<meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(description)}"><meta name="twitter:image" content="${esc(image)}"><meta property="og:image:alt" content="${esc(trekName)}">`;
 
-  const out = new HTMLRewriter()
+  let rw = new HTMLRewriter();
+  // the template is noindex; drop it only for posts worth indexing
+  if (indexable) rw = rw.on('meta[name="robots"]', { element(el: any) { el.remove(); } });
+  const out = rw
     .on('title', new SetText(`${title} | Trekking Partners Nepal`))
     .on('meta[name="description"]', new SetAttr(description))
     .on('meta[property="og:title"]', new SetAttr(title))

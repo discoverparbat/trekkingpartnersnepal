@@ -11,6 +11,7 @@ import { treks, treksInRegion, trekTitle, type Trek } from '../../data/treks';
 import { getRegion, type Region } from '../../data/regions';
 import { operator } from '../../data/operator';
 import { getTrekGuide } from '../../data/trekGuides';
+import { autoGuide } from '../../data/autoGuide';
 
 export function getStaticPaths() {
   return treks.map((trek) => ({
@@ -23,7 +24,7 @@ const { trek, region } = Astro.props as { trek: Trek; region: Region };
 const url = `https://trekkingpartnersnepal.com/${region.slug}/${trek.slug}/`;
 const related = treksInRegion(region.slug).filter((t) => t.slug !== trek.slug).slice(0, 3);
 const image = trek.image ?? region.hero;
-const guide = getTrekGuide(trek.slug);
+const guide = getTrekGuide(trek.slug) ?? autoGuide(trek);
 
 const schema = [
   {
@@ -66,7 +67,7 @@ const schema = [
   <section class="page-hero" style={`background-image:url('${image}')`}>
     <div class="container">
       <nav class="crumbs"><a href="/">Home</a> › <a href={`/${region.slug}/`}>{region.name}</a> › {trek.name}</nav>
-      <h1>{trekTitle(trek)}</h1>
+      <h1>{trekTitle(trek)}<span class="h1-sub">: find a trekking partner</span></h1>
       <p>{trek.summary}</p>
     </div>
   </section>
@@ -127,8 +128,8 @@ const schema = [
       </div>
 
       <aside>
-        <div class="side">
-          <h3>Join a fixed departure</h3>
+        <div class="side" id="departures">
+          <h3>{trek.name} fixed departures</h3>
           <DepartureList trek={trek.slug} stack />
         </div>
       </aside>
@@ -169,7 +170,7 @@ const schema = [
   .faq details p { margin: 10px 0 0; }
   .guide-cta { background: var(--sky-100); border-radius: 10px; padding: 16px 20px; font-weight: 500; }
   .guide-cta a { font-weight: 700; }
-  .side { position: sticky; top: 90px; background: linear-gradient(180deg, var(--sky-100), var(--white)); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .side { scroll-margin-top: 90px; position: sticky; top: 90px; background: linear-gradient(180deg, var(--sky-100), var(--white)); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
   @media (max-width: 960px) {
     .layout { grid-template-columns: 1fr; }
     .factbox { grid-template-columns: 1fr 1fr; }

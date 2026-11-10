@@ -441,3 +441,6 @@ a.q-by-name:hover { color: var(--sky-600); text-decoration: underline; }
 .trek-alert.ta-weather { background: var(--sky-50); border-color: var(--sky-200); color: var(--night-700); }
 .trek-alert.ta-trail { background: #eefaf2; border-color: #bfe6cc; color: #17532e; }
 .trek-alert.ta-site { background: #f5f0ff; border-color: #ddd0fb; color: #43277a; }
+
+/* "Annapurna Circuit Trek: find a trekking partner" – second half of trek/region H1s */
+.page-hero h1 .h1-sub { font-weight: 500; opacity: .9; }

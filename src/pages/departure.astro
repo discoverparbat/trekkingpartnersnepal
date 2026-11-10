@@ -192,6 +192,14 @@ import { operator } from '../data/operator';
 
     const start = new Date(d.start + 'T00:00:00');
     const end = new Date(start); end.setDate(end.getDate() + d.days - 1);
+
+    // Finished departures live on at the trek's permanent page (Cloudflare also does this
+    // with a 301 before the page loads; this covers local dev and cached copies).
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    if (d.published && end < today && !new URLSearchParams(location.search).has('preview')) {
+      location.replace(`/${region.slug}/${trek.slug}/#departures`);
+      return;
+    }
     const range = `${fmt(start, { day: 'numeric', month: 'short' })} – ${fmt(end, { day: 'numeric', month: 'short', year: 'numeric' })}`;
     const full = d.seatsLeft <= 0;
 
