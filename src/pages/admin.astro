@@ -553,7 +553,7 @@ import { categories } from '../data/news';
   $('signin').addEventListener('click', () =>
     supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/admin/' } }));
 
-  const signOut = async () => { await supabase.auth.signOut(); location.reload(); };
+  const signOut = async () => { await (await import('../lib/push')).forgetDevice(); await supabase.auth.signOut(); location.reload(); };
   $('signout').addEventListener('click', signOut);
   $('gate-signout').addEventListener('click', signOut);
 

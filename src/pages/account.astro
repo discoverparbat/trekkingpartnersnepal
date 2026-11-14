@@ -78,6 +78,16 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
           <span id="email-saved" class="saved" hidden>✓ Saved</span>
         </div>
 
+        <div class="form-card email-card" id="push-alerts">
+          <h2 class="form-title">Phone &amp; computer notifications</h2>
+          <p class="small" id="push-help">Checking this device…</p>
+          <div class="form-actions">
+            <button type="button" class="btn btn-sun btn-sm" id="push-toggle" hidden>Turn on for this device</button>
+            <span id="push-saved" class="saved" hidden>✓ On</span>
+          </div>
+          <p class="muted small">Works on Android, iPhone (add the site to your Home Screen first), Windows and Mac. Turn it on separately on each phone or computer you use. Signing out stops them on that device.</p>
+        </div>
+
         <div class="my-posts">
           <div class="section-head" style="margin-bottom:16px">
             <h2>My posts</h2>
@@ -127,6 +137,7 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
   import { getUser, getMyProfile, isComplete, goToLogin, takeNext, peekNext } from '../lib/auth';
   import { fetchTrips, avatar, dateRange, el } from '../lib/posts';
   import { getTrek } from '../data/treks';
+  import { pushState, enablePush, disablePush, pushHelp, forgetDevice, type PushState } from '../lib/push';
 
   const form = document.getElementById('profile') as HTMLFormElement;
   const f = (n: string) => form.elements.namedItem(n) as HTMLInputElement | HTMLSelectElement;
@@ -265,7 +276,26 @@ const years = Array.from({ length: thisYear - 18 - 1930 + 1 }, (_, i) => thisYea
     }));
   }
 
+  // Phone & computer notifications for this device (update 28)
+  const pushBtn = document.getElementById('push-toggle') as HTMLButtonElement;
+  const showPush = (st: PushState) => {
+    document.getElementById('push-help')!.textContent = pushHelp(st);
+    document.getElementById('push-saved')!.hidden = st !== 'on';
+    pushBtn.hidden = !(st === 'on' || st === 'off');
+    pushBtn.textContent = st === 'on' ? 'Turn off for this device' : 'Turn on for this device';
+    pushBtn.className = st === 'on' ? 'btn btn-outline btn-sm' : 'btn btn-sun btn-sm';
+  };
+  pushState().then(showPush);
+  pushBtn.addEventListener('click', async () => {
+    pushBtn.disabled = true;
+    try { showPush(await (pushBtn.textContent!.includes('off') ? disablePush() : enablePush())); }
+    catch { document.getElementById('push-help')!.textContent = 'Something went wrong – please try again.'; }
+    finally { pushBtn.disabled = false; }
+  });
+  if (location.hash === '#push-alerts') document.getElementById('push-alerts')?.scrollIntoView();
+
   document.getElementById('signout')!.addEventListener('click', async () => {
+    await forgetDevice();
     await supabase.auth.signOut();
     location.href = '/';
   });

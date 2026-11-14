@@ -88,8 +88,14 @@ const year = new Date().getFullYear();
               <strong>Notifications</strong>
               <button type="button" id="bell-all" class="bell-all" hidden>Mark all as read</button>
             </div>
+            <div class="bell-push" id="bell-push" hidden>
+              <span class="bell-push-icon" aria-hidden="true">📲</span>
+              <span class="bell-push-text"><strong>Get these on your phone</strong> <span id="bell-push-help"></span></span>
+              <button type="button" class="btn btn-sun btn-sm" id="bell-push-on">Turn on</button>
+              <button type="button" class="bell-push-x" id="bell-push-x" aria-label="Not now">×</button>
+            </div>
             <div class="bell-list" id="bell-list"><p class="bell-empty">Loading…</p></div>
-            <a class="bell-foot" href="/account/#email-alerts">Email settings</a>
+            <a class="bell-foot" href="/account/#email-alerts">Notification &amp; email settings</a>
           </div>
         </div>
         <button class="nav-toggle" aria-label="Menu" aria-expanded="false">☰</button>
@@ -168,6 +174,7 @@ const year = new Date().getFullYear();
       import { supabase } from '../lib/supabase';
       import { fetchNotices, unreadCount, markRead, markAllRead, markTripRead, markQuestionRead, watchNotices, type NoticeView } from '../lib/notifications';
       import { timeAgo } from '../lib/posts';
+      import { pushState, enablePush, syncPush, pushHelp, clearAppBadge } from '../lib/push';
 
       const wrap = document.getElementById('bell-wrap')!;
       const bell = document.getElementById('bell') as HTMLButtonElement;
@@ -251,12 +258,46 @@ const year = new Date().getFullYear();
         };
         await refresh();
         watchNotices(userId, refresh);
+        // A push arrived while the site is open → refresh the bell straight away
+        navigator.serviceWorker?.addEventListener('message', (e) => { if (e.data?.type === 'tpn-push') refresh(); });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+
+        // Phone & computer notifications (update 28): keep this device linked, and offer to turn them on
+        syncPush();
+        const pushBox = document.getElementById('bell-push')!;
+        const pushHelpEl = document.getElementById('bell-push-help')!;
+        const pushOn = document.getElementById('bell-push-on') as HTMLButtonElement;
+        const DISMISS = 'tpn-push-dismissed';
+        const dismissedRecently = () => {
+          try { return Date.now() - Number(localStorage.getItem(DISMISS) || 0) < 14 * 864e5; } catch { return false; }
+        };
+        const showPushBox = async () => {
+          const st = await pushState();
+          pushBox.hidden = !(st === 'off' || st === 'ios-install') || dismissedRecently();
+          pushHelpEl.textContent = st === 'ios-install' ? pushHelp(st) : 'Replies, answers and messages on your lock screen, like app notifications.';
+          pushOn.hidden = st !== 'off';
+        };
+        pushOn.addEventListener('click', async () => {
+          pushOn.disabled = true;
+          try {
+            const st = await enablePush();
+            if (st === 'on') { pushBox.hidden = true; return; }
+            pushHelpEl.textContent = pushHelp(st);
+            pushOn.hidden = true;
+          } catch {
+            pushHelpEl.textContent = 'Couldn’t turn them on – please try again.';
+          } finally { pushOn.disabled = false; }
+        });
+        document.getElementById('bell-push-x')!.addEventListener('click', () => {
+          try { localStorage.setItem(DISMISS, String(Date.now())); } catch {}
+          pushBox.hidden = true;
+        });
 
         bell.addEventListener('click', () => {
           const open = panel.hidden;
           panel.hidden = !open;
           bell.setAttribute('aria-expanded', String(open));
-          if (open) render(userId);
+          if (open) { render(userId); showPushBox(); clearAppBadge(); }
         });
         allBtn.addEventListener('click', async () => {
           await markAllRead(userId);
@@ -289,6 +330,7 @@ const year = new Date().getFullYear();
           .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => update())
           .subscribe();
         document.addEventListener('visibilitychange', () => { if (!document.hidden) update(); });
+        navigator.serviceWorker?.addEventListener('message', (e) => { if (e.data?.type === 'tpn-push') update(); });
       });
     </script>
     <script>

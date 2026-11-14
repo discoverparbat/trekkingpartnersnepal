@@ -176,3 +176,24 @@ How it works:
   Indexable posts are listed at `/find-partners/sitemap.xml`.
 - **News:** `supabase/update-27-spring-2027-article.sql` adds a draft spring 2027 article. Run it, review it
   in /admin/ → News, then publish.
+
+## Phone & computer notifications (update 28, Nov 2026)
+Every 🔔 bell notification and every private message also pops up on the member's phone or computer, like an
+app notification, even when the site is closed (Web Push). Members turn it on per device: **📲 Get these on your
+phone** in the bell panel, or **My account → Phone & computer notifications**. Signing out turns it off on that device.
+
+- Android, Windows, Mac, Linux: works in Chrome, Edge, Firefox, Safari (Mac) and Samsung Internet.
+- iPhone/iPad (iOS 16.4+): only after **Share → Add to Home Screen**, then opening the site from the Home Screen icon.
+  The bell panel and My account explain this to iPhone visitors.
+- Messages show the sender's first name and the start of the text. Replies, answers and news use the same wording as the bell.
+  Several replies on one post or messages in one chat replace each other instead of piling up.
+- No push while the member is reading that chat right now (read in the last 30 seconds), or if either person blocked the other.
+
+Files: `public/sw.js` (service worker), `src/lib/push.ts`, `supabase/update-28-push.sql`,
+`supabase/functions/push-send/` (sends the pushes with Web Crypto only, no npm packages).
+
+Setup (applied to the live project on 14 Nov 2026):
+1. Run `supabase/update-28-push.sql` (table `push_subscriptions` + triggers on notifications and messages).
+2. Deploy `supabase/functions/push-send/` (both files) as **push-send**, JWT verification **off**.
+3. Edge Functions → Secrets: `VAPID_PRIVATE_KEY` = the private half of the VAPID key pair. The public half is in
+   `src/lib/push.ts` and in the function. If you ever change the keys, change both, and members have to turn notifications on again.

@@ -86,7 +86,7 @@ import Base from '../layouts/Base.astro';
   });
 
   $('logout-btn').addEventListener('click', async () => {
-    await supabase.auth.signOut();
+    await (await import('../lib/push')).forgetDevice(); await supabase.auth.signOut();
     render(null);
     status('Signed out.');
   });
