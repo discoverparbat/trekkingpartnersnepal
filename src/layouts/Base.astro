@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Analytics from '../components/Analytics.astro';
 import DpLinkTracking from '../components/DpLinkTracking.astro';
+import PromoPopup from '../components/PromoPopup.astro';
 import { regions } from '../data/regions';
 
 interface Props {
@@ -341,5 +342,6 @@ const year = new Date().getFullYear();
         btn.setAttribute('aria-expanded', String(!!open));
       });
     </script>
+    <PromoPopup />
   </body>
 </html>

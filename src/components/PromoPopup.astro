@@ -1,0 +1,104 @@
+---
+// One-time promo popup. Shows once per visitor (remembered in localStorage),
+// and stops showing by itself after `until`. To run a new promo, change
+// `id` (so everyone sees it once again), `image`, `href`, `alt` and `until`.
+const promo = {
+  id: 'kokhe-danda-2026-11-21',
+  image: '/images/promo/kokhe-danda-21-nov.jpg',
+  href: '/fixed-departures/',
+  alt: 'Fixed departure: Kokhe Danda Trek, 4 days from Pokhara, 21–24 November 2026, with Discover Parbat',
+  until: '2026-11-21T23:59:59+05:45',
+};
+---
+<div
+  class="promo"
+  id="promo"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Fixed departure: Kokhe Danda Trek"
+  data-id={promo.id}
+  data-until={promo.until}
+  hidden
+>
+  <div class="promo-box">
+    <button type="button" class="promo-x" id="promo-x" aria-label="Close">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" /></svg>
+    </button>
+    <a href={promo.href} class="promo-link" id="promo-link">
+      <img data-src={promo.image} alt={promo.alt} width="1080" height="1350" />
+    </a>
+  </div>
+</div>
+
+<style>
+  .promo {
+    position: fixed; inset: 0; z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background: rgba(8, 22, 52, 0.72);
+    animation: promo-fade 0.25s ease-out;
+  }
+  .promo[hidden] { display: none; }
+  .promo-box {
+    position: relative;
+    width: min(480px, 100%, calc((100dvh - 40px) * 0.8));
+  }
+  .promo-link { display: block; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.6); }
+  .promo-link img { display: block; width: 100%; height: auto; }
+  .promo-x {
+    position: absolute; top: -14px; right: -14px; z-index: 1;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer;
+    background: #ffffff; color: #0f1d33;
+    border: 2px solid #0f1d33;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+  .promo-x:hover { background: #0f1d33; color: #ffffff; border-color: #ffffff; }
+  .promo-x:focus-visible { outline: 3px solid #f0712c; outline-offset: 2px; }
+  @media (max-width: 540px) {
+    .promo-box { margin-top: 52px; }
+    .promo-x { top: -54px; right: 0; }
+  }
+  @keyframes promo-fade { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .promo { animation: none; } }
+</style>
+
+<script>
+  const box = document.getElementById('promo') as HTMLElement | null;
+  const skip = /^\/(admin|login|messages|unsubscribe)/.test(location.pathname);
+  if (box && !skip) {
+    const key = 'tpn-promo-seen:' + box.dataset.id;
+    let seen = false;
+    try { seen = localStorage.getItem(key) === '1'; } catch {}
+    const expired = Date.now() > Date.parse(box.dataset.until || '');
+
+    if (!seen && !expired) {
+      const img = box.querySelector('img') as HTMLImageElement;
+      const closeBtn = document.getElementById('promo-x') as HTMLButtonElement;
+      const link = document.getElementById('promo-link') as HTMLAnchorElement;
+
+      const remember = () => { try { localStorage.setItem(key, '1'); } catch {} };
+      const close = () => {
+        box.hidden = true;
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', onKey);
+        remember();
+      };
+      const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+
+      closeBtn.addEventListener('click', close);
+      box.addEventListener('click', (e) => { if (e.target === box) close(); });
+      link.addEventListener('click', remember);
+
+      img.onload = () => {
+        setTimeout(() => {
+          box.hidden = false;
+          document.body.style.overflow = 'hidden';
+          document.addEventListener('keydown', onKey);
+          closeBtn.focus();
+        }, 800);
+      };
+      img.src = img.dataset.src || '';
+    }
+  }
+</script>
