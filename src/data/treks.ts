@@ -26,6 +26,8 @@ export const treks: Trek[] = [
     summary: 'The classic loop around the Annapurna massif, from subtropical valleys through Manang to the Thorong La pass and down to Muktinath.' },
   { slug: 'poon-hill', operatorPage: 'https://discoverparbat.com/poonhill-trek', region: 'annapurna-region', name: 'Ghorepani Poon Hill', days: '4–5', maxAltitude: '3,210 m', difficulty: 'Easy', season: 'Oct–May',
     summary: 'A short trek through rhododendron forest to the famous Poon Hill sunrise over Dhaulagiri and Annapurna. Great for first-timers.' },
+  { slug: 'muldai-viewpoint', operatorPage: 'https://discoverparbat.com/muldai-viewpoint-trek', region: 'annapurna-region', name: 'Muldai Viewpoint', days: '5–6', maxAltitude: '3,637 m', difficulty: 'Moderate', season: 'Oct–May',
+    summary: 'A quieter, higher add-on to Poon Hill: climb from the Ghorepani side to the Muldai viewpoint at 3,637 m for a wide Dhaulagiri and Annapurna panorama, with far fewer people than on Poon Hill.' },
   { slug: 'mardi-himal', operatorPage: 'https://discoverparbat.com/mardi-himal-trek', region: 'annapurna-region', name: 'Mardi Himal', days: '5–7', maxAltitude: '4,500 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Nov',
     summary: 'A ridge trail climbing above the forest to close-up views of Machapuchare (Fishtail) and Mardi Himal.' },
   { slug: 'khopra-danda', operatorPage: 'https://discoverparbat.com/khopra-ridge-trek', region: 'annapurna-region', name: 'Khopra Danda', days: '6–8', maxAltitude: '3,667 m', difficulty: 'Moderate', season: 'Mar–May, Oct–Dec',

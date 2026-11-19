@@ -158,6 +158,41 @@ export const trekGuides: Record<string, TrekGuide> = {
     ],
   },
 
+  // ── Muldai Viewpoint ──────────────────────────────────────
+  'muldai-viewpoint': {
+    sections: [
+      {
+        heading: 'Who the Muldai Viewpoint trek suits',
+        html: `<p>Muldai Viewpoint (sometimes spelled Mulde) sits at 3,637 m, above the busy <a href="/annapurna-region/poon-hill/">Poon Hill</a> trail. Most trekkers walk to Poon Hill at 3,210 m and turn around. Muldai is higher, quieter and gives a wider sweep of Dhaulagiri and the Annapurna range, so it's a good fit if you want the classic Ghorepani route without sharing the sunrise with hundreds of people.</p>
+<p>It's rated moderate: a few more hours of climbing than Poon Hill alone, and colder at the top. The usual plan is about six days from Pokhara, covering both Muldai and Poon Hill. Discover Parbat has the full <a href="https://discoverparbat.com/muldai-viewpoint-trek">Muldai Viewpoint Trek</a> itinerary and cost.</p>`,
+      },
+      {
+        heading: 'Do you need a guide or permit?',
+        html: `<p>The route is inside the Annapurna Conservation Area, so you need the <strong>ACAP permit</strong>, which you can get yourself in Pokhara. No TIMS card. A guide isn't legally required. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>Above Ghorepani the trail is much quieter than Poon Hill and less obvious in cloud. After snowfall the upper section can be icy and needs <strong>crampons</strong>, so in winter go with a partner or a local guide who knows the current conditions.</p>`,
+      },
+      {
+        heading: 'Best months, and when it\'s easiest to find a partner',
+        html: `<p><strong>October to December</strong> gives the clearest views. <strong>March–April</strong> brings rhododendrons in the forest below. January and February can bring snow up high, so check conditions before you go. In the monsoon the viewpoint is usually in cloud.</p>
+<p>Lots of people head to Ghorepani in season, but few of them go on to Muldai. The easiest way to find a partner is to <a href="${POST}">post your dates</a> and mention Muldai, or join a fixed departure.</p>`,
+      },
+      {
+        heading: 'Doing Muldai Viewpoint with a partner',
+        html: `<ul>
+<li><strong>Where to meet:</strong> Pokhara Lakeside, the day before. Pick up your ACAP permits together and share the jeep to the trailhead.</li>
+<li><strong>What to share:</strong> the jeep, teahouse rooms and a guide if you hire one.</li>
+<li><strong>Where you can split up:</strong> Ghorepani. One of you can do Poon Hill only while the other goes up to Muldai, then meet again at Ghorepani.</li>
+<li><strong>Go up together</strong> for the pre-dawn climb to the viewpoint, with head torches and warm layers. Read our <a href="${SAFETY}">partner safety checklist</a>.</li>
+</ul>`,
+      },
+    ],
+    faq: [
+      { q: 'How high is Muldai Viewpoint?', a: 'Muldai Viewpoint is at 3,637 m, about 400 m higher than Poon Hill (3,210 m).' },
+      { q: 'Do I need a guide for Muldai Viewpoint?', a: 'A guide is not legally required. You need the ACAP permit, which you can get in Pokhara. The upper trail is quiet and can be icy after snow, so going with a partner or local guide is recommended, especially in winter.' },
+      { q: 'Can I combine Muldai Viewpoint with Poon Hill?', a: 'Yes. Most trekkers do both from Ghorepani in about six days from Pokhara.' },
+    ],
+  },
+
   // ── Mardi Himal ───────────────────────────────────────────
   'mardi-himal': {
     sections: [
