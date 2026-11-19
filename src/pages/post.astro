@@ -181,6 +181,8 @@ import Base from '../layouts/Base.astro';
   import { reportButton } from '../lib/report';
   import { startConversation, START_ERRORS } from '../lib/messages';
   import { showTrekAlerts } from '../lib/community';
+  import { track } from '../lib/track';
+  import { showPushNudge } from '../lib/pushNudge';
   import { getTrek } from '../data/treks';
   import { getRegion } from '../data/regions';
 
@@ -217,6 +219,7 @@ import Base from '../layouts/Base.astro';
     if (trek && region) ($('t-treklink') as HTMLAnchorElement).href = `/${region.slug}/${trek.slug}/`;
     else $('t-treklink').hidden = true;
     $('new-note').hidden = !params.has('new');
+    if (params.has('new')) showPushNudge($('new-note'), 'Get notified when someone replies or messages you about this trek', 'new_post');
     $('app').hidden = false;
     showTrekAlerts($('trek-alerts'), trip.trek);
     setupShare(name, trip.start_date, trip.end_date);
@@ -330,6 +333,7 @@ import Base from '../layouts/Base.astro';
         $('r-error').hidden = false;
         return;
       }
+      track('reply_post', { trek: trip.trek });
       body.value = '';
       $('r-counter').textContent = '0 / 1000';
       loadReplies(user!.id, admin || isOwner);

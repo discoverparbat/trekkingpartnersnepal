@@ -89,6 +89,7 @@ import { treksInRegion } from '../../data/treks';
   import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../../lib/auth';
   import { getTrek } from '../../data/treks';
   import { fetchTrip } from '../../lib/posts';
+  import { track } from '../../lib/track';
 
   const form = document.getElementById('post') as HTMLFormElement;
   const f = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
@@ -207,6 +208,7 @@ import { treksInRegion } from '../../data/treks';
     const { data, error } = await supabase.from('trips').insert(fields).select('id').single();
     btn.disabled = false; btn.textContent = label;
     if (error) return showError('Could not publish: ' + error.message);
+    track('post_trek', { trek: fields.trek, region: fields.region });
     location.href = `/post/?id=${data.id}&new=1`;
   });
 

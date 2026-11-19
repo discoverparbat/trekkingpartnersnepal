@@ -176,6 +176,8 @@ import Base from '../layouts/Base.astro';
   import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../lib/auth';
   import { avatar, authorName, authorFacts, el } from '../lib/posts';
   import * as M from '../lib/messages';
+  import { track } from '../lib/track';
+  import { showPushNudge } from '../lib/pushNudge';
 
   const $ = (id: string) => document.getElementById(id)!;
   const show = (id: string) => { ['loading', 'gate', 'app'].forEach((x) => ($(x).hidden = x !== id)); };
@@ -393,6 +395,9 @@ import Base from '../layouts/Base.astro';
     try {
       const m = await chat.send(value.slice(0, M.MAX_MESSAGE));
       if (!messages.some((x) => x.id === m.id)) messages.push(m);
+      const mineCount = messages.filter((x) => x.mine).length;
+      track(chat.convo.started_by_me ? 'send_message' : 'message_reply', { first: mineCount === 1, trek: chat.convo.trek ?? '' });
+      if (mineCount === 1) showPushNudge(document.querySelector('.composer-tip')!, `Get notified when ${authorName(chat.convo.other).split(' ')[0]} replies`, 'first_message');
       text.value = ''; text.style.height = 'auto';
       render();
     } catch (x: any) {

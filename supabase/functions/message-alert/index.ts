@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
   const [{ data: convo }, { data: people }, { data: u }, { data: ban }] = await Promise.all([
     db.from('conversations').select('id, trip_id').eq('id', conversation_id).maybeSingle(),
-    db.from('profiles').select('id, display_name, email_replies, unsub_token').in('id', [recipient, sender]),
+    db.from('profiles').select('id, display_name, nationality, email_replies, unsub_token').in('id', [recipient, sender]),
     db.auth.admin.getUserById(recipient),
     db.from('bans').select('user_id').eq('user_id', recipient).maybeSingle(),
   ]);
@@ -66,16 +66,22 @@ Deno.serve(async (req) => {
   const unsubUrl = `${SITE}/unsubscribe/?t=${me.unsub_token}`;
   const about = trek ? ` about your <strong>${esc(trek)}</strong> plans` : '';
 
+  // Subject names the trek and where the sender is from: "Anna from Czechia messaged you about the Annapurna Circuit".
+  // A bare "X sent you a message" reads like spam and gave little reason to open it (19 Nov 2026).
+  const fromWhere = them?.nationality ? ` from ${them.nationality}` : '';
   const subject = type === 'invite'
-    ? `${who} wants to message you on Trekking Partners Nepal`
-    : `${who} sent you a message`;
+    ? `${who}${fromWhere} wants to message you on Trekking Partners Nepal`
+    : trek
+      ? `${who}${fromWhere} messaged you about the ${trek}`
+      : `${who}${fromWhere} sent you a message on Trekking Partners Nepal`;
   const body = type === 'invite'
     ? p(`Hi ${esc(name)},`) +
       p(`<strong>${esc(who)}</strong> would like to message you${about}.`) +
       p(`Messages on Trekking Partners Nepal are private – only the two of you can read them. Open Messages to read and reply.`) +
       `<div style="margin:0 0 22px">${button(chatUrl, 'Open messages')}</div>`
     : p(`Hi ${esc(name)},`) +
-      p(`<strong>${esc(who)}</strong> sent you a message${about}.`) +
+      p(`<strong>${esc(who)}</strong>${esc(fromWhere)} sent you a message${about}.`) +
+      p(`Trekkers usually plan within a few days, so a quick reply makes a match much more likely.`) +
       p(`<span style="color:#55657d;font-size:14px">For your privacy we don’t put messages in emails. Open the chat to read and reply.</span>`) +
       `<div style="margin:0 0 22px">${button(chatUrl, 'Read message')}</div>`;
   const html = shell(
