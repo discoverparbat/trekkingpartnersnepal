@@ -68,7 +68,8 @@ Deno.serve(async (req) => {
 
   // Subject names the trek and where the sender is from: "Anna from Czechia messaged you about the Annapurna Circuit".
   // A bare "X sent you a message" reads like spam and gave little reason to open it (19 Nov 2026).
-  const fromWhere = them?.nationality ? ` from ${them.nationality}` : '';
+  const nat = (them?.nationality ?? '').trim();
+  const fromWhere = nat ? ` from ${/^(United|Netherlands|Philippines|Czech Republic)/.test(nat) ? 'the ' : ''}${nat}` : '';
   const subject = type === 'invite'
     ? `${who}${fromWhere} wants to message you on Trekking Partners Nepal`
     : trek
