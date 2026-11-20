@@ -16,7 +16,7 @@ create table if not exists public.group_posts (
   end_date    date,
   flexible    boolean not null default false,
   summary     text not null check (char_length(summary) between 20 and 600),
-  fb_url      text not null check (fb_url ~* '^https://(www\.|m\.|web\.)?facebook\.com/groups/'),
+  fb_url      text not null check (fb_url ~* '^https://(www\.|m\.|web\.)?facebook\.com/(groups|share)/'),
   status      text not null default 'open' check (status in ('open', 'closed')),
   created_at  timestamptz not null default now(),
   check (end_date is null or end_date >= start_date)

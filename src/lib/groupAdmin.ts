@@ -10,7 +10,7 @@ const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getEleme
 let toast: Toast = () => {};
 let ready = false;
 
-const FB_RE = /^https:\/\/(www\.|m\.|web\.)?facebook\.com\/groups\//i;
+const FB_RE = /^https:\/\/(www\.|m\.|web\.)?facebook\.com\/(groups|share)\//i;
 // Rough check for contact details pasted into the summary
 const CONTACT_RE = /(@[a-z0-9_.]{3,}|[\w.+-]+@[\w-]+\.[\w.]+|\+?\d[\d\s-]{7,}\d|whats\s?app|instagram|insta\b)/i;
 
@@ -115,7 +115,7 @@ async function save(e: Event) {
   const start = field('start_date').value;
   const end = field('end_date').value || null;
 
-  if (!FB_RE.test(fbUrl)) return showError('Paste the link to the post in the Facebook group (it starts with https://www.facebook.com/groups/…).');
+  if (!FB_RE.test(fbUrl)) return showError('Paste the link to the post in the Facebook group (it starts with https://www.facebook.com/groups/… or a facebook.com/share/… link).');
   if (end && end < start) return showError('The end date can’t be before the start date.');
   if (summary.length < 20) return showError('Write a short summary – at least 20 characters.');
   if (CONTACT_RE.test(summary) &&
