@@ -692,32 +692,33 @@ export const trekGuides: Record<string, TrekGuide> = {
       {
         heading: 'Who the Annapurna North Base Camp trek suits',
         html: `<p>This is the side of Annapurna I that Maurice Herzog's French expedition climbed in 1950, the first 8,000 m peak ever summited. The route starts from Narchyang in Myagdi, near Beni, and climbs through forest and over high meadows to the north base camp at about 4,190 m, below the huge north face of Annapurna I.</p>
-<p>It's challenging. Lodges end at Narchyang, so the upper nights are camping, the trail is steep and rough in places, and you'll see very few people. It suits experienced trekkers who want a real expedition feel, mountaineering history and complete quiet.</p>`,
+<p>It's challenging. A hydropower road now reaches Humkhola at about 2,800 m, and from there the trail follows the Mistri Khola up to Panchakunda Lake and the base camp. Higher up you sleep in basic camps, and the trail is steep and rough in places. It suits experienced trekkers who want a real expedition feel and mountaineering history.</p>
+<p>It's no longer a quiet secret: many Nepali trekkers now do it in three days from Pokhara, and the camps can be <strong>overbooked during festivals and on weekends</strong>. Avoid those dates if you can.</p>`,
       },
       {
         heading: 'Do you need a guide or permit?',
-        html: `<p>The route is in the Annapurna Conservation Area, so you need the <strong>ACAP permit</strong>, which you can get yourself in Pokhara. No TIMS card, and no restricted-area permit. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
-<p>A guide isn't legally required, but on this route we'd treat one as essential. The trail above Narchyang is hard to find in places, you need tents, food and cooking gear, and help is far away.</p>`,
+        html: `<p>The route is in the Annapurna Conservation Area, so you need the <strong>ACAP permit</strong>: NPR 3,000 for foreigners, NPR 1,000 for Indians and NPR 1,500 for other SAARC nationals. Since 21 November 2026 it is checked at a new <strong>ACAP checkpoint in Baskot</strong>, Narchyang, the last village on the route, so get it in Pokhara or Kathmandu before you go (<a href="/news/annapurna-north-base-camp-acap-checkpoint/">read the update</a>). No TIMS card, and no restricted-area permit. See <a href="${GUIDE_RULES}">the 2026 rules</a>.</p>
+<p>A guide isn't legally required, but on this route we'd treat one as essential. The trail is hard to find in places, camp space needs arranging in busy periods, and help is far away.</p>`,
       },
       {
         heading: 'Best months, and when it\'s easiest to find a partner',
         html: `<p><strong>Late September–November</strong> and <strong>April–May</strong> are the windows. The upper meadows can be snowbound in winter, and the monsoon brings landslides and leeches in the lower forest.</p>
-<p>Only a handful of trekkers go here each season, so team up before you start. <a href="${POST}">Post your dates</a> well ahead.</p>`,
+<p>Foreign trekkers are still few here, so team up before you start. <a href="${POST}">Post your dates</a> well ahead.</p>`,
       },
       {
         heading: 'Doing it with a partner',
         html: `<ul>
-<li><strong>Why it matters here:</strong> a camping trek costs much the same for one or three people. Guides, porters, tents and food are far cheaper shared.</li>
+<li><strong>Why it matters here:</strong> a guide, jeep to Humkhola and camp arrangements cost much the same for one or three people, so sharing saves a lot.</li>
 <li><strong>Where to meet:</strong> Pokhara, then travel to Beni and Narchyang together.</li>
 <li><strong>Plan contingency days:</strong> weather can pin you down at camp. Agree in advance how many spare days you have.</li>
-<li><strong>Don't split up</strong> above Narchyang.</li>
+<li><strong>Don't split up</strong> above Humkhola.</li>
 </ul>`,
       },
     ],
     faq: [
-      { q: 'Where does the Annapurna North Base Camp trek start?', a: 'From Narchyang in Myagdi district, near Beni, about a day by road from Pokhara.' },
-      { q: 'Are there lodges on the Annapurna North Base Camp trek?', a: 'Lodges end at Narchyang. The upper nights are camping, so you need tents, food and cooking gear.' },
-      { q: 'Which permit do I need?', a: 'Only the ACAP permit. No restricted-area permit or TIMS card is needed.' },
+      { q: 'Where does the Annapurna North Base Camp trek start?', a: 'From Narchyang in Myagdi district, near Beni. A road now reaches Humkhola at about 2,800 m, where the walk up the Mistri Khola begins.' },
+      { q: 'Where do you sleep on the Annapurna North Base Camp trek?', a: 'In basic camps on the upper trail. They can be overbooked during festivals and on weekends, when many Nepali trekkers go, so book ahead or avoid those dates.' },
+      { q: 'Which permit do I need?', a: 'Only the ACAP permit (NPR 3,000 foreigners, 1,000 Indians, 1,500 other SAARC). Since 21 November 2026 it is checked at a new ACAP checkpoint in Baskot, Narchyang, so buy it in Pokhara or Kathmandu first. No restricted-area permit or TIMS card is needed.' },
     ],
   },
 

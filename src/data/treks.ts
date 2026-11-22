@@ -41,7 +41,7 @@ export const treks: Trek[] = [
   { slug: 'upper-mustang', region: 'annapurna-region', name: 'Upper Mustang', days: '12–17', maxAltitude: '3,840 m (Lo Manthang)', difficulty: 'Moderate', season: 'Mar–Nov', restricted: true,
     summary: 'The former Kingdom of Lo: red cliffs, cave dwellings and the walled city of Lo Manthang in a dry rain-shadow landscape that can be trekked even in monsoon.' },
   { slug: 'annapurna-north-base-camp', region: 'annapurna-region', name: 'Annapurna I Base Camp (North)', days: '7–9', maxAltitude: '4,190 m', difficulty: 'Challenging', season: 'Mar–May, Sep–Nov',
-    summary: 'A remote route from Narchyang in Myagdi to the north base camp of Annapurna I, the side of the mountain first climbed in 1950. Lodges end at Narchyang, so the upper nights are camping.' },
+    summary: 'A remote route from Narchyang in Myagdi to the north base camp of Annapurna I, the side of the mountain first climbed in 1950. A road now reaches Humkhola, and the upper nights are in basic camps. ACAP permits are checked at Baskot.' },
   { slug: 'khumai-korchon', region: 'annapurna-region', name: 'Khumai Danda & Korchon', days: '3–5', maxAltitude: 'approx. 3,700 m (Korchon)', difficulty: 'Moderate', season: 'Oct–May',
     summary: 'A short ridge trek from Ghachok near Pokhara up through forest to Khumai Danda and the Korchon viewpoint, face to face with Machapuchare, returning via Mirsa and the Kharpani hot spring.' },
   { slug: 'kori-kapuche-karpu', region: 'annapurna-region', name: 'Kori, Kapuche & Karpu', days: '4–7', maxAltitude: 'approx. 3,800 m (Kori)', difficulty: 'Moderate', season: 'Mar–May, Oct–Nov',
