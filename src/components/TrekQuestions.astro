@@ -1,5 +1,5 @@
 ---
-// "Questions about <trek>": the latest 3 Community questions for one trek, loaded live.
+// "Questions & guides about <trek>": the latest 3 Community posts for one trek, loaded live.
 interface Props {
   trek: string;      // trek slug
   label: string;     // trek name
@@ -11,8 +11,8 @@ const all = `/community/?trek=${trek}`;
 <section class="trek-qs" data-trek={trek}>
   <div class="tq-head">
     <div>
-      <h2>Questions about {label}</h2>
-      <p>Trail conditions, permits and gear, answered by trekkers who were just there and our local team.</p>
+      <h2>Questions &amp; guides about {label}</h2>
+      <p>Trail conditions, permits and gear, answered by trekkers who were just there and our local team, plus guides from recent trekkers.</p>
     </div>
     <a href={ask} class="btn btn-sun btn-sm">Ask about this trek</a>
   </div>
@@ -21,7 +21,7 @@ const all = `/community/?trek=${trek}`;
     <div class="tq-row skeleton" aria-hidden="true"></div>
   </div>
   <p class="tq-empty" data-empty hidden>No questions about {label} yet. Wondering about snow, permits or teahouses? Ask – we’ll answer.</p>
-  <a href={all} class="link-arrow tq-all" data-all hidden>All {label} questions →</a>
+  <a href={all} class="link-arrow tq-all" data-all hidden>All {label} posts →</a>
 </section>
 
 <style>
@@ -43,8 +43,8 @@ const all = `/community/?trek=${trek}`;
 </style>
 
 <script>
-  import { fetchQuestions, questionUrl, answersLabel } from '../lib/community';
-  import { topicLabel } from '../data/community';
+  import { fetchQuestions, questionUrl, repliesLabel, isGuide } from '../lib/community';
+  import { topicLabel, kindLabel } from '../data/community';
   import { timeAgo } from '../lib/posts';
 
   document.querySelectorAll<HTMLElement>('.trek-qs').forEach(async (box) => {
@@ -60,12 +60,12 @@ const all = `/community/?trek=${trek}`;
         const t = document.createElement('strong');
         t.textContent = q.title;
         const meta = document.createElement('small');
-        meta.append(`${topicLabel(q.topic)} · ${timeAgo(q.created_at)} · `);
+        meta.append(`${kindLabel(q.kind)} · ${topicLabel(q.topic)} · ${timeAgo(q.created_at)} · `);
         const n = document.createElement('b');
-        n.textContent = answersLabel(q.answers_count);
-        if (!q.answers_count) n.className = 'none';
+        n.textContent = repliesLabel(q);
+        if (!q.answers_count && !isGuide(q)) n.className = 'none';
         meta.append(n);
-        if (q.best_answer_id) {
+        if (q.best_answer_id && !isGuide(q)) {
           const ok = document.createElement('i');
           ok.textContent = ' · ✓ Answered';
           meta.append(ok);

@@ -3,19 +3,38 @@ import Base from '../../layouts/Base.astro';
 import { regions } from '../../data/regions';
 import { treksInRegion } from '../../data/treks';
 import { TOPICS, GENERAL, GENERAL_LABEL } from '../../data/community';
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 ---
-<Base title="Ask a question | Trekking Partners Nepal" description="Ask the Trekking Partners Nepal community about trail conditions, permits, gear and teahouses." noindex>
+<Base title="Ask a question or share a guide | Trekking Partners Nepal" description="Ask the Trekking Partners Nepal community about trail conditions, permits, gear and teahouses, or share a guide from your trek." noindex>
   <section class="section">
     <div class="container narrow">
-      <nav class="crumbs-dark"><a href="/community/">Community</a> › Ask a question</nav>
-      <h1>Ask a question</h1>
-      <p class="muted lead">Ask about a trek: trail and snow conditions, permits, gear, teahouses or transport. Trekkers who were just there, and our local team, will answer.</p>
+      <nav class="crumbs-dark"><a href="/community/">Community</a> › <span id="crumb">Ask a question</span></nav>
+      <h1 id="heading">Ask a question</h1>
+      <p class="muted lead" id="lead">Ask about a trek: trail and snow conditions, permits, gear, teahouses or transport. Trekkers who were just there, and our local team, will answer.</p>
 
       <div id="gate" class="panel" style="text-align:center">
         <p class="muted" style="margin:0">Checking your account…</p>
       </div>
 
       <form id="ask" class="form-card form-grid" novalidate hidden>
+        <fieldset class="kinds">
+          <legend>What are you posting?</legend>
+          <div class="kind-row">
+            <label class="kind-opt">
+              <input type="radio" name="kind" value="question" checked />
+              <span class="q-kind k-question">Question</span>
+              <strong>I need information</strong>
+              <small>Conditions, permits, gear, transport</small>
+            </label>
+            <label class="kind-opt">
+              <input type="radio" name="kind" value="guide" />
+              <span class="q-kind k-guide">Guide</span>
+              <strong>I’m sharing my experience</strong>
+              <small>Route, days, costs, teahouses, tips</small>
+            </label>
+          </div>
+        </fieldset>
+
         <div class="field-row">
           <label class="field">Trek
             <select name="trek" required>
@@ -36,14 +55,26 @@ import { TOPICS, GENERAL, GENERAL_LABEL } from '../../data/community';
           </label>
         </div>
 
-        <label class="field">Your question
-          <span class="hint">One clear sentence, e.g. “Is there snow on Mardi Himal High Camp right now?”</span>
+        <div class="field" id="trekked-field" hidden>
+          <span>When did you do this trek?</span>
+          <span class="hint">Month and year, so readers know how fresh your info is.</span>
+          <div class="trekked-row">
+            <select name="t-month" aria-label="Month">
+              <option value="">Month…</option>
+              {MONTHS.map((m, i) => <option value={String(i + 1).padStart(2, '0')}>{m}</option>)}
+            </select>
+            <select name="t-year" aria-label="Year"><option value="">Year…</option></select>
+          </div>
+        </div>
+
+        <label class="field"><span id="title-label">Your question</span>
+          <span class="hint" id="title-hint">One clear sentence, e.g. “Is there snow on Mardi Himal High Camp right now?”</span>
           <input name="title" required minlength="10" maxlength="140" />
           <span class="counter" id="t-counter">0 / 140</span>
         </label>
 
-        <label class="field">Details
-          <span class="hint">Your dates, what you already know, and what would help you decide.</span>
+        <label class="field"><span id="body-label">Details</span>
+          <span class="hint" id="body-hint">Your dates, what you already know, and what would help you decide.</span>
           <textarea name="body" required minlength="20" maxlength="3000"
             placeholder="E.g. I’m planning to go up on 28 October with a guide. Do I need microspikes for the section between High Camp and View Point, or is it dry? Are the teahouses at High Camp open?"></textarea>
           <span class="counter" id="b-counter">0 / 3000</span>
@@ -52,14 +83,16 @@ import { TOPICS, GENERAL, GENERAL_LABEL } from '../../data/community';
         <!-- Shown when the text looks like a partner request -->
         <div id="partner-warn" class="partner-warn" hidden>
           <strong>This sounds like you’re looking for trek partners.</strong>
-          <p>The Community is for trek questions only. Partner requests go on Find partners, where people heading the same way can find you by trek and dates.</p>
+          <p>The Community is for trek questions and guides. Partner requests go on Find partners, where people heading the same way can find you by trek and dates.</p>
           <div class="pw-actions">
             <a id="pw-go" href="/find-partners/new/" class="btn btn-sun btn-sm">Post on Find partners</a>
-            <button type="button" id="pw-anyway" class="btn btn-outline btn-sm">It’s a trek question – publish anyway</button>
+            <button type="button" id="pw-anyway" class="btn btn-outline btn-sm">It’s not a partner request – publish anyway</button>
           </div>
         </div>
 
-        <p class="form-note">🌍 Questions and answers are public, so don’t share your phone number or email here. Looking for people to trek with? <a href="/find-partners/new/">Post on Find partners</a> instead.</p>
+        <p class="form-note" id="ad-note" hidden>Guides are for your own experience. Posts that advertise guiding, tours or an agency are removed.</p>
+
+        <p class="form-note">🌍 Posts and replies are public, so don’t share your phone number or email here. Looking for people to trek with? <a href="/find-partners/new/">Post on Find partners</a> instead.</p>
 
         <p id="error" class="form-error" hidden></p>
 
@@ -83,13 +116,24 @@ import { TOPICS, GENERAL, GENERAL_LABEL } from '../../data/community';
   .partner-warn { background: #fff6e8; border: 1px solid #f6d39f; border-radius: 12px; padding: 16px 18px; color: #6b3a06; }
   .partner-warn p { margin: 6px 0 12px; font-size: .92rem; }
   .pw-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .kinds { border: 0; padding: 0; margin: 0; }
+  .kinds legend { font-weight: 600; margin-bottom: 8px; }
+  .kind-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .kind-opt { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; border: 2px solid var(--line); border-radius: var(--radius); padding: 14px 16px; cursor: pointer; background: var(--white); }
+  .kind-opt:hover { border-color: var(--sky-400); }
+  .kind-opt:has(input:checked) { border-color: var(--sun); background: #fff8f3; }
+  .kind-opt:has(input:focus-visible) { outline: 2px solid var(--sky-400); outline-offset: 2px; }
+  .kind-opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .kind-opt .q-kind { font-size: .78rem; margin-bottom: 4px; }
+  .kind-opt small { color: var(--muted); font-size: .85rem; }
+  .trekked-row { display: flex; gap: 10px; flex-wrap: wrap; }
 </style>
 
 <script>
   import { supabase } from '../../lib/supabase';
   import { getUser, getMyProfile, isComplete, goToLogin, goToAccount } from '../../lib/auth';
   import { getTrek } from '../../data/treks';
-  import { GENERAL, looksLikePartnerRequest } from '../../data/community';
+  import { GENERAL, BODY_MAX, looksLikePartnerRequest } from '../../data/community';
   import { questionUrl } from '../../lib/community';
 
   const form = document.getElementById('ask') as HTMLFormElement;
@@ -97,6 +141,53 @@ import { TOPICS, GENERAL, GENERAL_LABEL } from '../../data/community';
   const errorBox = document.getElementById('error')!;
   const warn = document.getElementById('partner-warn')!;
   let partnerOk = false;
+  const $ = (id: string) => document.getElementById(id)!;
+  const kindOf = () => ((form.elements.namedItem('kind') as RadioNodeList).value === 'guide' ? 'guide' : 'question');
+
+  // Years for "When did you do this trek?": this year and the five before
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear; y >= thisYear - 5; y--) f('t-year').append(new Option(String(y), String(y)));
+
+  const COPY = {
+    question: {
+      heading: 'Ask a question', crumb: 'Ask a question',
+      lead: 'Ask about a trek: trail and snow conditions, permits, gear, teahouses or transport. Trekkers who were just there, and our local team, will answer.',
+      titleLabel: 'Your question', titleHint: 'One clear sentence, e.g. “Is there snow on Mardi Himal High Camp right now?”',
+      bodyLabel: 'Details', bodyHint: 'Your dates, what you already know, and what would help you decide.',
+      placeholder: 'E.g. I’m planning to go up on 28 October with a guide. Do I need microspikes for the section between High Camp and View Point, or is it dry? Are the teahouses at High Camp open?',
+      submit: 'Publish question',
+    },
+    guide: {
+      heading: 'Share a guide', crumb: 'Share a guide',
+      lead: 'Just back from a trek? Share what it was really like – your route, days, costs and tips – so the next trekker can plan better.',
+      titleLabel: 'Guide title', titleHint: 'Say what it covers, e.g. “Mardi Himal in 5 days: my day-by-day and what I paid”',
+      bodyLabel: 'Your guide', bodyHint: 'Your route and days, where you slept, what you paid, trail conditions, and what you would do differently.',
+      placeholder: 'E.g. Day 1: Kande to Forest Camp, about 6 hours. Steep forest trail, two teahouses open…',
+      submit: 'Publish guide',
+    },
+  };
+
+  function setKind() {
+    const k = kindOf();
+    const c = COPY[k];
+    $('heading').textContent = c.heading;
+    $('crumb').textContent = c.crumb;
+    $('lead').textContent = c.lead;
+    $('title-label').textContent = c.titleLabel;
+    $('title-hint').textContent = c.titleHint;
+    $('body-label').textContent = c.bodyLabel;
+    $('body-hint').textContent = c.bodyHint;
+    const body = f('body') as unknown as HTMLTextAreaElement;
+    body.placeholder = c.placeholder;
+    body.maxLength = BODY_MAX[k];
+    body.rows = k === 'guide' ? 14 : 6;
+    $('b-counter').textContent = `${body.value.length} / ${BODY_MAX[k]}`;
+    $('submit').textContent = c.submit;
+    $('trekked-field').hidden = k !== 'guide';
+    $('ad-note').hidden = k !== 'guide';
+    document.title = `${c.heading} | Trekking Partners Nepal`;
+  }
+  form.querySelectorAll('input[name="kind"]').forEach((r) => r.addEventListener('change', setKind));
 
   function showError(msg: string) {
     errorBox.textContent = msg;
@@ -121,6 +212,10 @@ import { TOPICS, GENERAL, GENERAL_LABEL } from '../../data/community';
     }
     const pre = new URLSearchParams(location.search).get('trek');
     if (pre && (pre === GENERAL || getTrek(pre))) f('trek').value = pre;
+    if (new URLSearchParams(location.search).get('type') === 'guide') {
+      (form.querySelector('input[name="kind"][value="guide"]') as HTMLInputElement).checked = true;
+    }
+    setKind();
     gate.hidden = true;
     form.hidden = false;
   }
@@ -128,7 +223,7 @@ import { TOPICS, GENERAL, GENERAL_LABEL } from '../../data/community';
   const counter = (input: HTMLInputElement, out: string, max: number) =>
     input.addEventListener('input', () => { document.getElementById(out)!.textContent = `${input.value.length} / ${max}`; });
   counter(f('title'), 't-counter', 140);
-  counter(f('body'), 'b-counter', 3000);
+  f('body').addEventListener('input', () => { $('b-counter').textContent = `${f('body').value.length} / ${BODY_MAX[kindOf()]}`; });
 
   // Changing the text after the warning means we check again
   f('title').addEventListener('input', () => { partnerOk = false; });
@@ -149,8 +244,15 @@ import { TOPICS, GENERAL, GENERAL_LABEL } from '../../data/community';
     const body = f('body').value.trim();
     if (!trek) return showError('Please choose a trek, or “General / any trek”.');
     if (!topic) return showError('Please choose a topic.');
-    if (title.length < 10) return showError('Please write your question in at least 10 characters.');
+    const kind = kindOf();
+    const guide = kind === 'guide';
+    if (title.length < 10) return showError(guide ? 'Please give your guide a title of at least 10 characters.' : 'Please write your question in at least 10 characters.');
+    if (guide && body.length < 200) return showError('Please write a bit more – a guide needs at least 200 characters to be useful.');
     if (body.length < 20) return showError('Please add a few details (at least 20 characters).');
+    const month = f('t-month').value, year = f('t-year').value;
+    if (guide && (!month || !year)) return showError('Please choose the month and year you did this trek.');
+    const trekked = guide ? `${year}-${month}` : null;
+    if (guide && new Date(`${trekked}-01`) > new Date()) return showError('The month you did the trek can’t be in the future.');
 
     if (!partnerOk && looksLikePartnerRequest(`${title}\n${body}`)) {
       const go = document.getElementById('pw-go') as HTMLAnchorElement;
@@ -163,13 +265,16 @@ import { TOPICS, GENERAL, GENERAL_LABEL } from '../../data/community';
     const btn = document.getElementById('submit') as HTMLButtonElement;
     btn.disabled = true;
     btn.textContent = 'Publishing…';
-    const { data, error } = await supabase.from('questions')
-      .insert({ trek, region: trek === GENERAL ? null : getTrek(trek)?.region ?? null, topic, title, body })
-      .select('id').single();
+    const row: Record<string, unknown> = { trek, region: trek === GENERAL ? null : getTrek(trek)?.region ?? null, topic, title, body };
+    if (guide) { row.kind = 'guide'; row.trekked = trekked; }
+    const { data, error } = await supabase.from('questions').insert(row).select('id').single();
     if (error || !data) {
       btn.disabled = false;
-      btn.textContent = 'Publish question';
-      return showError('Could not publish: ' + (error?.message ?? 'please try again.'));
+      btn.textContent = COPY[kind].submit;
+      const msg = error?.message ?? 'please try again.';
+      return showError(guide && /kind|trekked|body_check|column/.test(msg)
+        ? 'Guides aren’t switched on yet (the site admin needs to run supabase/update-29-community-guides.sql).'
+        : 'Could not publish: ' + msg);
     }
     location.href = questionUrl(data.id) + '&new=1';
   });

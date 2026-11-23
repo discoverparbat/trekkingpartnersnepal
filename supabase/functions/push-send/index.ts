@@ -55,11 +55,13 @@ async function fromNotification(id: string): Promise<{ user: string; push: Push 
     if (!t && (n.kind === 'reply' || n.kind === 'thread_reply')) return null;   // post deleted
     if (t) trek = trekName(t.trek);
   }
-  let q: { id: string; title: string; trek: string } | null = null;
+  let q: { id: string; title: string; trek: string; kind?: string } | null = null;
   if (n.question_id) {
-    const { data } = await db.from('questions').select('id, title, trek').eq('id', n.question_id).maybeSingle();
-    q = data;
+    // kind exists after update-29-community-guides.sql
+    const res = await db.from('questions').select('id, title, trek, kind').eq('id', n.question_id).maybeSingle();
+    q = res.error ? (await db.from('questions').select('id, title, trek').eq('id', n.question_id).maybeSingle()).data : res.data;
   }
+  const guide = q?.kind === 'guide';
   const post = n.trip_id ? `/post/?id=${n.trip_id}` : '/account/';
   const qUrl = q ? `/community/question/?id=${q.id}` : '/community/';
   const qTitle = q ? `“${clip(q.title, 70)}”` : 'your question';
@@ -83,16 +85,20 @@ async function fromNotification(id: string): Promise<{ user: string; push: Push 
             body: many ? `Latest from ${who}. You replied there too.` : 'You replied there too. Tap to read.', url: post + '#replies' };
       break;
     case 'answer':
-      p = { title: many ? `${n.count} new answers to your question` : `${who} answered your question`, body: qTitle, url: qUrl + '#answers', urgency: 'high' };
+      p = guide
+        ? { title: many ? `${n.count} new comments on your guide` : `${who} commented on your guide`, body: qTitle, url: qUrl + '#answers', urgency: 'high' }
+        : { title: many ? `${n.count} new answers to your question` : `${who} answered your question`, body: qTitle, url: qUrl + '#answers', urgency: 'high' };
       break;
     case 'thread_answer':
-      p = { title: many ? `${n.count} new answers` : `${who} also answered`, body: qTitle, url: qUrl + '#answers' };
+      p = guide
+        ? { title: many ? `${n.count} new comments` : `${who} also commented`, body: qTitle, url: qUrl + '#answers' }
+        : { title: many ? `${n.count} new answers` : `${who} also answered`, body: qTitle, url: qUrl + '#answers' };
       break;
     case 'best_answer':
       p = { title: 'Your answer was marked best ✅', body: `${qTitle} – thanks for helping a fellow trekker!`, url: qUrl + '#answers' };
       break;
     case 'new_question':
-      p = { title: `🙋 New question from ${who}`, body: qTitle, url: qUrl + '#answer' };
+      p = guide ? { title: `🧭 New guide from ${who}`, body: qTitle, url: qUrl } : { title: `🙋 New question from ${who}`, body: qTitle, url: qUrl + '#answer' };
       break;
     case 'moved_to_partners':
       p = { title: 'Your question looks like a partner request', body: 'Post your dates on Find partners so other trekkers can join you.',

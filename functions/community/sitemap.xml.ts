@@ -1,5 +1,5 @@
 // Cloudflare Pages Function: /community/sitemap.xml
-// Lists every answered Community question so Google finds them (unanswered ones are noindex). Questions live in Supabase, not in the
+// Lists every answered Community question and every guide so Google finds them (unanswered questions are noindex). Questions live in Supabase, not in the
 // built site, so they can't go in the normal sitemap that Astro makes at build time.
 const SUPABASE_URL = 'https://waorryrsgdfvhujreuvq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_xZ4nFS-OrOyHDu8kkzJVYg_0y4I4ogh';
@@ -9,10 +9,13 @@ export async function onRequestGet(context: any) {
   const base = context.env?.SUPABASE_URL || SUPABASE_URL;
   let rows: { id: string; last_activity_at: string }[] = [];
   try {
-    const res = await fetch(
-      `${base}/rest/v1/questions?status=neq.moved&answers_count=gt.0&select=id,last_activity_at&order=last_activity_at.desc&limit=5000`,
+    const get = (filter: string) => fetch(
+      `${base}/rest/v1/questions?status=neq.moved&${filter}&select=id,last_activity_at&order=last_activity_at.desc&limit=5000`,
       { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, Accept: 'application/json' }, cf: { cacheTtl: 600 } } as RequestInit,
     );
+    // Answered questions and every guide (update 29); only answered questions before that update has run
+    let res = await get('or=(answers_count.gt.0,kind.eq.guide)');
+    if (!res.ok) res = await get('answers_count=gt.0');
     if (res.ok) rows = await res.json();
   } catch {}
 

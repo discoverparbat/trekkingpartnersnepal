@@ -32,6 +32,13 @@ export interface NoticeView extends Notice {
 const COLS = 'id, kind, trip_id, question_id, comment_id, actor_id, count, read_at, created_at';
 const QUESTION_KINDS = ['answer', 'thread_answer', 'best_answer', 'moved_to_partners', 'new_question'];
 
+type QInfo = { id: string; title: string; trek: string; kind?: string };
+/** Questions (and guides, update 29) the notices point at; without kind before update 29 has run */
+async function loadQuestions(ids: string[]) {
+  const res = await supabase.from('questions').select('id, title, trek, kind').in('id', ids);
+  return res.error ? supabase.from('questions').select('id, title, trek').in('id', ids) : res;
+}
+
 export async function fetchNotices(userId: string, limit = 20): Promise<NoticeView[]> {
   const load = (cols: string) => supabase
     .from('notifications').select(cols)
@@ -50,12 +57,12 @@ export async function fetchNotices(userId: string, limit = 20): Promise<NoticeVi
   const actorIds = [...new Set(data.map((n) => n.actor_id).filter(Boolean))] as string[];
   const [trips, questions, actors, admins] = await Promise.all([
     tripIds.length ? supabase.from('trips').select('id, trek').in('id', tripIds) : Promise.resolve({ data: [] as any[] }),
-    questionIds.length ? supabase.from('questions').select('id, title, trek').in('id', questionIds) : Promise.resolve({ data: [] as any[] }),
+    questionIds.length ? loadQuestions(questionIds) : Promise.resolve({ data: [] as any[] }),
     actorIds.length ? fetchProfiles(actorIds).then((data) => ({ data: data as any[] })) : Promise.resolve({ data: [] as any[] }),
     actorIds.length ? supabase.rpc('admin_ids') : Promise.resolve({ data: [] as any[] }),
   ]);
   const trekOf = new Map((trips.data ?? []).map((t: any) => [t.id, getTrek(t.trek)?.name ?? t.trek]));
-  const questionOf = new Map((questions.data ?? []).map((q: any) => [q.id, q as { id: string; title: string; trek: string }]));
+  const questionOf = new Map((questions.data ?? []).map((q: any) => [q.id, q as QInfo]));
   const adminSet = new Set<string>((admins.data ?? []).map((r: any) => (typeof r === 'string' ? r : r.admin_ids ?? r.user_id)));
   // Replies from the team account show the site name and logo, not the personal profile
   const actorOf = new Map((actors.data ?? []).map((a: any) => [a.id,
@@ -98,10 +105,20 @@ function announcement(n: Notice): NoticeView {
 
 const clip = (t: string, n = 60) => (t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t);
 
-function describeQuestion(n: Notice, q: { id: string; title: string; trek: string }, actor?: { display_name: string | null; avatar_url: string | null; team?: boolean }): NoticeView {
+function describeQuestion(n: Notice, q: QInfo, actor?: { display_name: string | null; avatar_url: string | null; team?: boolean }): NoticeView {
   const who = (actor?.team ? actor.display_name : actor?.display_name?.split(' ')[0]) || 'A trekker';
   const url = `/community/question/?id=${encodeURIComponent(q.id)}`;
   const title = `“${clip(q.title)}”`;
+  if (q.kind === 'guide' && (n.kind === 'answer' || n.kind === 'thread_answer' || n.kind === 'new_question')) {
+    const own = n.kind === 'answer';
+    if (n.kind === 'new_question') return { ...n, icon: '🧭', strong: 'New guide',
+      text: ` from ${who}: ${title}`, href: url, actorAvatar: actor?.avatar_url ?? null };
+    return { ...n, icon: '💬', strong: n.count > 1 ? `${n.count} new comments` : who,
+      text: n.count > 1
+        ? (own ? ` on your guide ${title} · latest from ${who}` : ` on ${title}, which you commented on · latest from ${who}`)
+        : (own ? ` commented on your guide ${title}` : ` also commented on ${title}`),
+      href: url + '#answers', actorAvatar: actor?.avatar_url ?? null };
+  }
   switch (n.kind) {
     case 'answer':
       return { ...n, icon: '💬', strong: n.count > 1 ? `${n.count} new answers` : who,

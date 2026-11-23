@@ -7,7 +7,7 @@
       <div>
         <span class="eyebrow">Community</span>
         <h2>On the trail right now</h2>
-        <p>Live trail updates from our team, and what trekkers are asking this week.</p>
+        <p>Live trail updates from our team, and what trekkers are asking and sharing this week.</p>
       </div>
       <a href="/community/" class="link-arrow">Visit the Community →</a>
     </div>
@@ -24,7 +24,8 @@
         </div>
         <div class="ch-foot">
           <a href="/community/ask/" class="btn btn-sun btn-sm">Ask a question</a>
-          <a href="/community/" class="link-arrow">All questions →</a>
+          <a href="/community/ask/?type=guide" class="btn btn-outline btn-sm">Share a guide</a>
+          <a href="/community/" class="link-arrow">All posts →</a>
         </div>
       </div>
     </div>
@@ -49,8 +50,8 @@
 </style>
 
 <script>
-  import { fetchQuestions, fetchNotes, noteRow, questionUrl, trekName, answersLabel } from '../lib/community';
-  import { topicLabel } from '../data/community';
+  import { fetchQuestions, fetchNotes, noteRow, questionUrl, trekName, repliesLabel, isGuide } from '../lib/community';
+  import { topicLabel, kindLabel } from '../data/community';
   import { timeAgo } from '../lib/posts';
 
   const notesBox = document.getElementById('ch-notes')!;
@@ -82,12 +83,12 @@
       const title = document.createElement('strong');
       title.textContent = q.title;
       const meta = document.createElement('small');
-      meta.append(`${trekName(q.trek)} · ${topicLabel(q.topic)} · ${timeAgo(q.created_at)} · `);
+      meta.append(`${kindLabel(q.kind)} · ${trekName(q.trek)} · ${topicLabel(q.topic)} · ${timeAgo(q.created_at)} · `);
       const count = document.createElement('b');
-      count.textContent = answersLabel(q.answers_count);
-      if (!q.answers_count) count.className = 'none';
+      count.textContent = repliesLabel(q);
+      if (!q.answers_count && !isGuide(q)) count.className = 'none';
       meta.append(count);
-      if (q.best_answer_id) {
+      if (q.best_answer_id && !isGuide(q)) {
         const ok = document.createElement('i');
         ok.textContent = ' · ✓ Answered';
         meta.append(ok);

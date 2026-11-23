@@ -14,7 +14,7 @@ import Base from '../../layouts/Base.astro';
 
         <div id="loading" class="panel" style="text-align:center"><p class="muted" style="margin:0">Loading…</p></div>
         <div id="missing" class="panel panel-dashed" hidden>
-          <h3>Question not found</h3>
+          <h3>Post not found</h3>
           <p class="muted">It may have been deleted or moved.</p>
           <a href="/community/" class="btn btn-sun">Browse the Community</a>
         </div>
@@ -33,6 +33,7 @@ import Base from '../../layouts/Base.astro';
             <div id="q-by"></div>
             <p id="q-body" class="q-body"></p>
             <div class="q-actions">
+              <button id="q-helpful" type="button" class="btn btn-outline btn-sm q-helpful" hidden>👍 Helpful</button>
               <span id="q-report"></span>
               <button id="q-delete" type="button" class="btn btn-outline btn-sm danger" hidden>Delete my question</button>
             </div>
@@ -51,12 +52,13 @@ import Base from '../../layouts/Base.astro';
             </div>
 
             <form id="a-form" class="form-card form-grid answer-form" novalidate hidden>
-              <label class="field">Your answer
+              <label class="field"><span id="a-label">Your answer</span>
                 <textarea name="body" required maxlength="2000" placeholder="Know the answer? Share what you saw and when you were there – recent first-hand info helps most."></textarea>
                 <span class="counter" id="a-counter">0 / 2000</span>
               </label>
               <p class="form-note">Answers are public. Keep it about the trek, and don’t share contact details here. Looking for people to trek with? Use <a href="/find-partners/">Find partners</a>.</p>
               <p id="a-error" class="form-error" hidden></p>
+              <p id="a-guide-note" class="form-note" hidden>Comments are public. Ask the author a follow-up, or add what you saw on the same trek. Don’t share contact details here – use <strong>Message</strong> on their profile instead.</p>
               <div style="display:flex;justify-content:flex-end"><button type="submit" id="a-send" class="btn btn-sun">Post your answer</button></div>
             </form>
           </section>
@@ -78,10 +80,18 @@ import Base from '../../layouts/Base.astro';
           <h3 id="more-title">More questions</h3>
           <ul id="more-list" class="more-list"></ul>
         </div>
+        <div class="side-card dp-card" id="dp-card" hidden>
+          <h3>Rather go with a local guide?</h3>
+          <p class="small">Join a fixed departure with Discover Parbat. Experienced local guides add a lot more than navigation.</p>
+          <a href="/fixed-departures/" class="btn btn-sun btn-sm">See fixed departures</a>
+        </div>
         <div class="side-card">
           <h3>Have your own question?</h3>
-          <p class="muted small">Trekkers and our local team answer.</p>
-          <a id="ask-link" href="/community/ask/" class="btn btn-sun btn-sm">Ask a question</a>
+          <p class="muted small">Trekkers and our local team answer. Just did a trek? Share a guide.</p>
+          <div class="side-btns">
+            <a id="ask-link" href="/community/ask/" class="btn btn-sun btn-sm">Ask a question</a>
+            <a id="guide-link" href="/community/ask/?type=guide" class="btn btn-outline btn-sm">Share a guide</a>
+          </div>
         </div>
       </aside>
     </div>
@@ -137,6 +147,11 @@ import Base from '../../layouts/Base.astro';
 
   .side-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 16px; }
   .side-card h3 { margin-bottom: 8px; font-size: 1.05rem; }
+  .side-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .dp-card { background: #fff8f3; border-color: #f6d39f; }
+  .dp-card p { color: #6b3a06; }
+  .q-helpful.voted { border-color: var(--sky-500); color: var(--sky-700); background: var(--sky-50); }
+  .q-actions .q-helpful { margin-right: auto; }
   .more-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
   .more-list :global(a) { color: var(--ink); text-decoration: none; font-weight: 500; font-size: .92rem; line-height: 1.35; display: block; }
   .more-list :global(a:hover) { color: var(--sky-600); }
@@ -155,9 +170,10 @@ import Base from '../../layouts/Base.astro';
   import { reportButton } from '../../lib/report';
   import {
     fetchQuestion, fetchAnswers, fetchQuestions, myVotes, adminIds, adminRow, byline, setBestAnswer,
-    deleteQuestion, trekName, trekUrl, questionUrl, answersLabel, type Question, type Answer,
+    deleteQuestion, trekName, trekUrl, questionUrl, answersLabel, commentsLabel, repliesLabel, isGuide, guideVotes,
+    type Question, type Answer,
   } from '../../lib/community';
-  import { topicLabel, GENERAL } from '../../data/community';
+  import { topicLabel, kindLabel, trekkedLabel, GENERAL } from '../../data/community';
   import { getTrek } from '../../data/treks';
 
   const $ = (id: string) => document.getElementById(id)!;
@@ -198,14 +214,22 @@ import Base from '../../layouts/Base.astro';
     document.title = `${q.title} | Trekking Partners Nepal`;
     $('crumb').textContent = name;
 
+    const guide = isGuide(q);
     const chips = $('q-chips');
-    chips.replaceChildren(el('span', 'q-trek', name), el('span', 'q-topic', topicLabel(q.topic)));
+    chips.replaceChildren(
+      el('span', `q-kind ${guide ? 'k-guide' : 'k-question'}`, kindLabel(q.kind)),
+      el('span', 'q-trek', name), el('span', 'q-topic', topicLabel(q.topic)));
+    if (guide && q.trekked) chips.append(el('span', 'q-flag q-trekked', 'Trekked ' + trekkedLabel(q.trekked)));
     if (q.pinned) chips.append(el('span', 'q-flag q-pinned', '📌 Pinned'));
-    if (q.status === 'closed') chips.append(el('span', 'q-flag q-closed', 'Closed for new answers'));
-    if (q.best_answer_id) chips.append(el('span', 'q-flag', '✓ Answered'));
+    if (q.status === 'closed') chips.append(el('span', 'q-flag q-closed', guide ? 'Closed for new comments' : 'Closed for new answers'));
+    if (!guide && q.best_answer_id) chips.append(el('span', 'q-flag', '✓ Answered'));
 
     $('q-title').textContent = q.title;
-    $('q-by').replaceChildren(byline(q.author, q.user_id, team.has(q.user_id), 'asked ' + timeAgo(q.created_at)));
+    $('q-by').replaceChildren(byline(q.author, q.user_id, team.has(q.user_id), (guide ? 'shared ' : 'asked ') + timeAgo(q.created_at)));
+    $('new-note').textContent = guide
+      ? '✓ Your guide is live. Thanks for sharing! We’ll let you know in the 🔔 when someone comments.'
+      : '✓ Your question is live. We’ll let you know in the 🔔 when someone answers. When an answer solves it, mark it as the best answer.';
+    ($('q-delete') as HTMLButtonElement).textContent = guide ? 'Delete my guide' : 'Delete my question';
     $('q-body').textContent = q.body;
 
     const isOwner = me.id === q.user_id;
@@ -214,7 +238,8 @@ import Base from '../../layouts/Base.astro';
       $('moved-note').hidden = false;
       if (q.trek !== GENERAL) ($('moved-go') as HTMLAnchorElement).href = `/find-partners/new/?trek=${encodeURIComponent(q.trek)}`;
     }
-    if (!isOwner && !team.has(q.user_id)) $('q-report').replaceChildren(reportButton('question', q.id, 'Report question'));
+    if (!isOwner && !team.has(q.user_id)) $('q-report').replaceChildren(reportButton('question', q.id, guide ? 'Report guide' : 'Report question'));
+    if (guide) setupHelpful();
     if (isOwner) {
       const del = $('q-delete') as HTMLButtonElement;
       del.hidden = false;
@@ -231,6 +256,30 @@ import Base from '../../layouts/Base.astro';
     }
   }
 
+  // "Helpful" on a guide (update 29)
+  async function setupHelpful() {
+    const btn = $('q-helpful') as HTMLButtonElement;
+    const { helpful, voted } = await guideVotes(q.id, me.id);
+    btn.textContent = `👍 Helpful${helpful ? ' · ' + helpful : ''}`;
+    btn.classList.toggle('voted', voted);
+    btn.setAttribute('aria-pressed', String(voted));
+    btn.hidden = false;
+    const mine = me.id === q.user_id;
+    btn.disabled = mine;
+    btn.title = mine ? 'You can’t vote on your own guide' : '';
+    btn.onclick = async () => {
+      if (!me.id) return goToLogin();
+      if (!me.member) return goToAccount();
+      btn.disabled = true;
+      const { error } = voted
+        ? await supabase.from('question_votes').delete().eq('question_id', q.id).eq('user_id', me.id)
+        : await supabase.from('question_votes').insert({ question_id: q.id });
+      btn.disabled = false;
+      if (error) return alert('Could not save your vote: ' + error.message);
+      setupHelpful();
+    };
+  }
+
   function teamAvatar() {
     const img = el('img', 'avatar');
     img.src = '/web-app-manifest-192x192.png'; img.alt = 'Trekking Partners Nepal'; img.width = 40; img.height = 40;
@@ -243,7 +292,11 @@ import Base from '../../layouts/Base.astro';
     // Best answer first, then oldest to newest
     answers.sort((a, b) => (a.id === q.best_answer_id ? -1 : b.id === q.best_answer_id ? 1 : 0));
 
-    $('a-title').textContent = answers.length ? answersLabel(answers.length) : 'Answers';
+    const guide = isGuide(q);
+    $('a-title').textContent = answers.length ? (guide ? commentsLabel : answersLabel)(answers.length) : guide ? 'Comments' : 'Answers';
+    $('a-none').textContent = guide
+      ? 'No comments yet. Did this trek too, or have a follow-up question? Add a comment.'
+      : 'No answers yet. Know the answer? Recent first-hand info helps most.';
     $('a-none').hidden = answers.length > 0;
     $('a-list').replaceChildren(...answers.map((a) => answerItem(a, voted.has(a.id))));
 
@@ -302,8 +355,8 @@ import Base from '../../layouts/Base.astro';
     });
     foot.append(help);
 
-    // Best answer: the asker or an admin chooses
-    if (me.id === q.user_id || me.admin) {
+    // Best answer: the asker or an admin chooses (questions only – guides have comments)
+    if (!isGuide(q) && (me.id === q.user_id || me.admin)) {
       const mark = el('button', 'a-btn mark', isBest ? 'Remove best answer' : '✓ Mark as best answer');
       mark.type = 'button';
       mark.addEventListener('click', async () => {
@@ -325,7 +378,7 @@ import Base from '../../layouts/Base.astro';
       const del = el('button', 'a-btn del', 'Delete');
       del.type = 'button';
       del.addEventListener('click', async () => {
-        if (!confirm('Delete this answer?')) return;
+        if (!confirm(isGuide(q) ? 'Delete this comment?' : 'Delete this answer?')) return;
         const { error } = await supabase.from('answers').delete().eq('id', a.id);
         if (error) return alert('Could not delete: ' + error.message);
         await supabase.from('reports').update({ status: 'resolved' }).eq('kind', 'answer').eq('target_id', a.id).eq('status', 'open');
@@ -360,7 +413,7 @@ import Base from '../../layouts/Base.astro';
     cancel.addEventListener('click', () => { box.remove(); text.hidden = false; });
     save.addEventListener('click', async () => {
       const v = ta.value.trim();
-      if (v.length < 2) { err.textContent = 'Answer can’t be empty.'; err.hidden = false; return; }
+      if (v.length < 2) { err.textContent = isGuide(q) ? 'Comment can’t be empty.' : 'Answer can’t be empty.'; err.hidden = false; return; }
       if (v === a.body) { box.remove(); text.hidden = false; return; }
       save.disabled = true;
       const { error } = await supabase.from('answers').update({ body: v }).eq('id', a.id);
@@ -385,13 +438,25 @@ import Base from '../../layouts/Base.astro';
       locked.hidden = false;
     };
 
+    const guide = isGuide(q);
+    const verb = guide ? 'comment' : 'answer';
+    $('a-label').textContent = guide ? 'Your comment' : 'Your answer';
+    ($('a-send') as HTMLButtonElement).textContent = guide ? 'Post your comment' : 'Post your answer';
+    (form.elements.namedItem('body') as HTMLTextAreaElement).placeholder = guide
+      ? 'A follow-up question for the author, or what you saw on the same trek and when.'
+      : 'Know the answer? Share what you saw and when you were there – recent first-hand info helps most.';
+    $('a-guide-note').hidden = !guide;
+    (form.querySelector('.form-note:not(#a-guide-note)') as HTMLElement).hidden = guide;
+
     if (q.status === 'moved') return;
     if (q.status === 'closed' && !me.admin) {
-      return lock('This question is closed for new answers', 'Have a similar question? Ask it in the Community.', 'Ask a question', () => (location.href = '/community/ask/'));
+      return guide
+        ? lock('This guide is closed for new comments', 'Did this trek too? Share your own guide.', 'Share a guide', () => (location.href = '/community/ask/?type=guide'))
+        : lock('This question is closed for new answers', 'Have a similar question? Ask it in the Community.', 'Ask a question', () => (location.href = '/community/ask/'));
     }
-    if (!me.id) return lock('Sign in to answer', 'Anyone can read answers. To answer, sign in with Google – it takes a few seconds.', 'Sign in with Google', () => goToLogin(location.pathname + location.search + '#answer'));
-    if (me.banned) return lock('Your account can’t post answers', 'It was suspended for breaking our rules. If you think this is a mistake, email hello@trekkingpartnersnepal.com.');
-    if (!me.member) return lock('Complete your profile to answer', 'Add your name, age and nationality so other trekkers know who is answering.', 'Complete my profile', () => goToAccount(location.pathname + location.search + '#answer'));
+    if (!me.id) return lock(`Sign in to ${verb}`, `Anyone can read ${verb}s. To ${verb}, sign in with Google – it takes a few seconds.`, 'Sign in with Google', () => goToLogin(location.pathname + location.search + '#answer'));
+    if (me.banned) return lock(`Your account can’t post ${verb}s`, 'It was suspended for breaking our rules. If you think this is a mistake, email hello@trekkingpartnersnepal.com.');
+    if (!me.member) return lock(`Complete your profile to ${verb}`, `Add your name, age and nationality so other trekkers know who is ${guide ? 'commenting' : 'answering'}.`, 'Complete my profile', () => goToAccount(location.pathname + location.search + '#answer'));
 
     form.hidden = false;
     if (form.dataset.ready) return;
@@ -423,12 +488,14 @@ import Base from '../../layouts/Base.astro';
   // ── Sidebar ────────────────────────────────────────────────
   async function loadSide() {
     $('side').hidden = false;
+    $('dp-card').hidden = !isGuide(q);
     const trek = getTrek(q.trek);
     if (trek) {
       $('trek-facts').textContent = `${trek.name}: ${trek.days} days, max ${trek.maxAltitude}, ${trek.difficulty.toLowerCase()}.`;
       ($('trek-link') as HTMLAnchorElement).href = trekUrl(trek.slug)!;
       $('trek-card').hidden = false;
       ($('ask-link') as HTMLAnchorElement).href = `/community/ask/?trek=${encodeURIComponent(trek.slug)}`;
+      ($('guide-link') as HTMLAnchorElement).href = `/community/ask/?type=guide&trek=${encodeURIComponent(trek.slug)}`;
       try {
         const trips = await fetchTrips({ trek: trek.slug });
         $('partners-text').textContent = trips.length
@@ -442,12 +509,12 @@ import Base from '../../layouts/Base.astro';
     try {
       const more = (await fetchQuestions({ trek: q.trek, limit: 6 })).filter((x) => x.id !== q.id).slice(0, 4);
       if (more.length) {
-        $('more-title').textContent = q.trek === GENERAL ? 'More general questions' : `More about ${trekName(q.trek)}`;
+        $('more-title').textContent = q.trek === GENERAL ? 'More general posts' : `More about ${trekName(q.trek)}`;
         $('more-list').replaceChildren(...more.map((m) => {
           const li = el('li');
           const a = el('a', '', m.title);
           a.href = questionUrl(m.id);
-          li.append(a, el('small', '', answersLabel(m.answers_count)));
+          li.append(a, el('small', '', `${kindLabel(m.kind)} · ${repliesLabel(m)}`));
           return li;
         }));
         $('more-card').hidden = false;

@@ -4,11 +4,13 @@ import { supabase } from './supabase';
 import { el, avatar, authorName, authorFacts, timeAgo, fetchProfiles, type Author } from './posts';
 import { getTrek } from '../data/treks';
 import { getRegion } from '../data/regions';
-import { GENERAL, GENERAL_LABEL, topicLabel, noteLabel } from '../data/community';
+import { GENERAL, GENERAL_LABEL, topicLabel, noteLabel, kindLabel, trekkedLabel } from '../data/community';
 
 export interface Question {
   id: string;
   user_id: string;
+  kind: 'question' | 'guide';      // update 29; 'question' before it has run
+  trekked: string | null;          // guides: 'YYYY-MM' when the author did the trek
   trek: string;
   region: string | null;
   topic: string;
@@ -44,7 +46,14 @@ export interface Note {
   created_at: string;
 }
 
-const Q_COLS = 'id, user_id, trek, region, topic, title, body, status, pinned, best_answer_id, answers_count, last_activity_at, created_at';
+const Q_COLS = 'id, user_id, kind, trekked, trek, region, topic, title, body, status, pinned, best_answer_id, answers_count, last_activity_at, created_at';
+// Before update-29-community-guides.sql has run there are no kind/trekked columns
+const Q_COLS_OLD = Q_COLS.replace('kind, trekked, ', '');
+const withKind = (r: any): Question => ({ ...r, kind: r.kind === 'guide' ? 'guide' : 'question', trekked: r.trekked ?? null });
+
+export const isGuide = (q: Pick<Question, 'kind'>) => q.kind === 'guide';
+/** Replies: "answers" on questions, "comments" on guides */
+export const repliesLabel = (q: Pick<Question, 'kind' | 'answers_count'>) => (isGuide(q) ? commentsLabel(q.answers_count) : answersLabel(q.answers_count));
 
 export const questionUrl = (id: string) => `/community/question/?id=${encodeURIComponent(id)}`;
 export const trekName = (slug: string) => (slug === GENERAL ? GENERAL_LABEL : getTrek(slug)?.name ?? slug);
@@ -79,23 +88,32 @@ async function authors(ids: string[]) {
 }
 
 // ── Loading ─────────────────────────────────────────────────
-export async function fetchQuestions(opts: { limit?: number; trek?: string } = {}): Promise<Question[]> {
-  let q = supabase.from('questions').select(Q_COLS).neq('status', 'moved')
-    .order('pinned', { ascending: false }).order('last_activity_at', { ascending: false });
-  if (opts.trek) q = q.eq('trek', opts.trek);
-  q = q.limit(opts.limit ?? 300);
-  const { data, error } = await q;
-  if (error) throw new Error(error.message);
-  const rows = (data ?? []) as Question[];
+export async function fetchQuestions(opts: { limit?: number; trek?: string; kind?: 'question' | 'guide' } = {}): Promise<Question[]> {
+  const load = (cols: string, kind = true) => {
+    let q = supabase.from('questions').select(cols).neq('status', 'moved')
+      .order('pinned', { ascending: false }).order('last_activity_at', { ascending: false });
+    if (opts.trek) q = q.eq('trek', opts.trek);
+    if (opts.kind && kind) q = q.eq('kind', opts.kind);
+    return q.limit(opts.limit ?? 300);
+  };
+  let res: any = await load(Q_COLS);
+  if (res.error) {
+    if (opts.kind === 'guide') return [];
+    res = await load(Q_COLS_OLD, false);
+  }
+  if (res.error) throw new Error(res.error.message);
+  const rows = ((res.data ?? []) as any[]).map(withKind);
   const byId = await authors(rows.map((r) => r.user_id));
   return rows.map((r) => ({ ...r, author: byId.get(r.user_id) }));
 }
 
 export async function fetchQuestion(id: string): Promise<Question | null> {
-  const { data, error } = await supabase.from('questions').select(Q_COLS).eq('id', id).maybeSingle();
-  if (error || !data) return null;
+  let res: any = await supabase.from('questions').select(Q_COLS).eq('id', id).maybeSingle();
+  if (res.error) res = await supabase.from('questions').select(Q_COLS_OLD).eq('id', id).maybeSingle();
+  const data = res.data;
+  if (res.error || !data) return null;
   const byId = await authors([data.user_id]);
-  return { ...(data as Question), author: byId.get(data.user_id) };
+  return { ...withKind(data), author: byId.get(data.user_id) };
 }
 
 export async function fetchAnswers(questionId: string): Promise<Answer[]> {
@@ -117,6 +135,16 @@ export async function myVotes(answerIds: string[]) {
   if (!answerIds.length) return new Set<string>();
   const { data } = await supabase.from('answer_votes').select('answer_id').in('answer_id', answerIds);
   return new Set((data ?? []).map((v: any) => v.answer_id as string));
+}
+
+/** "Helpful" votes on a guide: the count, and whether I voted */
+export async function guideVotes(questionId: string, myId: string) {
+  const [count, mine] = await Promise.all([
+    supabase.from('question_vote_counts').select('helpful').eq('question_id', questionId).maybeSingle(),
+    myId ? supabase.from('question_votes').select('question_id').eq('question_id', questionId).eq('user_id', myId).maybeSingle()
+         : Promise.resolve({ data: null }),
+  ]);
+  return { helpful: (count.data as any)?.helpful ?? 0, voted: !!mine.data };
 }
 
 /** Current admin notes, newest first. Pass a trek to get only the notes about that trek. */
@@ -155,8 +183,9 @@ export async function moveToPartners(q: Pick<Question, 'id' | 'title'>) {
   return ok;
 }
 
-export async function deleteQuestion(q: Pick<Question, 'id'>) {
-  if (!confirm('Delete this question and all its answers? This can’t be undone.')) return false;
+export async function deleteQuestion(q: Pick<Question, 'id'> & Partial<Pick<Question, 'kind'>>) {
+  const guide = (q as Partial<Question>).kind === 'guide';
+  if (!confirm(guide ? 'Delete this guide and all its comments? This can’t be undone.' : 'Delete this question and all its answers? This can’t be undone.')) return false;
   const { error } = await supabase.from('questions').delete().eq('id', q.id);
   if (error) { alert('Could not delete: ' + error.message); return false; }
   await supabase.from('reports').update({ status: 'resolved' }).eq('kind', 'question').eq('target_id', q.id).eq('status', 'open');
@@ -167,10 +196,13 @@ export async function deleteQuestion(q: Pick<Question, 'id'>) {
 const CHAT_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
 
 export const answersLabel = (n: number) => (n === 0 ? 'No answers yet' : n === 1 ? '1 answer' : `${n} answers`);
+export const commentsLabel = (n: number) => (n === 0 ? 'No comments yet' : n === 1 ? '1 comment' : `${n} comments`);
 
 function chips(q: Question) {
   const meta = el('div', 'q-meta');
+  meta.append(el('span', `q-kind ${isGuide(q) ? 'k-guide' : 'k-question'}`, kindLabel(q.kind)));
   meta.append(el('span', 'q-trek', trekName(q.trek)), el('span', 'q-topic', topicLabel(q.topic)));
+  if (isGuide(q) && q.trekked) meta.append(el('span', 'q-flag q-trekked', 'Trekked ' + trekkedLabel(q.trekked)));
   if (q.pinned) meta.append(el('span', 'q-flag q-pinned', '📌 Pinned'));
   if (q.status === 'closed') meta.append(el('span', 'q-flag q-closed', 'Closed'));
   return meta;
@@ -207,17 +239,21 @@ export function questionCard(q: Question, o: CardOptions = {}) {
   link.href = questionUrl(q.id);
   h.append(link);
   card.append(chips(q), h, el('p', 'q-excerpt', q.body));
-  card.append(byline(q.author, q.user_id, !!o.team?.has(q.user_id), 'asked ' + timeAgo(q.created_at)));
+  const guide = isGuide(q);
+  card.append(byline(q.author, q.user_id, !!o.team?.has(q.user_id), (guide ? 'shared ' : 'asked ') + timeAgo(q.created_at)));
 
   const foot = el('div', 'q-foot');
-  const count = el('span', q.answers_count ? 'q-count' : 'q-count none');
+  // Guides with no comments aren't "waiting" like an unanswered question, so no orange
+  const count = el('span', q.answers_count || guide ? 'q-count' : 'q-count none');
   count.innerHTML = CHAT_ICON;   // fixed icon, no user text
-  count.append(answersLabel(q.answers_count));
+  count.append(repliesLabel(q));
   foot.append(count);
-  if (q.best_answer_id) foot.append(el('span', 'q-answered', '✓ Answered'));
+  if (guide) foot.append(el('span', 'q-ago', `${Math.max(1, Math.round(q.body.split(/\s+/).length / 200))} min read`));
+  if (!guide && q.best_answer_id) foot.append(el('span', 'q-answered', '✓ Answered'));
   if (q.answers_count) foot.append(el('span', 'q-ago', 'active ' + timeAgo(q.last_activity_at)));
-  const go = el('a', 'q-go', q.status === 'open' && !q.answers_count ? 'Answer →' : 'Read answers →');
-  go.href = questionUrl(q.id) + (q.status === 'open' && !q.answers_count ? '#answer' : '');
+  const answerNow = !guide && q.status === 'open' && !q.answers_count;
+  const go = el('a', 'q-go', guide ? 'Read guide →' : answerNow ? 'Answer →' : 'Read answers →');
+  go.href = questionUrl(q.id) + (answerNow ? '#answer' : '');
   foot.append(go);
   card.append(foot);
 
@@ -236,7 +272,8 @@ export function adminRow(q: Question, done: () => void) {
   };
   row.append(el('span', 'q-mod-label', 'Admin'));
   b(q.pinned ? 'Unpin' : 'Pin to top', '', () => setPinned(q.id, !q.pinned));
-  b(q.status === 'closed' ? 'Reopen answers' : 'Close answers', '', () => setStatus(q.id, q.status === 'closed' ? 'open' : 'closed'));
+  const what = isGuide(q) ? 'comments' : 'answers';
+  b(q.status === 'closed' ? `Reopen ${what}` : `Close ${what}`, '', () => setStatus(q.id, q.status === 'closed' ? 'open' : 'closed'));
   b('↪ Move to Find partners', 'move', () => moveToPartners(q));
   b('Delete', 'danger', () => deleteQuestion(q));
   return row;

@@ -5,16 +5,16 @@ import { treksInRegion } from '../../data/treks';
 import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
 ---
 <Base
-  title="Nepal Trekking Questions & Trail Conditions | Trekking Partners Nepal"
-  description="Ask about trail conditions, snow, permits, gear, teahouses and transport on Nepal treks. Answers from trekkers who were just there and our local team."
+  title="Nepal Trekking Questions, Guides & Trail Conditions | Trekking Partners Nepal"
+  description="Ask about trail conditions, snow, permits, gear and teahouses on Nepal treks, or read trek guides from trekkers who were just there. Answers from trekkers and our local team."
 >
   <section class="page-hero" style="background-image:url('/images/hero.jpg')">
     <div class="container">
       <nav class="crumbs"><a href="/">Home</a> › Community</nav>
-      <h1>Ask the trail</h1>
-      <p>Questions about routes, trail conditions, permits, gear and teahouses. Trekkers who were just there, and our local team, answer.</p>
+      <h1>Ask &amp; share the trail</h1>
+      <p>Ask about routes, trail conditions, permits, gear and teahouses, or share a guide from a trek you just did. Trekkers who were just there, and our local team, help out.</p>
       <ul class="rules">
-        <li>✓ Trek questions only</li><li>✓ Recent conditions</li><li>✓ Gear &amp; permits</li><li>✕ Partner requests go to Find partners</li>
+        <li>✓ Trek questions</li><li>✓ Trek guides &amp; experiences</li><li>✓ Gear &amp; permits</li><li>✕ Partner requests go to Find partners</li>
       </ul>
     </div>
   </section>
@@ -63,17 +63,23 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
         </div>
 
         <div class="toolbar">
-          <input id="f-search" type="search" placeholder="Search questions, e.g. Mardi Himal snow" aria-label="Search questions" />
+          <input id="f-search" type="search" placeholder="Search questions and guides, e.g. Mardi Himal snow" aria-label="Search questions and guides" />
           <select id="f-region" aria-label="Region">
             <option value="">All regions</option>
             {regions.map((r) => <option value={r.slug}>{r.name}</option>)}
           </select>
           <a href="/community/ask/" class="btn btn-sun">Ask a question</a>
+          <a href="/community/ask/?type=guide" class="btn btn-outline">Share a guide</a>
+        </div>
+        <div class="kind-tabs" id="f-kinds" role="group" aria-label="Post type">
+          <button type="button" class="kind-tab active" data-kind="" aria-pressed="true">All <span class="kind-n" data-n=""></span></button>
+          <button type="button" class="kind-tab" data-kind="question" aria-pressed="false">Questions <span class="kind-n" data-n="question"></span></button>
+          <button type="button" class="kind-tab" data-kind="guide" aria-pressed="false">Guides <span class="kind-n" data-n="guide"></span></button>
         </div>
         <div class="topic-chips" id="f-topics" role="group" aria-label="Topic">
           <button type="button" class="chip active" data-topic="">All</button>
           {TOPICS.map((t) => <button type="button" class="chip" data-topic={t.value}>{t.label}</button>)}
-          <button type="button" class="chip" data-topic="unanswered">Unanswered</button>
+          <button type="button" class="chip" data-topic="unanswered" id="chip-unanswered">Unanswered</button>
         </div>
 
         <p id="trek-filter" class="trek-filter" hidden>Showing questions about <strong id="trek-filter-name"></strong> <button type="button" id="trek-filter-clear" aria-label="Show all treks">✕ All treks</button></p>
@@ -83,27 +89,25 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
         </div>
         <div id="q-empty" class="panel panel-dashed" hidden>
           <h3 id="q-empty-title">No questions yet</h3>
-          <p class="muted">Be the first to ask. Trekkers and our local team will answer.</p>
-          <a href="/community/ask/" class="btn btn-sun">Ask a question</a>
+          <p class="muted" id="q-empty-text">Be the first to ask. Trekkers and our local team will answer.</p>
+          <a href="/community/ask/" class="btn btn-sun" id="q-empty-btn">Ask a question</a>
         </div>
-        <div class="more"><button type="button" id="q-more" class="btn btn-outline" hidden>Show more questions</button></div>
+        <div class="more"><button type="button" id="q-more" class="btn btn-outline" hidden>Show more</button></div>
       </div>
 
       <aside class="c-side">
         <div class="side-card">
-          <h3>What to ask here</h3>
-          <ul class="ok">
-            <li>Current trail and snow conditions</li>
-            <li>Gear and clothing</li>
-            <li>Permits, TIMS and entry rules</li>
-            <li>Teahouses, food, water, transport</li>
-          </ul>
+          <h3>Two ways to post</h3>
+          <p class="kind-help"><span class="q-kind k-question">Question</span></p>
+          <p class="muted small">Need info before or during a trek: trail and snow conditions, permits, gear, teahouses, transport.</p>
+          <p class="kind-help"><span class="q-kind k-guide">Guide</span></p>
+          <p class="muted small">Just did a trek? Share your route, days, what you paid, teahouses and tips, so the next trekker knows what to expect.</p>
         </div>
         <div class="side-card">
           <h3>Not here</h3>
           <ul class="no">
             <li>Looking for trek partners</li>
-            <li>Selling guiding or tours</li>
+            <li>Selling guiding or tours, including guides that read like ads</li>
             <li>Off-topic chat</li>
           </ul>
           <p class="muted small">Posts that break these rules are moved or removed.</p>
@@ -138,6 +142,13 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
   .toolbar input:focus, .toolbar select:focus { outline: 2px solid var(--sky-400); outline-offset: 1px; }
   .topic-chips { margin-bottom: 16px; }
   .topic-chips .chip { cursor: pointer; font-family: var(--font-body); padding: 6px 14px; font-size: .86rem; }
+  .kind-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 4px 0 14px; overflow-x: auto; }
+  .kind-tab { font: 600 .95rem var(--font-body); padding: 10px 14px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; min-height: 44px; }
+  .kind-tab:hover { color: var(--night-800); }
+  .kind-tab.active { color: var(--night-800); border-bottom-color: var(--sun); }
+  .kind-n { font-size: .74rem; background: var(--sky-100); color: var(--sky-700); border-radius: 999px; padding: 1px 8px; }
+  .kind-n:empty { display: none; }
+  .kind-help { margin: 0 0 6px; font-size: .78rem; }
   .q-count-line { color: var(--muted); font-size: .88rem; margin: 0 0 10px; min-height: 1.3em; }
   .more { text-align: center; margin-top: 18px; }
   .trek-filter { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; font-size: .92rem; color: var(--night-700); }
@@ -164,14 +175,17 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
   const search = $('f-search') as HTMLInputElement;
   const region = $('f-region') as HTMLSelectElement;
   const chips = [...document.querySelectorAll<HTMLButtonElement>('#f-topics .chip')];
+  const kindTabs = [...document.querySelectorAll<HTMLButtonElement>('#f-kinds .kind-tab')];
   const PAGE = 20;
 
   const params = new URLSearchParams(location.search);
   let topic = params.get('topic') ?? '';
   let trek = params.get('trek') ?? '';
+  let kind = ['question', 'guide'].includes(params.get('type') ?? '') ? params.get('type')! : '';
   search.value = params.get('q') ?? '';
   region.value = params.get('region') ?? '';
   if (!chips.some((c) => c.dataset.topic === topic)) topic = '';
+  if (kind === 'guide' && topic === 'unanswered') topic = '';
   chips.forEach((c) => c.classList.toggle('active', c.dataset.topic === topic));
 
   let all: Question[] = [];
@@ -183,8 +197,9 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
 
   function matches(q: Question) {
     if (trek && q.trek !== trek) return false;
+    if (kind && q.kind !== kind) return false;
     if (region.value && q.region !== region.value) return false;
-    if (topic === 'unanswered' && q.answers_count > 0) return false;
+    if (topic === 'unanswered' && (q.answers_count > 0 || q.kind === 'guide')) return false;
     if (topic && topic !== 'unanswered' && q.topic !== topic) return false;
     const words = norm(search.value).split(/\s+/).filter(Boolean);
     if (!words.length) return true;
@@ -197,18 +212,38 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
     list.replaceChildren(...found.slice(0, shown).map((q) => questionCard(q, { admin, team, onChange: load })));
     list.hidden = found.length === 0;
     $('q-empty').hidden = found.length > 0;
-    $('q-empty-title').textContent = all.length ? 'No questions match' : 'No questions yet';
+    const noun = kind === 'guide' ? 'guides' : kind === 'question' ? 'questions' : 'posts';
+    const anyOfKind = all.some((q) => !kind || q.kind === kind);
+    $('q-empty-title').textContent = anyOfKind ? `No ${noun} match` : `No ${noun} yet`;
+    $('q-empty-text').textContent = kind === 'guide'
+      ? 'Just did a trek? Share your route, days and tips, so the next trekker knows what to expect.'
+      : 'Be the first to ask. Trekkers and our local team will answer.';
+    const emptyBtn = $('q-empty-btn') as HTMLAnchorElement;
+    emptyBtn.textContent = kind === 'guide' ? 'Share a guide' : 'Ask a question';
+    emptyBtn.href = kind === 'guide' ? '/community/ask/?type=guide' : '/community/ask/';
+    $('chip-unanswered').hidden = kind === 'guide';
+    kindTabs.forEach((t) => {
+      const on = (t.dataset.kind ?? '') === kind;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-pressed', String(on));
+    });
+    const hasGuides = all.some((q) => q.kind === 'guide');
+    document.querySelectorAll<HTMLElement>('#f-kinds .kind-n').forEach((n) => {
+      const k = n.dataset.n ?? '';
+      n.textContent = hasGuides ? String(all.filter((q) => !k || q.kind === k).length) : '';
+    });
     $('q-more').hidden = found.length <= shown;
     $('trek-filter').hidden = !trek;
     if (trek) $('trek-filter-name').textContent = trekName(trek);
-    const filtered = !!(search.value.trim() || region.value || topic || trek);
-    $('q-count').textContent = all.length && filtered ? `${found.length} of ${all.length} questions` : '';
+    const filtered = !!(search.value.trim() || region.value || topic || trek || kind);
+    $('q-count').textContent = all.length && filtered ? `${found.length} of ${all.length} posts` : '';
 
     const q = new URLSearchParams();
     if (search.value.trim()) q.set('q', search.value.trim());
     if (region.value) q.set('region', region.value);
     if (topic) q.set('topic', topic);
     if (trek) q.set('trek', trek);
+    if (kind) q.set('type', kind);
     history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
   }
 
@@ -280,6 +315,15 @@ import { TOPICS, NOTE_KINDS, NOTE_EXPIRY } from '../../data/community';
   chips.forEach((c) => c.addEventListener('click', () => {
     topic = c.dataset.topic ?? '';
     chips.forEach((x) => x.classList.toggle('active', x === c));
+    shown = PAGE;
+    render();
+  }));
+  kindTabs.forEach((t) => t.addEventListener('click', () => {
+    kind = t.dataset.kind ?? '';
+    if (kind === 'guide' && topic === 'unanswered') {
+      topic = '';
+      chips.forEach((c) => c.classList.toggle('active', c.dataset.topic === ''));
+    }
     shown = PAGE;
     render();
   }));

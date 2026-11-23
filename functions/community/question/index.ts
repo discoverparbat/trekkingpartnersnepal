@@ -58,7 +58,9 @@ export async function onRequestGet(context: any) {
   let team = new Set<string>();
   let helpful = new Map<string, number>();
   try {
-    const rows = await rest(env, `questions?id=eq.${id}&select=id,user_id,trek,title,body,status,best_answer_id,answers_count,created_at,last_activity_at`);
+    const cols = 'id,user_id,trek,title,body,status,best_answer_id,answers_count,created_at,last_activity_at';
+    // kind/trekked exist after update-29-community-guides.sql; fall back to the old columns before that
+    const rows = (await rest(env, `questions?id=eq.${id}&select=${cols},kind,trekked`)) ?? (await rest(env, `questions?id=eq.${id}&select=${cols}`));
     q = Array.isArray(rows) ? rows[0] ?? null : null;
     if (!q || q.status === 'moved') return page;
     const [ans, admins] = await Promise.all([
@@ -80,23 +82,29 @@ export async function onRequestGet(context: any) {
   } catch {}
   if (!q) return page;
 
+  const guide = q.kind === 'guide';
   const nameOf = (uid: string) => (team.has(uid) ? TEAM : people.get(uid)?.display_name?.split(' ')[0] || 'Trekker');
   const trek = getTrek(q.trek);
   const trekName = trek?.name ?? (q.trek === 'general' ? 'Nepal trekking' : q.trek);
   const url = `${SITE}/community/question/?id=${q.id}`;
   const title = `${clip(q.title, 90)} – ${trekName}`;
   const n = answers.length;
-  const description = clip(`${q.body} · ${n === 0 ? 'No answers yet' : n === 1 ? '1 answer' : `${n} answers`} from trekkers and our local team.`, 200);
+  const replies = (k: number) => guide
+    ? (k === 0 ? 'No comments yet' : k === 1 ? '1 comment' : `${k} comments`)
+    : (k === 0 ? 'No answers yet' : k === 1 ? '1 answer' : `${k} answers`);
+  const description = guide
+    ? clip(`${trekName} guide by a trekker: ${q.body}`, 200)
+    : clip(`${q.body} · ${replies(n)} from trekkers and our local team.`, 200);
   const image = new URL(trek?.image || '/images/hero.jpg', SITE).href;
 
   // Best answer first, like the page itself
-  const best = answers.find((a) => a.id === q.best_answer_id);
+  const best = guide ? undefined : answers.find((a) => a.id === q.best_answer_id);
   const ordered = best ? [best, ...answers.filter((a) => a !== best)] : answers;
 
   const html =
     `<article class="ssr-q"><p><a href="/community/">Community</a> · ${esc(trekName)}</p>` +
-    `<h1>${esc(q.title)}</h1><p>Asked by ${esc(nameOf(q.user_id))} · ${day(q.created_at)}</p><p>${esc(q.body)}</p></article>` +
-    `<h2>${n === 0 ? 'No answers yet' : n === 1 ? '1 answer' : `${n} answers`}</h2>` +
+    `<h1>${esc(q.title)}</h1><p>${guide ? 'Shared' : 'Asked'} by ${esc(nameOf(q.user_id))} · ${day(q.created_at)}</p><p>${esc(q.body)}</p></article>` +
+    `<h2>${replies(n)}</h2>` +
     ordered.map((a) =>
       `<div class="ssr-a"><strong>${esc(nameOf(a.user_id))}</strong>${a === best ? ' · ✓ Best answer' : ''} · ${day(a.created_at)}\n${esc(a.body)}</div>`
     ).join('');
@@ -112,7 +120,27 @@ export async function onRequestGet(context: any) {
       ? { '@type': 'Organization', name: TEAM, url: SITE }
       : { '@type': 'Person', name: nameOf(a.user_id) },
   });
-  const schema = {
+  const personOrTeam = (uid: string) => team.has(uid)
+    ? { '@type': 'Organization', name: TEAM, url: SITE }
+    : { '@type': 'Person', name: nameOf(uid) };
+  // Guides are forum posts with comments, not questions with answers
+  const guideSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'DiscussionForumPosting',
+    headline: clip(q.title, 110),
+    text: clip(q.body, 5000),
+    url,
+    image,
+    datePublished: q.created_at,
+    dateModified: q.last_activity_at,
+    author: personOrTeam(q.user_id),
+    about: { '@type': 'TouristTrip', name: trekName },
+    interactionStatistic: { '@type': 'InteractionCounter', interactionType: 'https://schema.org/CommentAction', userInteractionCount: n },
+    ...(n ? { comment: answers.slice(0, 20).map((a) => ({
+      '@type': 'Comment', text: clip(a.body, 2000), datePublished: a.created_at, url: `${url}#a-${a.id}`, author: personOrTeam(a.user_id),
+    })) } : {}),
+  };
+  const qaSchema = {
     '@context': 'https://schema.org',
     '@type': 'QAPage',
     mainEntity: {
@@ -127,11 +155,13 @@ export async function onRequestGet(context: any) {
       ...(n ? { suggestedAnswer: answers.filter((a) => a !== best).slice(0, 20).map(answerLd) } : {}),
     },
   };
+  const schema = guide ? guideSchema : qaSchema;
   const jsonLd = JSON.stringify(schema).replace(/</g, '\\u003c');
 
   // Unanswered questions are thin pages: keep the template's noindex until someone answers.
   // Once a question has an answer it becomes indexable (and appears in /community/sitemap.xml).
-  const indexable = n > 0;
+  // Guides are full write-ups, so they are indexable from the start.
+  const indexable = guide || n > 0;
   const extra =
     (indexable ? `<meta name="robots" content="max-image-preview:large">` : '') +
     `<meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(description)}">` +

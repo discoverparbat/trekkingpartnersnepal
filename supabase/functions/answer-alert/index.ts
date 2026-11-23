@@ -19,21 +19,21 @@ const esc = (s: string) =>
 const short = (t: string, n = 320) => (t.length > n ? t.slice(0, n - 1) + '…' : t);
 const clip = (t: string, n = 70) => (t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t);
 
-function emailHtml(o: { name: string; answerer: string; title: string; excerpt: string; url: string; unsubUrl: string }) {
+function emailHtml(o: { name: string; answerer: string; title: string; excerpt: string; url: string; unsubUrl: string; guide: boolean }) {
   return `<!doctype html><html><body style="margin:0;background:#f2f8ff;font-family:Arial,Helvetica,sans-serif;color:#0f1d33">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2f8ff;padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border:1px solid #d6e3f3;border-radius:14px">
 <tr><td style="background:#081634;color:#ffffff;padding:18px 24px;border-radius:14px 14px 0 0;font-weight:bold;font-size:16px">Trekking Partners Nepal</td></tr>
 <tr><td style="padding:24px">
 <p style="margin:0 0 12px;font-size:16px">Hi ${esc(o.name)},</p>
-<p style="margin:0 0 6px;font-size:16px;line-height:1.5"><strong>${esc(o.answerer)}</strong> answered your question:</p>
+<p style="margin:0 0 6px;font-size:16px;line-height:1.5"><strong>${esc(o.answerer)}</strong> ${o.guide ? 'commented on your guide' : 'answered your question'}:</p>
 <p style="margin:0 0 16px;font-size:16px;line-height:1.4;font-weight:bold">“${esc(o.title)}”</p>
 <div style="background:#f2f8ff;border-left:4px solid #2e8fdc;border-radius:8px;padding:12px 14px;margin:0 0 20px;font-size:15px;line-height:1.5;white-space:pre-wrap">${esc(o.excerpt)}</div>
-<a href="${o.url}" style="display:inline-block;background:#f0712c;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:999px">Read the answer</a>
-<p style="margin:22px 0 0;font-size:13px;color:#55657d;line-height:1.5">Did it solve your question? Mark it as the best answer, so other trekkers find it too.</p>
+<a href="${o.url}" style="display:inline-block;background:#f0712c;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:999px">${o.guide ? 'Read the comment' : 'Read the answer'}</a>
+${o.guide ? '' : '<p style="margin:22px 0 0;font-size:13px;color:#55657d;line-height:1.5">Did it solve your question? Mark it as the best answer, so other trekkers find it too.</p>'}
 </td></tr>
 <tr><td style="padding:16px 24px;border-top:1px solid #d6e3f3;font-size:12px;color:#55657d;line-height:1.5">
-You get this because you asked a question in the Trekking Partners Nepal Community.
+You get this because you ${o.guide ? 'shared a guide' : 'asked a question'} in the Trekking Partners Nepal Community.
 <a href="${o.unsubUrl}" style="color:#55657d">Turn off reply emails</a>
 </td></tr></table></td></tr></table></body></html>`;
 }
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
   if (!n || n.kind !== 'answer' || !n.question_id || !n.answer_id) return new Response('nothing to send');
 
   const [{ data: q }, { data: a }, { data: prof }, { data: ban }, { data: actor }, { data: adminRow }] = await Promise.all([
-    db.from('questions').select('id, title, status').eq('id', n.question_id).maybeSingle(),
+    db.from('questions').select('*').eq('id', n.question_id).maybeSingle(),   // * so it works before and after update 29 (kind)
     db.from('answers').select('id, body').eq('id', n.answer_id).maybeSingle(),
     db.from('profiles').select('display_name, email_replies, unsub_token').eq('id', n.user_id).maybeSingle(),
     db.from('bans').select('user_id').eq('user_id', n.user_id).maybeSingle(),
@@ -80,10 +80,10 @@ Deno.serve(async (req) => {
       from: FROM,
       to: [to],
       reply_to: REPLY_TO,
-      subject: `${answerer} answered: ${clip(q.title)}`,
+      subject: `${answerer} ${q.kind === 'guide' ? 'commented on your guide' : 'answered'}: ${clip(q.title)}`,
       html: emailHtml({
         name: (prof.display_name || 'trekker').split(' ')[0],
-        answerer, title: q.title, excerpt: short(a.body), url, unsubUrl,
+        answerer, title: q.title, excerpt: short(a.body), url, unsubUrl, guide: q.kind === 'guide',
       }),
       headers: { 'List-Unsubscribe': `<${unsubUrl}>, <mailto:${REPLY_TO}?subject=unsubscribe>` },
     }),

@@ -11,6 +11,24 @@ export const TOPICS = [
 ] as const;
 
 export type Topic = (typeof TOPICS)[number]['value'];
+
+/** A Community post is a question, or a guide (a member's experience of a trek). Update 29. */
+export const KINDS = [
+  { value: 'question', label: 'Question' },
+  { value: 'guide', label: 'Guide' },
+] as const;
+export type Kind = (typeof KINDS)[number]['value'];
+export const kindLabel = (v: string) => (v === 'guide' ? 'Guide' : 'Question');
+
+/** Max length of the post text (must match update-29-community-guides.sql) */
+export const BODY_MAX = { question: 3000, guide: 10000 } as const;
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** '2026-11' → 'Nov 2026' */
+export function trekkedLabel(v: string | null | undefined) {
+  const m = /^(\d{4})-(\d{2})$/.exec(v ?? '');
+  return m ? `${MONTHS[Number(m[2]) - 1]} ${m[1]}` : '';
+}
 export const topicLabel = (v: string) => TOPICS.find((t) => t.value === v)?.label ?? 'Other';
 
 /** Questions that aren't about one trek (SIM cards, flights to Lukla, general gear…) */

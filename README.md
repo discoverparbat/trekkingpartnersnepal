@@ -197,3 +197,17 @@ Setup (applied to the live project on 14 Nov 2026):
 2. Deploy `supabase/functions/push-send/` (both files) as **push-send**, JWT verification **off**.
 3. Edge Functions → Secrets: `VAPID_PRIVATE_KEY` = the private half of the VAPID key pair. The public half is in
    `src/lib/push.ts` and in the function. If you ever change the keys, change both, and members have to turn notifications on again.
+
+## Community guides (update 29)
+
+Members can post a **Guide** (their experience of a trek) as well as a **Question**. Guides use the same
+`questions` table with `kind = 'guide'`, show a green Guide tag, have comments instead of answers (no best answer),
+a "Helpful" vote, a "Trekked <month year>" date and up to 10,000 characters. The Community page has
+All / Questions / Guides tabs (`/community/?type=guide`), and `/community/ask/?type=guide` opens the form on Guide.
+Guides are indexable from the start (DiscussionForumPosting schema) and are in `/community/sitemap.xml`.
+
+Setup:
+1. Run `supabase/update-29-community-guides.sql`. Until it's run the site keeps working with questions only,
+   and posting a guide shows a "not switched on yet" message.
+2. Redeploy `supabase/functions/answer-alert/` and `supabase/functions/push-send/` so guide owners get
+   "commented on your guide" instead of "answered your question" in emails and phone notifications.
