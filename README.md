@@ -206,7 +206,7 @@ a "Helpful" vote, a "Trekked <month year>" date and up to 10,000 characters. The
 All / Questions / Guides tabs (`/community/?type=guide`), and `/community/ask/?type=guide` opens the form on Guide.
 Guides are indexable from the start (DiscussionForumPosting schema) and are in `/community/sitemap.xml`.
 
-Setup:
+Setup (applied to the live project on 23 Nov 2026):
 1. Run `supabase/update-29-community-guides.sql`. Until it's run the site keeps working with questions only,
    and posting a guide shows a "not switched on yet" message.
 2. Redeploy `supabase/functions/answer-alert/` and `supabase/functions/push-send/` so guide owners get

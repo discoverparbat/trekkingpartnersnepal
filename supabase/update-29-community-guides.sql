@@ -72,6 +72,7 @@ begin
   if public.is_admin() then return new; end if;
   new.status := 'open';
   new.pinned := false;
+  if auth.uid() is null then return new; end if;      -- SQL Editor / service role
   if (select count(*) from public.questions
       where user_id = new.user_id and created_at > now() - interval '1 day') >= 5 then
     raise exception 'You can post up to 5 questions or guides a day. Please add to one of your existing posts instead.';
